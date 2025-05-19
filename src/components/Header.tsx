@@ -64,6 +64,7 @@ const Header = () => {
         {
             title: "PUBLICATION",
             dropdown: [
+                { name: "Web Articles", href: "/publication/web-articles" },
                 { name: "Issue Briefs", href: "/publication/issue-briefs" },
                 { name: "Research reports", href: "/publication/research-reports" },
                 { name: "Newsletters", href: "/publication/newsletters" },

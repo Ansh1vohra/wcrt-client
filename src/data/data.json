@@ -1,0 +1,75 @@
+{
+    "categories": [
+      {
+        "name": "Newsletters",
+        "items": [
+          {
+            "title": "Weekly Tech Digest",
+            "author": "Jane Smith",
+            "postDate": "2023-10-15",
+            "abstract": "A roundup of the biggest tech stories this week.",
+            "content": "This week in tech, we saw major advancements in AI, a new smartphone release, and updates on cybersecurity threats...",
+            "image": "/article.jpg"
+          },
+          {
+            "title": "Climate Change Monthly",
+            "author": "John Doe",
+            "postDate": "2023-10-10",
+            "abstract": "Latest updates on climate policies and innovations.",
+            "content": "Governments worldwide are introducing stricter carbon emission policies, while startups are developing new green technologies...",
+            "image": "/article.jpg"
+          }
+        ]
+      },
+      {
+        "name": "Web Articles",
+        "items": [
+          {
+            "title": "The Future of Remote Work",
+            "author": "Alice Johnson",
+            "postDate": "2023-10-12",
+            "abstract": "How hybrid work models are shaping the future of employment.",
+            "content": "Companies are increasingly adopting hybrid work models, blending remote and in-office work. Studies show a 30% increase in productivity...",
+            "image": "/article.jpg"
+          },
+          {
+            "title": "Understanding Blockchain",
+            "author": "Bob Williams",
+            "postDate": "2023-10-08",
+            "abstract": "A beginner's guide to blockchain technology.",
+            "content": "Blockchain is a decentralized ledger technology that ensures transparency and security. It powers cryptocurrencies like Bitcoin...",
+            "image":"/article.jpg"
+          },
+          {
+            "title": "Mental Health in the Digital Age",
+            "author": "Sarah Lee",
+            "postDate": "2023-10-05",
+            "abstract": "How social media affects mental well-being.",
+            "content": "Studies indicate that excessive social media use can lead to anxiety and depression. Experts recommend digital detoxes...",
+            "image": "/article.jpg"
+          }
+        ]
+      },
+      {
+        "name": "Issue Briefs",
+        "items": [
+          {
+            "title": "Economic Impact of AI",
+            "author": "Michael Brown",
+            "postDate": "2023-10-01",
+            "abstract": "How AI is transforming global economies.",
+            "content": "AI is expected to contribute over $15 trillion to the global economy by 2030. Key sectors include healthcare, finance, and logistics...",
+            "image": "/article.jpg"
+          },
+          {
+            "title": "Renewable Energy Trends 2023",
+            "author": "Emily Davis",
+            "postDate": "2023-09-28",
+            "abstract": "The latest developments in solar and wind energy.",
+            "content": "Solar panel efficiency has reached new highs, while offshore wind farms are expanding rapidly in Europe and Asia...",
+            "image": "/article.jpg"
+          }
+        ]
+      }
+    ]
+  }
