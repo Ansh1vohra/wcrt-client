@@ -23,6 +23,7 @@ export default function Home() {
     .slice(0, 4);
 
   useEffect(() => {
+    console.log(newsIndex);
     setMounted(true);
   }, []);
 
