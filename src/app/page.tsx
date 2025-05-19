@@ -6,16 +6,29 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import data from '@/data/data.json';
 
+interface Article {
+  title: string;
+  abstract: string;
+  author: string;
+  postDate: string;
+  image?: string;
+}
+
+interface Category {
+  name: string;
+  items: Article[];
+}
+
 const defaultImage = "/article.jpg";
 
 export default function Home() {
   const [mounted, setMounted] = useState(false);
   const [newsIndex, setNewsIndex] = useState(0);
 
-  // Combine all articles from different categories
-  const allArticles = data.categories.reduce((acc, category) => {
+  // Combine all articles from different categories with proper typing
+  const allArticles = data.categories.reduce<Article[]>((acc, category: Category) => {
     return [...acc, ...category.items];
-  }, [] as any[]);
+  }, []);
 
   // Get recent articles (last 4)
   const recentArticles = allArticles
@@ -25,7 +38,7 @@ export default function Home() {
   useEffect(() => {
     console.log(newsIndex);
     setMounted(true);
-  }, []);
+  }, [newsIndex]); // Added newsIndex to dependencies
 
   useEffect(() => {
     if (!mounted) return;
@@ -37,9 +50,10 @@ export default function Home() {
   }, [mounted, allArticles.length]);
 
   // Function to validate image path
-  const getValidImagePath = (imagePath: string) => {
+  const getValidImagePath = (imagePath?: string) => {
     return imagePath || defaultImage;
   };
+
   const sliderSettings = {
     dots: true,
     infinite: true,
@@ -53,10 +67,10 @@ export default function Home() {
     dotsClass: "slick-dots",
     customPaging: function(i: number) {
       return (
-        <div className="relative w-24 h-16 cursor-pointer">
+        <div className="relative w-24 h-16 cursor-pointer hidden sm:block">
           <div className="relative w-full h-full transform transition-all duration-300 hover:scale-110">
             <Image
-              src={allArticles[i]?.image || defaultImage}
+              src={getValidImagePath(allArticles[i]?.image)}
               alt={allArticles[i]?.title || ""}
               fill
               style={{ objectFit: 'cover' }}
@@ -68,17 +82,20 @@ export default function Home() {
       );
     },
     appendDots: (dots: React.ReactNode) => (
-      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent py-6">
+      <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-black/80 to-transparent py-6 hidden sm:block">
         <div className="container mx-auto px-8">
           <ul className="flex justify-center items-center gap-4"> {dots} </ul>
         </div>
       </div>
     ),
   };
+
   if (!mounted) return null;
+
   return (
     <main className="min-h-screen bg-white">
-      {/* Newsflash Section */}      <div className="bg-red-700 text-white py-2">
+      {/* Newsflash Section */}
+      <div className="bg-[#d8259a] text-white py-2">
         <div className="container mx-auto px-4">
           <div className="flex items-center">
             <span className="font-bold mr-4 whitespace-nowrap">NEWSFLASH:</span>
@@ -102,14 +119,16 @@ export default function Home() {
             </div>
           </div>
         </div>
-      </div>{/* Hero Section with Slider */}
-      <section className="relative w-full h-[600px] md:h-[500px] lg:h-[400px] bg-gradient-to-r from-red-700 to-red-900">
+      </div>
+
+      {/* Hero Section with Slider */}
+      <section className="relative w-full h-[600px] md:h-[500px] lg:h-[400px] bg-gradient-to-r from-[#d8259a] to-[#a01c7a]">
         <Slider {...sliderSettings} className="h-full">
           {allArticles.map((article, index) => (
             <div key={index} className="relative h-[600px] md:h-[500px] lg:h-[400px]">
               <div className="absolute inset-0">
                 <Image
-                  src={article.image || defaultImage}
+                  src={getValidImagePath(article.image)}
                   alt={article.title}
                   fill
                   style={{ objectFit: 'cover' }}
@@ -120,19 +139,21 @@ export default function Home() {
               <div className="relative h-full flex items-end justify-start px-8 pb-20">
                 <div className="max-w-4xl">
                   <h2 className="text-4xl md:text-5xl font-bold text-white mb-4">{article.title}</h2>
-                  <p className="text-lg md:text-xl text-gray-200 mb-6">{article.abstract}</p>                  <button className="bg-red-700 hover:bg-red-800 text-white px-8 py-3 rounded transition-colors">
+                  <p className="text-lg md:text-xl text-gray-200 mb-6">{article.abstract}</p>
+                  <button className="bg-[#d8259a] hover:bg-[#b82085] text-white px-8 py-3 rounded transition-colors">
                     Read More
                   </button>
                 </div>
               </div>
             </div>
           ))}
-        </Slider>      </section>
+        </Slider>
+      </section>
 
       {/* Recent Articles Section */}
       <section className="bg-gray-100 py-8">
         <div className="container mx-auto px-4">
-          <h2 className="text-2xl font-bold mb-6 text-red-700 border-b-2 border-red-700 pb-2">
+          <h2 className="text-2xl font-bold mb-6 text-[#d8259a] border-b-2 border-[#d8259a] pb-2">
             Recent Articles
           </h2>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
@@ -162,8 +183,9 @@ export default function Home() {
 
       {/* Categories Section */}
       <section className="container mx-auto px-4 py-8">
-        {data.categories.map((category, index) => (
-          <div key={index} className="mb-16">            <h2 className="text-2xl font-bold mb-6 text-red-700 border-b-2 border-red-700 pb-2">
+        {data.categories.map((category: Category, index) => (
+          <div key={index} className="mb-16">
+            <h2 className="text-2xl font-bold mb-6 text-[#d8259a] border-b-2 border-[#d8259a] pb-2">
               {category.name}
             </h2>
             <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
@@ -171,7 +193,7 @@ export default function Home() {
                 <div key={itemIndex} className="bg-white shadow hover:shadow-lg transition-shadow duration-200 rounded-lg overflow-hidden">
                   <div className="relative h-48">
                     <Image
-                      src={item.image || defaultImage}
+                      src={getValidImagePath(item.image)}
                       alt={item.title}
                       fill
                       style={{ objectFit: 'cover' }}
@@ -184,7 +206,7 @@ export default function Home() {
                       <span className="text-sm text-gray-500">{item.author}</span>
                       <span className="text-sm text-gray-500">{new Date(item.postDate).toLocaleDateString()}</span>
                     </div>
-                    <button className="mt-4 w-full bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-full transition-colors">
+                    <button className="mt-4 w-full bg-[#d8259a] hover:bg-[#b82085] text-white px-4 py-2 rounded-full transition-colors">
                       Read Article
                     </button>
                   </div>
