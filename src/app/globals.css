@@ -1,26 +1,109 @@
 @import "tailwindcss";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Cal+Sans&family=Host+Grotesk:ital,wght@0,300..800;1,300..800&family=Lexend:wght@100..900&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Oswald:wght@200..700&family=Playfair:ital,opsz,wght@0,5..1200,300..900;1,5..1200,300..900&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&family=Syne:wght@400..800&display=swap');
+
+body {
+  font-family: "Oswald", sans-serif;
+  font-optical-sizing: auto;
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
+/* Newsflash animation */
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
+@keyframes slide {
+  0% {
+    opacity: 0;
+    transform: translateX(100%);
+  }
+  10%, 90% {
+    opacity: 1;
+    transform: translateX(0);
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(-100%);
   }
 }
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+.animate-slide {
+  animation: slide 5s ease-in-out infinite;
+  min-width: 100%;
+  white-space: nowrap;
+  display: inline-block;
+}
+
+/* Slider thumbnail styles */
+.slick-dots {
+  position: absolute;
+  bottom: 20px !important;
+  display: flex !important;
+  justify-content: center;
+  padding: 0;
+  margin: 0;
+  list-style: none;
+  gap: 8px;
+}
+
+.slick-dots li {
+  width: auto !important;
+  height: auto !important;
+  margin: 0 !important;
+  opacity: 0.7;
+  transition: opacity 0.3s ease;
+}
+
+.slick-dots li:hover {
+  opacity: 1;
+}
+
+.slick-dots li.slick-active {
+  opacity: 1;
+}
+
+/* Slider custom styles */
+.slick-slider {
+  position: relative;
+  height: 100%;
+}
+
+.slick-list,
+.slick-track,
+.slick-slide > div {
+  height: 100%;
+}
+
+.slick-thumbs {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 1rem;
+  margin: 0;
+  text-align: center;
+  background: linear-gradient(to top, rgba(0,0,0,0.7), transparent);
+}
+
+.slick-thumbs li {
+  width: auto !important;
+  height: auto !important;
+  margin: 0 4px !important;
+  transition: all 0.3s ease;
+}
+
+.slick-thumbs li.slick-active {
+  transform: scale(1.1);
+}
+
+.slick-prev,
+.slick-next {
+  z-index: 1;
+  width: 40px !important;
+  height: 40px !important;
+}
+
+.slick-prev {
+  left: 20px !important;
+}
+
+.slick-next {
+  right: 20px !important;
 }
