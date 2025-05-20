@@ -206,6 +206,7 @@ const Header = () => {
                                     height={50}
                                     alt="Logo"
                                     className="h-12 w-auto"
+                        
                                 />
                             </Link>
                         </div>

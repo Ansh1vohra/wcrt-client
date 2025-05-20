@@ -9,6 +9,7 @@
     "lint": "next lint"
   },
   "dependencies": {
+
     "@types/react-slick": "^0.23.13",
     "next": "15.3.2",
     "react": "^19.0.0",
