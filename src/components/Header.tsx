@@ -2,6 +2,7 @@
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
 
 type MenuItem = {
     title: string;
@@ -9,21 +10,46 @@ type MenuItem = {
     href?: string;
 };
 
+const menuItems: MenuItem[] = [
+    { title: 'HOME', href: '/', dropdown: null },
+    { title: 'ABOUT US', href: '/about', dropdown: null },
+    { 
+        title: 'PUBLICATION',
+        dropdown: [
+            { name: 'Web Articles', href: '/publication/web-articles' },
+            { name: 'Reports', href: '/publication/reports' },
+            { name: 'Newsletters', href: '/publication/newsletters' }
+        ]
+    },
+    {
+        title: 'RESEARCH AREAS',
+        dropdown: [
+            { name: 'Defense & Security', href: '/research/defense' },
+            { name: 'Politics & Governance', href: '/research/politics' },
+            { name: 'Economics & Trade', href: '/research/economics' }
+        ]
+    },
+    { title: 'WEB ARCHIVE', href: '/archive', dropdown: null },
+    { title: 'EVENTS', href: '/events', dropdown: null },
+    { title: 'PROMEX', href: '/promex', dropdown: null },
+    { title: 'CAREERS', href: '/careers', dropdown: null },
+    { title: 'CONTACT', href: '/contact', dropdown: null },
+];
+
 const Header = () => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [showMobileSearch, setShowMobileSearch] = useState(false);
     const [isClient, setIsClient] = useState(false);
+    const pathname = usePathname();
     const mobileMenuRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
 
-    // Add useEffect to handle client-side mounting
     useEffect(() => {
         setIsClient(true);
     }, []);
 
-    // Close mobile menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
@@ -37,7 +63,6 @@ const Header = () => {
         };
     }, []);
 
-    // Focus search input when mobile search is shown
     useEffect(() => {
         if (showMobileSearch && searchInputRef.current) {
             searchInputRef.current.focus();
@@ -56,68 +81,18 @@ const Header = () => {
         setShowMobileSearch(!showMobileSearch);
     };
 
-    const menuItems: MenuItem[] = [
-        {
-            title: "HOME",
-            dropdown: null,
-            href: "/"
-        },
-        {
-            title: "ABOUT US",
-            dropdown: null,
-            href: "/about"
-        },
-        {
-            title: "PUBLICATION",
-            dropdown: [
-                { name: "Web Articles", href: "/publication/web-articles" },
-                { name: "Issue Briefs", href: "/publication/issue-briefs" },
-                { name: "Research reports", href: "/publication/research-reports" },
-                { name: "Newsletters", href: "/publication/newsletters" },
-                { name: "WCRT Journal", href: "/publication/wcrt-journal" },
-                { name: "Scholar Warrior", href: "/publication/scholar-warrior" },
-                { name: "Books", href: "/publication/books" },
-                { name: "Essays", href: "/publication/essays" }
-            ]
-        },
-        {
-            title: "RESEARCH AREAS",
-            dropdown: null,
-            href: "/research"
-        },
-        {
-            title: "WEB ARCHIVE",
-            dropdown: null,
-            href: "/archive"
-        },
-        {
-            title: "EVENTS",
-            dropdown: null,
-            href: "/events"
-        },
-        {
-            title: "PROMEX",
-            dropdown: null,
-            href: "/promex"
-        },
-        {
-            title: "UNIVERSITY CELL",
-            dropdown: null,
-            href: "/university"
-        },
-        {
-            title: "CAREERS",
-            dropdown: null,
-            href: "/careers"
-        },
-        {
-            title: "CONTACT",
-            dropdown: null,
-            href: "/contact"
+    const isActivePage = (item: MenuItem) => {
+        if (item.href === '/') {
+            return pathname === '/';
         }
-    ];
+        if (item.href) {
+            // Only match if not home and pathname starts with href (but not just '/')
+            return item.href !== '/' && pathname.startsWith(item.href);
+        }
+        // Only match dropdowns if any dropdown href matches exactly
+        return item.dropdown?.some(drop => pathname === drop.href) || false;
+    };
 
-    // Desktop search input section
     const renderDesktopSearch = () => {
         if (!isClient) return null;
         
@@ -181,113 +156,96 @@ const Header = () => {
     };
 
     return (
-        <>
-            <header className="sticky top-0 z-50 bg-white shadow-md">
-                <div className="container mx-auto px-8 py-2">
-                    {/* Top Bar - Mobile */}
-                    <div className="flex items-center justify-between md:hidden">
-                        {/* Hamburger Button */}
-                        <button
-                            onClick={toggleMobileMenu}
-                            className="p-2 text-gray-700 focus:outline-none"
-                            aria-label="Toggle menu"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button>
-
-                        {/* Logo - Centered on mobile */}
-                        <div className="flex-shrink-0">
-                            <Link href="/">
-                                <Image
-                                    src="/wrctlogo.png"
-                                    width={150}
-                                    height={50}
-                                    alt="Logo"
-                                    className="h-12 w-auto"
-                        
-                                />
-                            </Link>
-                        </div>
-
-                        {/* Search Icon - Mobile */}
-                        <div className="flex items-center">
-                            {renderMobileSearch()}
-                        </div>
-                    </div>
-
-                    {/* Top Bar - Desktop */}
-                    <div className="hidden md:flex items-center justify-between border-b-2 border-gray-200 pb-2">
-                        <div className="flex items-center">
-                            <Link href="/">
-                                <Image
-                                    src="/wrctlogo.png"
-                                    width={200}
-                                    height={200}
-                                    alt="Logo"
-                                    className="h-16 w-auto"
-                                />
-                            </Link>
-                        </div>
-
-                        {/* Search Input - Desktop */}
+        <header className="sticky top-0 z-50 bg-white shadow-sm">
+            <div className="container mx-auto px-4">
+                {/* Logo and Search section */}
+                <div className="flex items-center justify-between py-4">
+                    <Link href="/" className="flex items-center">
+                        <Image
+                            src="/wrctlogo.png"
+                            width={180}
+                            height={60}
+                            alt="Logo"
+                            className="h-12 w-auto"
+                        />
+                    </Link>
+                    <div className="hidden md:block">
                         {renderDesktopSearch()}
                     </div>
-
-                    {/* Main Navigation - Desktop */}
-                    <nav className="hidden md:block mt-2">
-                        <ul className="flex flex-wrap justify-evenly gap-4">
-                            {menuItems.map((item, index) => (
-                                <li
-                                    key={index}
-                                    className="relative group"
-                                    onMouseEnter={() => item.dropdown && toggleDropdown(index)}
-                                    onMouseLeave={() => item.dropdown && setActiveDropdown(null)}
-                                >
-                                    <div className="flex items-center">
-                                        <Link
-                                            href={item.href || '#'}
-                                            className="text-gray-700 hover:text-gray-900 font-medium py-2"
-                                        >
-                                            {item.title}
-                                        </Link>
-                                        {item.dropdown && (
-                                            <span className="ml-1">
-                                                <svg
-                                                    className={`w-4 h-4 text-gray-500 transition-transform ${activeDropdown === index ? 'rotate-180' : ''}`}
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                </svg>
-                                            </span>
-                                        )}
-                                    </div>
-
-                                    {/* Dropdown Menu */}
-                                    {item.dropdown && activeDropdown === index && (
-                                        <div className="absolute left-0 mt-0 w-48 bg-white rounded-md shadow-lg z-10">
-                                            <ul className="py-1">
-                                                {item.dropdown.map((subItem, subIndex) => (
-                                                    <li key={subIndex}>
-                                                        <Link
-                                                            href={subItem.href}
-                                                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                                        >
-                                                            {subItem.name}
-                                                        </Link>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        </div>
-                                    )}
-                                </li>
-                            ))}
-                        </ul>
-                    </nav>
+                    <div className="md:hidden">
+                        {renderMobileSearch()}
+                    </div>
                 </div>
+
+                {/* Navigation */}
+                <nav className="hidden md:block border-t border-gray-200">
+                    <ul className="flex justify-between items-center py-2">
+                        {menuItems.map((item, index) => (
+                            <li
+                                key={index}
+                                className="relative group"
+                                onMouseEnter={() => item.dropdown && setActiveDropdown(index)}
+                                onMouseLeave={() => setActiveDropdown(null)}
+                            >
+                                <div className="flex items-center">
+                                    <Link
+                                        href={item.href || '#'}
+                                        className={`text-sm font-medium px-3 py-2 relative transition-colors duration-200
+                                            ${isActivePage(item) ? 'text-pink-600' : 'text-gray-700 hover:text-pink-600'}
+                                        `}
+                                    >
+                                        {item.title}
+                                        <div className={`absolute bottom-0 left-0 w-full h-0.5 bg-pink-600 transform origin-left transition-transform duration-300 ease-out
+                                            ${isActivePage(item) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}
+                                        `}></div>
+                                    </Link>
+                                    {item.dropdown && (
+                                        <svg
+                                            className={`w-4 h-4 ml-1 transition-transform duration-200 ${
+                                                activeDropdown === index ? 'rotate-180 text-pink-600' : 'text-gray-400'
+                                            }`}
+                                            fill="none"
+                                            stroke="currentColor"
+                                            viewBox="0 0 24 24"
+                                        >
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                        </svg>
+                                    )}
+                                </div>
+
+                                {/* Dropdown */}
+                                {item.dropdown && activeDropdown === index && (
+                                    <div className="absolute top-full left-0 w-48 bg-white shadow-lg rounded-lg py-2 z-50 transform transition-all duration-200">
+                                        {item.dropdown.map((dropItem, dropIndex) => (
+                                            <Link
+                                                key={dropIndex}
+                                                href={dropItem.href}
+                                                className={`block px-4 py-2 text-sm transition-colors duration-200
+                                                    ${pathname === dropItem.href 
+                                                        ? 'text-pink-600 bg-pink-50' 
+                                                        : 'text-gray-700 hover:text-pink-600 hover:bg-gray-50'
+                                                    }
+                                                `}
+                                            >
+                                                {dropItem.name}
+                                            </Link>
+                                        ))}
+                                    </div>
+                                )}
+                            </li>
+                        ))}
+                    </ul>
+                </nav>
+
+                {/* Mobile Menu Button */}
+                <button
+                    onClick={toggleMobileMenu}
+                    className="md:hidden p-2 text-gray-600"
+                >
+                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                    </svg>
+                </button>
 
                 {/* Mobile Menu */}
                 {isMobileMenuOpen && (
@@ -315,7 +273,9 @@ const Header = () => {
                                         <div className="flex items-center justify-between">
                                             <Link
                                                 href={item.href || '#'}
-                                                className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded flex-grow"
+                                                className={`block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded flex-grow
+                                                    ${isActivePage(item) ? 'text-pink-600 bg-pink-50' : ''}
+                                                `}
                                                 onClick={() => setIsMobileMenuOpen(false)}
                                             >
                                                 {item.title}
@@ -343,7 +303,9 @@ const Header = () => {
                                                     <li key={subIndex}>
                                                         <Link
                                                             href={subItem.href}
-                                                            className="block py-1 px-4 text-sm text-gray-600 hover:bg-gray-100 rounded"
+                                                            className={`block py-1 px-4 text-sm text-gray-600 hover:bg-gray-100 rounded
+                                                                ${pathname === subItem.href ? 'text-pink-600 bg-pink-50' : ''}
+                                                            `}
                                                             onClick={() => setIsMobileMenuOpen(false)}
                                                         >
                                                             {subItem.name}
@@ -358,13 +320,13 @@ const Header = () => {
                         </nav>
                     </div>
                 )}
-            </header>
 
-            {/* Overlay when mobile menu is open */}
-            {isMobileMenuOpen && (
-                <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
-            )}
-        </>
+                {/* Overlay when mobile menu is open */}
+                {isMobileMenuOpen && (
+                    <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
+                )}
+            </div>
+        </header>
     );
 };
 
