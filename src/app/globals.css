@@ -71,6 +71,27 @@ body {
   height: 100%;
 }
 
+/* Slider animation styles */
+.slick-slide {
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1), opacity 0.8s ease;
+  opacity: 0.5;
+  transform: scale(0.95);
+}
+
+.slick-slide.slick-active {
+  opacity: 1;
+  transform: scale(1);
+}
+
+.slick-current {
+  z-index: 10;
+}
+
+/* Override default fade animation */
+.slick-slider:not(.slick-vertical) .slick-track {
+  transition: transform 0.8s cubic-bezier(0.4, 0, 0.2, 1) !important;
+}
+
 .slick-thumbs {
   position: absolute;
   bottom: 0;
@@ -106,4 +127,43 @@ body {
 
 .slick-next {
   right: 20px !important;
+}
+
+/* Custom block-style pagination (pink theme) */
+.pagination-block {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+}
+.pagination-block .page-btn {
+  background: #f06292;
+  color: #fff;
+  border-radius: 12px;
+  padding: 0.7em 1.5em;
+  font-size: 1.15rem;
+  font-weight: 500;
+  border: none;
+  transition: background 0.2s, color 0.2s;
+  cursor: pointer;
+}
+.pagination-block .page-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+.pagination-block .page-btn.next {
+  background: #e1006a;
+}
+.pagination-block .page-btn.prev {
+  background: #f48fb1;
+}
+.pagination-block .page-info {
+  background: #ffc400;
+  color: #e1006a;
+  border-radius: 10px;
+  padding: 0.7em 1.5em;
+  font-size: 1.15rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
