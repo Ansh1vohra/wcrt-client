@@ -142,34 +142,34 @@ export default function Home() {
   }, [allArticles]);
 
   return (
-    <main className="container mx-auto px-4">
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+    <main className="container mx-auto px-4 max-w-full overflow-x-hidden">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
         {/* Left Column: Newsflash and Content */}
-        <div className="md:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-6 lg:space-y-8">
           {/* Newsflash Banner with animation */}
-          <div className="bg-pink-600 text-white p-2 flex items-center transform transition-transform duration-300 hover:scale-[1.01]">
-            <span className="bg-yellow-400 text-pink-600 px-2 py-1 text-sm font-bold mr-4">NEWSFLASH</span>
+          <div className="bg-pink-600 text-white p-2 flex items-center transform transition-transform duration-300 hover:scale-[1.01] rounded-lg">
+            <span className="bg-yellow-400 text-pink-600 px-2 py-1 text-xs lg:text-sm font-bold mr-2 lg:mr-4 whitespace-nowrap">NEWSFLASH</span>
             <div className="flex-1 overflow-hidden">
-              <div className="animate-marquee whitespace-nowrap">
+              <div className="animate-marquee whitespace-nowrap text-sm lg:text-base">
                 {sortedArticles[newsIndex]?.title}
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-1 lg:gap-2">
               <button 
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 flex items-center justify-center text-white focus:outline-none focus:ring-2 focus:ring-white/50" 
+                className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 flex items-center justify-center text-white focus:outline-none focus:ring-2 focus:ring-white/50" 
                 onClick={() => setNewsIndex((prev) => (prev - 1 + sortedArticles.length) % sortedArticles.length)}
                 aria-label="Previous news"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                 </svg>
               </button>
               <button 
-                className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 flex items-center justify-center text-white focus:outline-none focus:ring-2 focus:ring-white/50" 
+                className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 flex items-center justify-center text-white focus:outline-none focus:ring-2 focus:ring-white/50" 
                 onClick={() => setNewsIndex((prev) => (prev + 1) % sortedArticles.length)}
                 aria-label="Next news"
               >
-                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
                   <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                 </svg>
               </button>
@@ -178,7 +178,8 @@ export default function Home() {
 
           {/* Main Article Section */}
           <div className="relative group">
-            {/* Main Slider */}            <div className="overflow-hidden rounded-lg relative">
+            {/* Main Slider */}
+            <div className="overflow-hidden rounded-lg relative">
               <Slider ref={sliderRef} {...sliderSettings}>
                 {featuredArticles.map((article, index) => (
                   <Link 
@@ -202,7 +203,11 @@ export default function Home() {
                           {article.title}
                         </h2>
                         <p className="text-gray-200 text-sm mt-2">
-                          By {article.author} | {new Date(article.postDate).toLocaleDateString()}
+                          By {article.author} | {new Date(article.postDate).toLocaleDateString('en-US', {
+                            year: 'numeric',
+                            month: '2-digit',
+                            day: '2-digit'
+                          })}
                         </p>
                       </div>
                     </div>
@@ -245,41 +250,41 @@ export default function Home() {
             </div>
           </div>
 
-          {/* Recent Articles Section with animation */}
+          {/* Recent Articles Section */}
           <div className="transform transition-all duration-300">
             <div className="flex items-center justify-between mb-4">
-              <h2 className="text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2">Recent Articles</h2>
+              <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2">Recent Articles</h2>
               <div className="flex gap-2">
                 <button 
-                  className="w-8 h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                  className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
                   onClick={() => setRecentPage((prev) => Math.max(1, prev - 1))}
                   aria-label="Previous recent articles"
                   disabled={recentPage === 1}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                   </svg>
                 </button>
                 <button 
-                  className="w-8 h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
+                  className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
                   onClick={() => setRecentPage((prev) => Math.min(recentTotalPages, prev + 1))}
                   aria-label="Next recent articles"
                   disabled={recentPage === recentTotalPages}
                 >
-                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-4 h-4">
+                  <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
                     <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                   </svg>
                 </button>
               </div>
             </div>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {recentArticles.map((article, index) => (
                 <Link 
                   key={index}
                   href={`/publication/web-articles/${encodeURIComponent(article.title.toLowerCase().replace(/\s+/g, '-'))}`}
                   className="flex items-start space-x-3 group"
                 >
-                  <div className="relative w-20 h-20 flex-shrink-0">
+                  <div className="relative w-16 h-16 lg:w-20 lg:h-20 flex-shrink-0">
                     <Image
                       src={validatedImages[article.image || ''] || defaultImage}
                       alt={article.title}
@@ -287,45 +292,17 @@ export default function Home() {
                       className="object-cover rounded-lg"
                     />
                   </div>
-                  <div className="flex-1">
+                  <div className="flex-1 min-w-0">
                     <h3 className="text-sm font-medium group-hover:text-pink-600 transition-colors line-clamp-2">
                       {article.title}
                     </h3>
                     <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block align-middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                      {new Date(article.postDate).toLocaleDateString()}
-                    </p>
-                  </div>
-                </Link>
-              ))}
-            </div>
-          </div>
-
-          {/* All Articles Section */}
-          <div className="transform transition-all duration-300">
-            <h2 className="text-2xl font-bold text-pink-600 mb-4 border-b-2 border-pink-600 pb-2">All Articles</h2>
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              {paginatedArticles.map((article, index) => (
-                <Link 
-                  key={index}
-                  href={`/publication/web-articles/${encodeURIComponent(article.title.toLowerCase().replace(/\s+/g, '-'))}`}
-                  className="flex items-start space-x-3 group"
-                >
-                  <div className="relative w-20 h-20 flex-shrink-0">
-                    <Image
-                      src={validatedImages[article.image || ''] || defaultImage}
-                      alt={article.title}
-                      fill
-                      className="object-cover rounded-lg"
-                    />
-                  </div>
-                  <div className="flex-1">
-                    <h3 className="text-sm font-medium group-hover:text-pink-600 transition-colors line-clamp-2">
-                      {article.title}
-                    </h3>
-                    <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block align-middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                      {new Date(article.postDate).toLocaleDateString()}
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block align-middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                      {new Date(article.postDate).toLocaleDateString('en-US', {
+                        year: 'numeric',
+                        month: '2-digit',
+                        day: '2-digit'
+                      })}
                     </p>
                   </div>
                 </Link>
@@ -335,7 +312,7 @@ export default function Home() {
         </div>
 
         {/* Right Column: Web Updates and Trending */}
-        <div className="md:col-span-1 space-y-8">
+        <div className="lg:col-span-1 space-y-6 lg:space-y-8">
           {/* Web Updates Section */}
           <div className="transform transition-all duration-300 hover:translate-y-[-2px]">
             <WebUpdates updates={webUpdates} validateImage={validateImage} />
@@ -353,12 +330,48 @@ export default function Home() {
         </div>
       </div>
 
+      {/* All Articles Section - always last in vertical stack on mobile */}
+      <div className="block lg:hidden mt-8">
+        <h2 className="text-xl lg:text-2xl font-bold text-pink-600 mb-4 border-b-2 border-pink-600 pb-2">All Articles</h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          {paginatedArticles.map((article, index) => (
+            <Link 
+              key={index}
+              href={`/publication/web-articles/${encodeURIComponent(article.title.toLowerCase().replace(/\s+/g, '-'))}`}
+              className="flex items-start space-x-3 group"
+            >
+              <div className="relative w-16 h-16 lg:w-20 lg:h-20 flex-shrink-0">
+                <Image
+                  src={validatedImages[article.image || ''] || defaultImage}
+                  alt={article.title}
+                  fill
+                  className="object-cover rounded-lg"
+                />
+              </div>
+              <div className="flex-1 min-w-0">
+                <h3 className="text-sm font-medium group-hover:text-pink-600 transition-colors line-clamp-2">
+                  {article.title}
+                </h3>
+                <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block align-middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                  {new Date(article.postDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                  })}
+                </p>
+              </div>
+            </Link>
+          ))}
+        </div>
+      </div>
+
       {/* Pagination */}
-      <div className="flex justify-center mt-8 gap-2">
+      <div className="flex justify-center mt-8 gap-2 overflow-x-auto pb-4">
         <button
           onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
           disabled={currentPage === 1}
-          className="px-6 py-3 bg-gray-100 text-gray-500 rounded-none font-medium text-lg hover:bg-gray-200 transition-all duration-200"
+          className="px-4 lg:px-6 py-2 lg:py-3 bg-gray-100 text-gray-500 rounded-none font-medium text-sm lg:text-lg hover:bg-gray-200 transition-all duration-200 whitespace-nowrap"
         >
           Previous
         </button>
@@ -366,7 +379,7 @@ export default function Home() {
           <button
             key={i}
             onClick={() => setCurrentPage(i + 1)}
-            className={`px-6 py-3 text-lg rounded-none font-medium transition-all duration-200 ${
+            className={`px-4 lg:px-6 py-2 lg:py-3 text-sm lg:text-lg rounded-none font-medium transition-all duration-200 whitespace-nowrap ${
               currentPage === i + 1
                 ? 'bg-red-500 text-white'
                 : 'bg-gray-100 text-black hover:bg-gray-200'
@@ -378,7 +391,7 @@ export default function Home() {
         <button
           onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
           disabled={currentPage === totalPages}
-          className="px-6 py-3 bg-gray-100 text-gray-500 rounded-none font-medium text-lg hover:bg-gray-200 transition-all duration-200"
+          className="px-4 lg:px-6 py-2 lg:py-3 bg-gray-100 text-gray-500 rounded-none font-medium text-sm lg:text-lg hover:bg-gray-200 transition-all duration-200 whitespace-nowrap"
         >
           Next
         </button>
