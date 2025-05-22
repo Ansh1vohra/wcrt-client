@@ -55,10 +55,10 @@ const TrendingAndPopular = ({ articles, latestArticles, trendingArticles, valida
   }, [articles, latestArticles, trendingArticles, validateImage]);
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-4 transition-all duration-300 ease-in-out">
+    <div className="bg-white rounded-lg shadow-sm p-3 lg:p-4 transition-all duration-300 ease-in-out">
       <div className="flex border-b border-gray-200">
         <button
-          className={`px-4 py-2 -mb-px text-sm font-medium relative transition-colors duration-200 ${
+          className={`px-2 lg:px-4 py-1.5 lg:py-2 -mb-px text-xs lg:text-sm font-medium relative transition-colors duration-200 ${
             activeTab === 'trending'
               ? 'text-pink-600'
               : 'text-gray-500 hover:text-gray-700'
@@ -71,7 +71,7 @@ const TrendingAndPopular = ({ articles, latestArticles, trendingArticles, valida
           )}
         </button>
         <button
-          className={`px-4 py-2 -mb-px text-sm font-medium relative transition-colors duration-200 ${
+          className={`px-2 lg:px-4 py-1.5 lg:py-2 -mb-px text-xs lg:text-sm font-medium relative transition-colors duration-200 ${
             activeTab === 'comments'
               ? 'text-pink-600'
               : 'text-gray-500 hover:text-gray-700'
@@ -84,7 +84,7 @@ const TrendingAndPopular = ({ articles, latestArticles, trendingArticles, valida
           )}
         </button>
         <button
-          className={`px-4 py-2 -mb-px text-sm font-medium relative transition-colors duration-200 ${
+          className={`px-2 lg:px-4 py-1.5 lg:py-2 -mb-px text-xs lg:text-sm font-medium relative transition-colors duration-200 ${
             activeTab === 'latest'
               ? 'text-pink-600'
               : 'text-gray-500 hover:text-gray-700'
@@ -98,15 +98,15 @@ const TrendingAndPopular = ({ articles, latestArticles, trendingArticles, valida
         </button>
       </div>
 
-      <div className="mt-4">
-        <div className="grid grid-cols-1 gap-4">
+      <div className="mt-3 lg:mt-4">
+        <div className="grid grid-cols-1 gap-3 lg:gap-4">
           {getActiveArticles().map((article, index) => (
             <Link 
               href={`/publication/web-articles/${encodeURIComponent(article.title.toLowerCase().replace(/\s+/g, '-'))}`}
               key={index}
-              className="flex gap-3 group transform transition-transform duration-200 hover:translate-x-1"
+              className="flex gap-2 lg:gap-3 group transform transition-transform duration-200 hover:translate-x-1"
             >
-              <div className="relative w-20 h-20 flex-shrink-0 overflow-hidden rounded">
+              <div className="relative w-16 h-16 lg:w-20 lg:h-20 flex-shrink-0 overflow-hidden rounded">
                 <Image
                   src={validatedImages[article.image || ''] || defaultImage}
                   alt={article.title}
@@ -114,14 +114,18 @@ const TrendingAndPopular = ({ articles, latestArticles, trendingArticles, valida
                   className="object-cover transition-transform duration-200 group-hover:scale-105"
                 />
               </div>
-              <div className="flex-grow">
-                <h3 className="text-sm font-medium text-gray-900 group-hover:text-pink-600 transition-colors duration-200 line-clamp-2">
+              <div className="flex-grow min-w-0">
+                <h3 className="text-xs lg:text-sm font-medium text-gray-900 group-hover:text-pink-600 transition-colors duration-200 line-clamp-2">
                   {article.title}
                 </h3>
-                <p className="text-xs text-gray-500 mt-1">
-                  {new Date(article.postDate).toLocaleDateString()}
+                <p className="text-[10px] lg:text-xs text-gray-500 mt-0.5 lg:mt-1">
+                  {new Date(article.postDate).toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: '2-digit',
+                    day: '2-digit'
+                  })}
                   {activeTab === 'comments' && article.comments && (
-                    <span className="ml-2 text-pink-600">
+                    <span className="ml-1 lg:ml-2 text-pink-600">
                       {article.comments} comments
                     </span>
                   )}
