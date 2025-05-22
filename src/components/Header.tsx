@@ -13,15 +13,42 @@ const Header = () => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
     const [searchQuery, setSearchQuery] = useState('');
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-    const headerRef = useRef<HTMLDivElement>(null);
+    const [searchQuery, setSearchQuery] = useState('');
+    const [showMobileSearch, setShowMobileSearch] = useState(false);
+    const mobileMenuRef = useRef<HTMLDivElement>(null);
+    const searchInputRef = useRef<HTMLInputElement>(null);
 
-    const getCurrentDate = () => {
-        return new Date().toLocaleDateString('en-US', {
-            weekday: 'long',
-            month: 'long',
-            day: 'numeric',
-            year: 'numeric'
-        });
+    // Close mobile menu when clicking outside
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
+                setIsMobileMenuOpen(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleClickOutside);
+        return () => {
+            document.removeEventListener('mousedown', handleClickOutside);
+        };
+    }, []);
+
+    // Focus search input when mobile search is shown
+    useEffect(() => {
+        if (showMobileSearch && searchInputRef.current) {
+            searchInputRef.current.focus();
+        }
+    }, [showMobileSearch]);
+
+    const toggleDropdown = (dropdown: number) => {
+        setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
+    };
+
+    const toggleMobileMenu = () => {
+        setIsMobileMenuOpen(!isMobileMenuOpen);
+    };
+
+    const toggleMobileSearch = () => {
+        setShowMobileSearch(!showMobileSearch);
     };
 
     const menuItems: MenuItem[] = [
@@ -49,47 +76,139 @@ const Header = () => {
         { title: "CONTACT", dropdown: null, href: "/contact" }
     ];
 
-    return (
-        <div ref={headerRef} className="w-full max-w-6xl mx-auto">
-            {/* Top Bar */}
-            <div className="bg-white border-b">
-                <div className="max-w-5xl mx-auto px-4 py-2 flex justify-between items-center">
-                    <div className="text-gray-600 text-sm">{getCurrentDate()}</div>
-                    <div className="hidden md:flex gap-6">
-                        <Link href="/advertise" className="text-gray-600 hover:text-gray-900 text-sm">
-                            ADVERTISE WITH US
-                        </Link>
-                        <Link href="/support" className="text-gray-600 hover:text-gray-900 text-sm">
-                            SUPPORT US
-                        </Link>
-                        <Link href="/write" className="text-gray-600 hover:text-gray-900 text-sm">
-                            WRITE FOR US
-                        </Link>
-                    </div>
-                    <div className="relative hidden md:block">
-                        <input
-                            type="text"
-                            placeholder="Search..."
-                            value={searchQuery}
-                            onChange={(e) => setSearchQuery(e.target.value)}
-                            className="pl-8 pr-3 py-1 border border-gray-300 rounded w-48 text-sm"
-                        />
-                        <svg 
-                            className="w-4 h-4 text-gray-400 absolute left-2 top-1.5"
-                            fill="none"
-                            stroke="currentColor"
-                            viewBox="0 0 24 24"
-                        >
-                            <path 
-                                strokeLinecap="round" 
-                                strokeLinejoin="round" 
-                                strokeWidth={2} 
-                                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" 
-                            />
-                        </svg>
-                    </div>
+    // Desktop search input section
+    const renderDesktopSearch = () => {
+        if (!isClient) return null;
+        
+        return (
+            <div className="relative">
+                <input
+                    type="text"
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    spellCheck={false}
+                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+                <div className="absolute left-3 top-2.5 text-gray-400">
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
                 </div>
             </div>
+        );
+    };
+
+    const renderMobileSearch = () => {
+        if (!isClient) return null;
+
+        return showMobileSearch ? (
+            <div className="relative ml-2">
+                <input
+                    ref={searchInputRef}
+                    type="text"
+                    placeholder="Search..."
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className="pl-8 pr-4 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 w-40"
+                />
+                <div className="absolute left-2 top-1.5 text-gray-400">
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                    </svg>
+                </div>
+                <button
+                    onClick={() => setShowMobileSearch(false)}
+                    className="absolute right-2 top-1.5 text-gray-400"
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
+            </div>
+        ) : (
+            <button
+                onClick={toggleMobileSearch}
+                className="p-2 text-gray-700 focus:outline-none"
+                aria-label="Search"
+            >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                </svg>
+            </button>
+        );
+    };
+
+    return (
+        <>
+            <header className="sticky top-0 z-50 bg-white shadow-md">
+                <div className="container mx-auto px-8 py-2">
+                    {/* Top Bar - Mobile */}
+                    <div className="flex items-center justify-between md:hidden">
+                        {/* Hamburger Button */}
+                        <button
+                            onClick={toggleMobileMenu}
+                            className="p-2 text-gray-700 focus:outline-none"
+                            aria-label="Toggle menu"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                            </svg>
+                        </button>
+
+                        {/* Logo - Centered on mobile */}
+                        <div className="flex-shrink-0">
+                            <Link href="/">
+                                <Image
+                                    src="/wrctlogo.png"
+                                    width={150}
+                                    height={50}
+                                    alt="Logo"
+                                    className="h-12 w-auto"
+                        
+                                />
+                            </Link>
+                        </div>
+
+                        {/* Search Icon - Mobile */}
+                        <div className="flex items-center">
+                            {showMobileSearch ? (
+                                <div className="relative ml-2">
+                                    <input
+                                        ref={searchInputRef}
+                                        type="text"
+                                        placeholder="Search..."
+                                        value={searchQuery}
+                                        onChange={(e) => setSearchQuery(e.target.value)}
+                                        className="pl-8 pr-4 py-1 border border-gray-300 rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 w-40"
+                                    />
+                                    <div className="absolute left-2 top-1.5 text-gray-400">
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                        </svg>
+                                    </div>
+                                    <button
+                                        onClick={() => setShowMobileSearch(false)}
+                                        className="absolute right-2 top-1.5 text-gray-400"
+                                    >
+                                        <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                        </svg>
+                                    </button>
+                                </div>
+                            ) : (
+                                <button
+                                    onClick={toggleMobileSearch}
+                                    className="p-2 text-gray-700 focus:outline-none"
+                                    aria-label="Search"
+                                >
+                                    <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                    </svg>
+                                </button>
+                            )}
+                        </div>
+                    </div>
 
             {/* Main Header */}
             <div className="bg-[#8B0000]">
@@ -104,13 +223,24 @@ const Header = () => {
                                 className="rounded-full"
                             />
                         </div>
-                        <div className="text-white">
-                            <h1 className="text-4xl font-serif mb-1">WRCT</h1>
-                            <h2 className="text-xl font-serif">Women & Child Rights Trust</h2>
+
+                        {/* Search Input - Desktop */}
+                        <div className="relative">
+                            <input
+                                type="text"
+                                placeholder="Search..."
+                                value={searchQuery}
+                                onChange={(e) => setSearchQuery(e.target.value)}
+                                spellCheck="false"
+                                className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+                            />
+                            <div className="absolute left-3 top-2.5 text-gray-400">
+                                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+                                </svg>
+                            </div>
                         </div>
                     </div>
-                </div>
-            </div>
 
             {/* Navigation */}
             <nav className="bg-white border-b shadow-lg">
