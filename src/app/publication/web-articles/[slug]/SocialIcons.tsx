@@ -1,11 +1,18 @@
 'use client'
+import { useState,useEffect } from "react"
 
 interface SocialShareProps {
   title: string
 }
 
 export default function SocialShare({ title }: SocialShareProps) {
-  const currentUrl = typeof window !== 'undefined' ? window.location.href : ''
+  // Initialize with empty string for SSR
+  const [currentUrl, setCurrentUrl] = useState('')
+
+  useEffect(() => {
+    // This will only run on the client side after hydration
+    setCurrentUrl(window.location.href)
+  }, [])
 
   return (
     <div className="flex gap-2 my-8">

@@ -3,10 +3,10 @@ import Image from 'next/image'
 import { Metadata } from 'next'
 import { notFound } from 'next/navigation'
 import articlesData from '@/data/data.json'
-import Comments from '@/app/publications/web-articles/[slug]/comment'
-import SocialShare from '@/app/publications/web-articles/[slug]/SocialIcons'
-import Logo from '@/app/publications/web-articles/[slug]/logo'
-import Footer from '@/app/publications/web-articles/[slug]/footer'
+import Comments from '@/app/publication/web-articles/[slug]/comment'
+import SocialShare from '@/app/publication/web-articles/[slug]/SocialIcons'
+import Logo from '@/app/publication/web-articles/[slug]/logo'
+// import Footer from '@/app/publication/web-articles/[slug]/footer'
 
 
 interface Article {
@@ -51,31 +51,34 @@ async function getArticleBySlug(slug: string): Promise<Article | null> {
   }
 }
 
-export async function generateMetadata(
-  { params }: { params: { slug: string } }
-): Promise<Metadata> {
-  const article = await getArticleBySlug(params.slug)
+export async function generateMetadata({
+  params,
+}: {
+  params: Promise<{ slug: string }>
+}): Promise<Metadata> {
+  const { slug } = await params;
+  const article = await getArticleBySlug(slug);
 
   if (!article) {
     return {
       title: 'Article Not Found',
       description: 'The requested article could not be found'
-    }
+    };
   }
 
   return {
     title: article.title,
     description: article.abstract || article.content.substring(0, 160)
-  }
+  };
 }
 
-export default async function ArticlePage({ 
-  params 
-}: { 
-  params: { slug: string } 
+export default async function ArticlePage({
+  params,
+}: {
+  params: Promise<{ slug: string }>
 }) {
-  const article = await getArticleBySlug(params.slug)
-
+  const { slug } = await params;
+  const article = await getArticleBySlug(slug);
   if (!article) {
     notFound()
   }
@@ -157,7 +160,7 @@ export default async function ArticlePage({
         
          
       </article>
-      <Footer />
+      {/* <Footer /> */}
     </main>
     
   )

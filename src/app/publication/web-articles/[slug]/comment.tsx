@@ -30,6 +30,7 @@ export default function Comments() {
             value={comment}
             onChange={(e) => setComment(e.target.value)}
             required
+            spellCheck="false"
             className="w-full border rounded-lg p-3 min-h-[150px]"
           />
         </div>
@@ -45,6 +46,7 @@ export default function Comments() {
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
+              spellCheck="false"
               className="w-full border rounded-lg p-3"
             />
           </div>
