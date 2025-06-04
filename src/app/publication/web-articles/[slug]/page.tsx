@@ -7,6 +7,11 @@ import Comments from '@/app/publication/web-articles/[slug]/comment'
 import SocialShare from '@/app/publication/web-articles/[slug]/SocialIcons'
 import Logo from '@/app/publication/web-articles/[slug]/logo'
 // import Footer from '@/app/publication/web-articles/[slug]/footer'
+//import WebUpdates from '@/components/WebUpdates';
+//import TrendingAndPopular from '@/components/TrendingAndPopular';
+//import { useEffect } from 'react'
+//import { useState } from 'react'
+
 
 
 interface Article {
@@ -154,7 +159,6 @@ export default async function ArticlePage({
         <SocialShare title={article.title} />
 
         {/* Related Articles */}
-        
         <Comments />
         <Logo />
         
