@@ -1,7 +1,10 @@
+
 "use client"
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
+import { usePathname } from 'next/navigation';
+import TopNavbar from './TopNavbar';
 
 type MenuItem = {
     title: string;
@@ -9,21 +12,54 @@ type MenuItem = {
     href?: string;
 };
 
+const menuItems: MenuItem[] = [
+    { title: 'HOME', href: '/', dropdown: null },
+    { title: 'ABOUT US', href: '/about', dropdown: null },
+    { 
+        title: 'PUBLICATION',
+        dropdown: [
+            { name: "Web Articles", href: "/publication/web-articles" },
+            { name: "Issue Briefs", href: "/publication/issue-briefs" },
+            { name: "Research reports", href: "/publication/research-reports" },
+            { name: "Newsletters", href: "/publication/newsletters" },
+            { name: "WCRT Journal", href: "/publication/wcrt-journal" },
+            { name: "Scholar Warrior", href: "/publication/scholar-warrior" },
+            { name: "Books", href: "/publication/books" },
+            { name: "Essays", href: "/publication/essays" }
+        ]
+    },
+    {
+        title: 'RESEARCH AREAS',
+        dropdown: [
+            { name: 'Defense & Security', href: '/research/defense' },
+            { name: 'Politics & Governance', href: '/research/politics' },
+            { name: 'Economics & Trade', href: '/research/economics' }
+        ]
+    },
+    { title: 'WEB ARCHIVE', href: '/archive', dropdown: null },
+    { title: 'EVENTS', href: '/events', dropdown: [
+        {name:'Seminars',href:'/events/seminars'},
+        {name:'Webinars',href:'/events/webinars'}
+    ] },
+    { title: 'PROMEX', href: '/promex', dropdown: null },
+    { title: 'CAREERS', href: '/careers', dropdown: null },
+    { title: 'CONTACT', href: '/contact', dropdown: null },
+];
+
 const Header = () => {
     const [activeDropdown, setActiveDropdown] = useState<number | null>(null);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState('');
     const [showMobileSearch, setShowMobileSearch] = useState(false);
     const [isClient, setIsClient] = useState(false);
+    const pathname = usePathname();
     const mobileMenuRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
 
-    // Add useEffect to handle client-side mounting
     useEffect(() => {
         setIsClient(true);
     }, []);
 
-    // Close mobile menu when clicking outside
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (mobileMenuRef.current && !mobileMenuRef.current.contains(event.target as Node)) {
@@ -37,7 +73,6 @@ const Header = () => {
         };
     }, []);
 
-    // Focus search input when mobile search is shown
     useEffect(() => {
         if (showMobileSearch && searchInputRef.current) {
             searchInputRef.current.focus();
@@ -56,88 +91,14 @@ const Header = () => {
         setShowMobileSearch(!showMobileSearch);
     };
 
-    const menuItems: MenuItem[] = [
-        {
-            title: "HOME",
-            dropdown: null,
-            href: "/"
-        },
-        {
-            title: "ABOUT US",
-            dropdown: null,
-            href: "/about"
-        },
-        {
-            title: "PUBLICATION",
-            dropdown: [
-                { name: "Web Articles", href: "/publication/web-articles" },
-                { name: "Issue Briefs", href: "/publication/issue-briefs" },
-                { name: "Research reports", href: "/publication/research-reports" },
-                { name: "Newsletters", href: "/publication/newsletters" },
-                { name: "WCRT Journal", href: "/publication/wcrt-journal" },
-                { name: "Scholar Warrior", href: "/publication/scholar-warrior" },
-                { name: "Books", href: "/publication/books" },
-                { name: "Essays", href: "/publication/essays" }
-            ]
-        },
-        {
-            title: "RESEARCH AREAS",
-            dropdown: null,
-            href: "/research"
-        },
-        {
-            title: "WEB ARCHIVE",
-            dropdown: null,
-            href: "/archive"
-        },
-        {
-            title: "EVENTS",
-            dropdown: null,
-            href: "/events"
-        },
-        {
-            title: "PROMEX",
-            dropdown: null,
-            href: "/promex"
-        },
-        {
-            title: "UNIVERSITY CELL",
-            dropdown: null,
-            href: "/university"
-        },
-        {
-            title: "CAREERS",
-            dropdown: null,
-            href: "/careers"
-        },
-        {
-            title: "CONTACT",
-            dropdown: null,
-            href: "/contact"
+    const isActivePage = (item: MenuItem) => {
+        if (item.href === '/') {
+            return pathname === '/';
         }
-    ];
-
-    // Desktop search input section
-    const renderDesktopSearch = () => {
-        if (!isClient) return null;
-        
-        return (
-            <div className="relative">
-                <input
-                    type="text"
-                    placeholder="Search..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    spellCheck={false}
-                    className="pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-                <div className="absolute left-3 top-2.5 text-gray-400">
-                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                    </svg>
-                </div>
-            </div>
-        );
+        if (item.href) {
+            return item.href !== '/' && pathname.startsWith(item.href);
+        }
+        return item.dropdown?.some(drop => pathname === drop.href) || false;
     };
 
     const renderMobileSearch = () => {
@@ -158,6 +119,14 @@ const Header = () => {
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
                     </svg>
                 </div>
+                <button
+                    onClick={() => setShowMobileSearch(false)}
+                    className="absolute right-2 top-1.5 text-gray-400"
+                >
+                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                    </svg>
+                </button>
             </div>
         ) : (
             <button
@@ -174,105 +143,100 @@ const Header = () => {
 
     return (
         <>
-            <header className="sticky top-0 z-50 bg-white shadow-md">
-                <div className="container mx-auto px-8 py-2">
-                    {/* Top Bar - Mobile */}
-                    <div className="flex items-center justify-between md:hidden">
-                        {/* Hamburger Button */}
-                        <button
-                            onClick={toggleMobileMenu}
-                            className="p-2 text-gray-700 focus:outline-none"
-                            aria-label="Toggle menu"
-                        >
-                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
-                            </svg>
-                        </button>
-
-                        {/* Logo - Centered on mobile */}
-                        <div className="flex-shrink-0">
-                            <Link href="/">
+            {/* Top section with background image - scrolls normally */}
+            <TopNavbar />
+            <div 
+                className="w-6xl mx-auto bg-cover bg-center"
+                style={{ backgroundImage: "url('/headerbg.jpg')" }}
+            >
+                <div className="container mx-auto px-4 md:w-6xl py-5 md:py-10">
+                    <div className="flex items-center justify-between">
+                        <div className="flex items-center space-x-4">
+                            {/* Hamburger button */}
+                            <button
+                                onClick={toggleMobileMenu}
+                                className="md:hidden p-2 text-gray-600"
+                            >
+                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+                                </svg>
+                            </button>
+                            
+                            {/* Logo */}
+                            <Link href="/" className="flex items-center">
                                 <Image
                                     src="/wrctlogo.png"
-                                    width={150}
-                                    height={50}
+                                    width={180}
+                                    height={60}
                                     alt="Logo"
                                     className="h-12 w-auto"
-                        
                                 />
                             </Link>
                         </div>
-
-                        {/* Search Icon - Mobile */}
-                        <div className="flex items-center">
+                        
+                        {/* Mobile search */}
+                        <div className="md:hidden">
                             {renderMobileSearch()}
                         </div>
                     </div>
+                </div>
+            </div>
 
-                    {/* Top Bar - Desktop */}
-                    <div className="hidden md:flex items-center justify-between border-b-2 border-gray-200 pb-2">
-                        <div className="flex items-center">
-                            <Link href="/">
-                                <Image
-                                    src="/wrctlogo.png"
-                                    width={200}
-                                    height={200}
-                                    alt="Logo"
-                                    className="h-16 w-auto"
-                                />
-                            </Link>
-                        </div>
-
-                        {/* Search Input - Desktop */}
-                        {renderDesktopSearch()}
-                    </div>
-
-                    {/* Main Navigation - Desktop */}
-                    <nav className="hidden md:block mt-2">
-                        <ul className="flex flex-wrap justify-evenly gap-4">
+            {/* Sticky navigation bar - stays fixed at top when scrolling */}
+            <div className="sticky top-0 z-50 bg-white shadow-sm">
+                <div className="container mx-auto px-4 md:w-6xl">
+                    <nav className="hidden md:block border-t border-gray-200">
+                        <ul className="flex justify-between items-center py-2">
                             {menuItems.map((item, index) => (
                                 <li
                                     key={index}
                                     className="relative group"
-                                    onMouseEnter={() => item.dropdown && toggleDropdown(index)}
-                                    onMouseLeave={() => item.dropdown && setActiveDropdown(null)}
+                                    onMouseEnter={() => item.dropdown && setActiveDropdown(index)}
+                                    onMouseLeave={() => setActiveDropdown(null)}
                                 >
                                     <div className="flex items-center">
                                         <Link
                                             href={item.href || '#'}
-                                            className="text-gray-700 hover:text-gray-900 font-medium py-2"
+                                            className={`text-sm font-medium px-3 py-2 relative transition-colors duration-200
+                                                ${isActivePage(item) ? 'text-pink-600' : 'text-gray-700 hover:text-pink-600'}
+                                            `}
                                         >
                                             {item.title}
+                                            <div className={`absolute bottom-0 left-0 w-full h-0.5 bg-pink-600 transform origin-left transition-transform duration-300 ease-out
+                                                ${isActivePage(item) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}
+                                            `}></div>
                                         </Link>
                                         {item.dropdown && (
-                                            <span className="ml-1">
-                                                <svg
-                                                    className={`w-4 h-4 text-gray-500 transition-transform ${activeDropdown === index ? 'rotate-180' : ''}`}
-                                                    fill="none"
-                                                    stroke="currentColor"
-                                                    viewBox="0 0 24 24"
-                                                >
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                </svg>
-                                            </span>
+                                            <svg
+                                                className={`w-4 h-4 ml-1 transition-transform duration-200 ${
+                                                    activeDropdown === index ? 'rotate-180 text-pink-600' : 'text-gray-400'
+                                                }`}
+                                                fill="none"
+                                                stroke="currentColor"
+                                                viewBox="0 0 24 24"
+                                            >
+                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                            </svg>
                                         )}
                                     </div>
 
-                                    {/* Dropdown Menu */}
+                                    {/* Dropdown */}
                                     {item.dropdown && activeDropdown === index && (
-                                        <div className="absolute left-0 mt-0 w-48 bg-white rounded-md shadow-lg z-10">
-                                            <ul className="py-1">
-                                                {item.dropdown.map((subItem, subIndex) => (
-                                                    <li key={subIndex}>
-                                                        <Link
-                                                            href={subItem.href}
-                                                            className="flex items-center px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
-                                                        >
-                                                            {subItem.name}
-                                                        </Link>
-                                                    </li>
-                                                ))}
-                                            </ul>
+                                        <div className="absolute top-full left-0 w-48 bg-white shadow-lg rounded-lg py-2 z-50 transform transition-all duration-200">
+                                            {item.dropdown.map((dropItem, dropIndex) => (
+                                                <Link
+                                                    key={dropIndex}
+                                                    href={dropItem.href}
+                                                    className={`block px-4 py-2 text-sm transition-colors duration-200
+                                                        ${pathname === dropItem.href 
+                                                            ? 'text-pink-600 bg-pink-50' 
+                                                            : 'text-gray-700 hover:text-pink-600 hover:bg-gray-50'
+                                                        }
+                                                    `}
+                                                >
+                                                    {dropItem.name}
+                                                </Link>
+                                            ))}
                                         </div>
                                     )}
                                 </li>
@@ -280,77 +244,81 @@ const Header = () => {
                         </ul>
                     </nav>
                 </div>
+            </div>
 
-                {/* Mobile Menu */}
-                {isMobileMenuOpen && (
-                    <div
-                        ref={mobileMenuRef}
-                        className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50 overflow-y-auto md:hidden"
-                    >
-                        <div className="p-4 border-b border-gray-200 flex justify-between items-center">
-                            <button
-                                onClick={toggleMobileMenu}
-                                className="p-2 text-gray-700 focus:outline-none"
-                            >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-                                </svg>
-                            </button>
-                            <h3 className="text-lg font-medium">Menu</h3>
-                            <div className="w-6"></div> {/* Spacer for alignment */}
-                        </div>
-
-                        <nav className="p-4">
-                            <ul className="space-y-2">
-                                {menuItems.map((item, index) => (
-                                    <li key={index}>
-                                        <div className="flex items-center justify-between">
-                                            <Link
-                                                href={item.href || '#'}
-                                                className="block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded flex-grow"
-                                                onClick={() => setIsMobileMenuOpen(false)}
-                                            >
-                                                {item.title}
-                                            </Link>
-                                            {item.dropdown && (
-                                                <button
-                                                    onClick={() => toggleDropdown(index)}
-                                                    className="p-2 text-gray-500"
-                                                >
-                                                    <svg
-                                                        className={`w-4 h-4 transition-transform ${activeDropdown === index ? 'rotate-180' : ''}`}
-                                                        fill="none"
-                                                        stroke="currentColor"
-                                                        viewBox="0 0 24 24"
-                                                    >
-                                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                                    </svg>
-                                                </button>
-                                            )}
-                                        </div>
-
-                                        {item.dropdown && activeDropdown === index && (
-                                            <ul className="pl-6 mt-1 space-y-1">
-                                                {item.dropdown.map((subItem, subIndex) => (
-                                                    <li key={subIndex}>
-                                                        <Link
-                                                            href={subItem.href}
-                                                            className="block py-1 px-4 text-sm text-gray-600 hover:bg-gray-100 rounded"
-                                                            onClick={() => setIsMobileMenuOpen(false)}
-                                                        >
-                                                            {subItem.name}
-                                                        </Link>
-                                                    </li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </li>
-                                ))}
-                            </ul>
-                        </nav>
+            {/* Mobile Menu */}
+            {isMobileMenuOpen && (
+                <div
+                    ref={mobileMenuRef}
+                    className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50 overflow-y-auto md:hidden"
+                >
+                    <div className="p-4 border-b border-gray-200 flex justify-between items-center">
+                        <button
+                            onClick={toggleMobileMenu}
+                            className="p-2 text-gray-700 focus:outline-none"
+                        >
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                        <h3 className="text-lg font-medium">Menu</h3>
+                        <div className="w-6"></div>
                     </div>
-                )}
-            </header>
+
+                    <nav className="p-4">
+                        <ul className="space-y-2">
+                            {menuItems.map((item, index) => (
+                                <li key={index}>
+                                    <div className="flex items-center justify-between">
+                                        <Link
+                                            href={item.href || '#'}
+                                            className={`block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded flex-grow
+                                                ${isActivePage(item) ? 'text-pink-600 bg-pink-50' : ''}
+                                            `}
+                                            onClick={() => setIsMobileMenuOpen(false)}
+                                        >
+                                            {item.title}
+                                        </Link>
+                                        {item.dropdown && (
+                                            <button
+                                                onClick={() => toggleDropdown(index)}
+                                                className="p-2 text-gray-500"
+                                            >
+                                                <svg
+                                                    className={`w-4 h-4 transition-transform ${activeDropdown === index ? 'rotate-180' : ''}`}
+                                                    fill="none"
+                                                    stroke="currentColor"
+                                                    viewBox="0 0 24 24"
+                                                >
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            </button>
+                                        )}
+                                    </div>
+
+                                    {item.dropdown && activeDropdown === index && (
+                                        <ul className="pl-6 mt-1 space-y-1">
+                                            {item.dropdown.map((subItem, subIndex) => (
+                                                <li key={subIndex}>
+                                                    <Link
+                                                        href={subItem.href}
+                                                        className={`block py-1 px-4 text-sm text-gray-600 hover:bg-gray-100 rounded
+                                                            ${pathname === subItem.href ? 'text-pink-600 bg-pink-50' : ''}
+                                                        `}
+                                                        onClick={() => setIsMobileMenuOpen(false)}
+                                                    >
+                                                        {subItem.name}
+                                                    </Link>
+                                                </li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </li>
+                            ))}
+                        </ul>
+                    </nav>
+                </div>
+            )}
 
             {/* Overlay when mobile menu is open */}
             {isMobileMenuOpen && (
@@ -360,4 +328,4 @@ const Header = () => {
     );
 };
 
-export default Header
+export default Header;
