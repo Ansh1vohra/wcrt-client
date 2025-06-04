@@ -28,6 +28,7 @@ const AdminLogin = () => {
               <label className="block text-gray-700 mb-1">Username</label>
               <input
                 type="text"
+                spellCheck="false"
                 className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200"
               />
             </div>

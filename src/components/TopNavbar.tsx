@@ -26,7 +26,7 @@ export default function TopNavbar(){
 
     return (
         <div className="bg-neutral-100 py-2 flex items-center justify-around hidden text-xs md:flex">
-            <div className="flex gap-6">
+            <div className="flex gap-6 md:max-w-6xl">
                 <div>{formattedDate}</div>
                 <Link href="/advertise" className="text-gray-600 hover:text-gray-900">
                     ADVERTISE WITH US
@@ -38,7 +38,10 @@ export default function TopNavbar(){
                     WRITE FOR US
                 </Link>
                 <Link href="/write" className="text-gray-600 hover:text-gray-900">
-                    SHOP
+                    SHOP(FUND RAISER)
+                </Link>
+                <Link href="/donate" className="text-gray-600 hover:text-gray-900">
+                    DONATE
                 </Link>
             </div>
             <div className="relative">
