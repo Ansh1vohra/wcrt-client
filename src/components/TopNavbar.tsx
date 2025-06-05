@@ -37,7 +37,7 @@ export default function TopNavbar(){
                 <Link href="/write" className="text-gray-600 hover:text-gray-900">
                     WRITE FOR US
                 </Link>
-                <Link href="/write" className="text-gray-600 hover:text-gray-900">
+                <Link href="/shop" className="text-gray-600 hover:text-gray-900">
                     SHOP(FUND RAISER)
                 </Link>
                 <Link href="/donate" className="text-gray-600 hover:text-gray-900">
