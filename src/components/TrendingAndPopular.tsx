@@ -3,6 +3,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 
+//       if (article) {
 interface Article {
   title: string;
   abstract: string;
