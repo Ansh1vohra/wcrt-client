@@ -5,12 +5,47 @@ import { useRouter } from "next/navigation";
 
 const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    adminUserName: "",
+    adminPassword: ""
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
+
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
-    localStorage.setItem("admin-token", "your-token"); // simulate login
-    router.push("/admin/admindashboard");
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/admin/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();      if (response.ok && data.token) {
+        localStorage.setItem("admin-token", data.token);
+        router.push("/admin");
+      } else {
+        setError(data.message || "Login failed");
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -21,13 +56,23 @@ const AdminLogin = () => {
           <h2 className="text-3xl font-semibold text-pink-600 mb-2">Admin Login</h2>
           <p className="text-gray-600 mb-6">Welcome back! Please enter your details</p>
 
+          {error && (
+            <div className="bg-red-50 text-red-500 p-3 rounded-md mb-4">
+              {error}
+            </div>
+          )}
+
           <form className="space-y-4" onSubmit={handleLogin}>
             <div>
               <label className="block text-gray-700 mb-1">Username</label>
               <input
                 type="text"
+                name="adminUserName"
+                value={formData.adminUserName}
+                onChange={handleChange}
                 spellCheck="false"
                 className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200"
+                required
               />
             </div>
 
@@ -36,8 +81,12 @@ const AdminLogin = () => {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  name="adminPassword"
+                  value={formData.adminPassword}
+                  onChange={handleChange}
                   className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 pr-10"
                   autoComplete="current-password"
+                  required
                 />
                 <button
                   type="button"
@@ -76,9 +125,12 @@ const AdminLogin = () => {
 
             <button
               type="submit"
-              className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-md transition duration-300"
+              disabled={loading}
+              className={`w-full bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-md transition duration-300 ${
+                loading ? 'opacity-70 cursor-not-allowed' : ''
+              }`}
             >
-              Log in
+              {loading ? 'Logging in...' : 'Log in'}
             </button>
           </form>
         </div>
