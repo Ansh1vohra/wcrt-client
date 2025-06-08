@@ -7,7 +7,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <html lang="en">
       <body>
         <AdminNavbar />
-        <main className="p-6">{children}</main>
+        <main className="px-4 py-14">{children}</main>
       </body>
     </html>
   );

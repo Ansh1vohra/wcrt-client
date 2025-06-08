@@ -9,17 +9,15 @@ const AdminLogin = () => {
 
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
-
-    // TODO: Add your real API call and validation here
-    // If successful:
+    localStorage.setItem("admin-token", "your-token"); // simulate login
     router.push("/admin/admindashboard");
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="w-full max-w-4xl h-[600px] shadow-lg rounded-xl overflow-hidden flex">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4">
+      <div className="w-full max-w-4xl shadow-lg rounded-xl overflow-hidden flex flex-col md:flex-row h-auto md:h-[600px]">
         {/* Left: Form */}
-        <div className="w-1/2 p-10 bg-white flex flex-col justify-center">
+        <div className="w-full md:w-1/2 p-8 sm:p-10 bg-white flex flex-col justify-center">
           <h2 className="text-3xl font-semibold text-pink-600 mb-2">Admin Login</h2>
           <p className="text-gray-600 mb-6">Welcome back! Please enter your details</p>
 
@@ -86,7 +84,7 @@ const AdminLogin = () => {
         </div>
 
         {/* Right: Image */}
-        <div className="w-1/2 hidden md:block h-full">
+        <div className="w-full md:w-1/2 h-64 md:h-auto hidden sm:block">
           <img
             src="/admin.jpg"
             alt="Login visual"

@@ -105,6 +105,7 @@ const CreateWritersPage = () => {
               <input
                 type="text"
                 value={writer.username}
+                spellCheck='false'
                 onChange={(e) => handleChange(index, "username", e.target.value)}
                 className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 pr-10"
                 required
