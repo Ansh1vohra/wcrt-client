@@ -1,51 +1,70 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const publicationOptions = [
-  "Web Articles",
-  "Issue Briefs",
-  "Reserach Reports",
-  "Newsletters",
-  "WCRT Journal",
-  "Scholar Warrior",
-  "Books",
-  "Essays",
+  "web-articles",
+  "issue-briefs",
+  "manekshaw-papers",
+  "newsletter",
+  "wcrt-journal",
+  "scholar-warrior",
+  "books",
+  "essay",
+  "intern-articles",
+  "external-publications"
 ];
 
 const CreateWritersPage = () => {
   const [writers, setWriters] = useState([
-    { username: "", password: "", permissions: [] as string[], other: "" },
+    { 
+      writerName: "", 
+      writerPassword: "", 
+      fullName: "",
+      email: "",
+      categories: [] as string[], 
+      other: "" 
+    },
   ]);
   const [success, setSuccess] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
+
+  // Check for admin token
+  useEffect(() => {
+    const token = localStorage.getItem("admin-token");
+    if (!token) {
+      router.push("/admin/login");
+    }
+  }, [router]);
 
   const handleChange = (
     index: number,
-    field: "username" | "password" | "permissions" | "other",
+    field: "writerName" | "writerPassword" | "fullName" | "email" | "categories" | "other",
     value: string | string[]
   ) => {
     const updated = [...writers];
-    if (field === "permissions") {
-      updated[index].permissions = value as string[];
+    if (field === "categories") {
+      updated[index].categories = value as string[];
     } else {
       updated[index][field] = value as string;
     }
     setWriters(updated);
   };
 
-  const handlePermissionToggle = (index: number, permission: string) => {
+  const handleCategoryToggle = (index: number, category: string) => {
     const updated = [...writers];
-    const currentPermissions = updated[index].permissions;
+    const currentCategories = updated[index].categories;
 
-    if (currentPermissions.includes(permission)) {
-      updated[index].permissions = currentPermissions.filter((p) => p !== permission);
+    if (currentCategories.includes(category)) {
+      updated[index].categories = currentCategories.filter((c) => c !== category);
     } else {
-      updated[index].permissions = [...currentPermissions, permission];
+      updated[index].categories = [...currentCategories, category];
     }
 
-    if (permission === "Other" && !updated[index].permissions.includes("Other")) {
+    if (category === "Other" && !updated[index].categories.includes("Other")) {
       updated[index].other = "";
     }
 
@@ -55,7 +74,14 @@ const CreateWritersPage = () => {
   const addWriter = () => {
     setWriters([
       ...writers,
-      { username: "", password: "", permissions: [], other: "" },
+      { 
+        writerName: "", 
+        writerPassword: "", 
+        fullName: "",
+        email: "",
+        categories: [], 
+        other: "" 
+      },
     ]);
   };
 
@@ -65,11 +91,60 @@ const CreateWritersPage = () => {
     setWriters(updated);
   };
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    console.log("Writers to create:", writers);
-    setSuccess(true);
-    setTimeout(() => setSuccess(false), 4000);
+    setError("");
+
+    // Validate at least one category is selected
+    if (writers[0].categories.length === 0) {
+      setError("Please select at least one publication type");
+      return;
+    }
+
+    setLoading(true);
+    const token = localStorage.getItem("admin-token");
+    if (!token) {
+      router.push("/admin/login");
+      return;
+    }
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/writer`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        body: JSON.stringify(writers[0]),
+      });
+
+      const data = await response.json();
+
+      if (response.ok) {
+        setSuccess(true);
+        setTimeout(() => setSuccess(false), 4000);
+        // Clear form after successful creation
+        setWriters([{ 
+          writerName: "", 
+          writerPassword: "", 
+          fullName: "",
+          email: "",
+          categories: [], 
+          other: "" 
+        }]);
+      } else {
+        if (response.status === 401) {
+          localStorage.removeItem("admin-token");
+          router.push("/admin/login");
+        } else {
+          setError(data.error || data.message || "Failed to create writers");
+        }
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -77,6 +152,14 @@ const CreateWritersPage = () => {
       <h2 className="text-3xl font-bold text-pink-600 mb-10 text-center">
         Create Writer Accounts
       </h2>
+
+      {error && (
+        <div className="max-w-3xl mx-auto mb-6">
+          <div className="bg-red-50 text-red-500 p-3 rounded-md">
+            {error}
+          </div>
+        </div>
+      )}
 
       <form onSubmit={handleSubmit} className="space-y-8 max-w-3xl mx-auto">
         {writers.map((writer, index) => (
@@ -92,8 +175,7 @@ const CreateWritersPage = () => {
                 <button
                   type="button"
                   onClick={() => removeWriter(index)}
-                 className="text-red-500 text-sm px-2 py-1 rounded-md hover:bg-red-100 transition"
-
+                  className="text-red-500 text-sm px-2 py-1 rounded-md hover:bg-red-100 transition"
                 >
                   Remove
                 </button>
@@ -104,9 +186,9 @@ const CreateWritersPage = () => {
               <label className="block mb-1 text-gray-700">Username</label>
               <input
                 type="text"
-                value={writer.username}
+                value={writer.writerName}
                 spellCheck='false'
-                onChange={(e) => handleChange(index, "username", e.target.value)}
+                onChange={(e) => handleChange(index, "writerName", e.target.value)}
                 className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 pr-10"
                 required
               />
@@ -116,8 +198,30 @@ const CreateWritersPage = () => {
               <label className="block mb-1 text-gray-700">Password</label>
               <input
                 type="password"
-                value={writer.password}
-                onChange={(e) => handleChange(index, "password", e.target.value)}
+                value={writer.writerPassword}
+                onChange={(e) => handleChange(index, "writerPassword", e.target.value)}
+                className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 pr-10"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1 text-gray-700">Full Name</label>
+              <input
+                type="text"
+                value={writer.fullName}
+                onChange={(e) => handleChange(index, "fullName", e.target.value)}
+                className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 pr-10"
+                required
+              />
+            </div>
+
+            <div>
+              <label className="block mb-1 text-gray-700">Email</label>
+              <input
+                type="email"
+                value={writer.email}
+                onChange={(e) => handleChange(index, "email", e.target.value)}
                 className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 pr-10"
                 required
               />
@@ -125,19 +229,36 @@ const CreateWritersPage = () => {
 
             <div>
               <label className="block mb-2 text-gray-700 font-medium">
-                Types of Publications
+                Types of Publications <span className="text-red-500">*</span>
               </label>
               <div className="space-y-2 pl-1">
+                <div className="mb-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const updated = [...writers];
+                      if (updated[index].categories.length === publicationOptions.length) {
+                        updated[index].categories = [];
+                      } else {
+                        updated[index].categories = [...publicationOptions];
+                      }
+                      setWriters(updated);
+                    }}
+                    className="text-sm text-pink-600 hover:text-pink-700 underline mb-2"
+                  >
+                    {writers[index].categories.length === publicationOptions.length ? 'Unselect All' : 'Select All'}
+                  </button>
+                </div>
                 {publicationOptions.map((option) => (
                   <div key={option} className="flex items-center gap-2">
                     <input
                       type="checkbox"
-                      id={`perm-${index}-${option}`}
-                      checked={writer.permissions.includes(option)}
-                      onChange={() => handlePermissionToggle(index, option)}
+                      id={`cat-${index}-${option}`}
+                      checked={writer.categories.includes(option)}
+                      onChange={() => handleCategoryToggle(index, option)}
                       className="accent-pink-500"
                     />
-                    <label htmlFor={`perm-${index}-${option}`} className="text-gray-800">
+                    <label htmlFor={`cat-${index}-${option}`} className="text-gray-800">
                       {option}
                     </label>
                   </div>
@@ -146,23 +267,23 @@ const CreateWritersPage = () => {
                 <div className="flex items-center gap-2">
                   <input
                     type="checkbox"
-                    id={`perm-${index}-other`}
-                    checked={writer.permissions.includes("Other")}
-                    onChange={() => handlePermissionToggle(index, "Other")}
+                    id={`cat-${index}-other`}
+                    checked={writer.categories.includes("Other")}
+                    onChange={() => handleCategoryToggle(index, "Other")}
                     className="accent-pink-500"
                   />
-                  <label htmlFor={`perm-${index}-other`} className="text-gray-800">
+                  <label htmlFor={`cat-${index}-other`} className="text-gray-800">
                     Other
                   </label>
                 </div>
 
-                {writer.permissions.includes("Other") && (
+                {writer.categories.includes("Other") && (
                   <input
                     type="text"
                     placeholder="Specify other"
                     value={writer.other}
                     onChange={(e) => handleChange(index, "other", e.target.value)}
-                   className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 pr-10"
+                    className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 pr-10"
                   />
                 )}
               </div>
@@ -183,7 +304,7 @@ const CreateWritersPage = () => {
             type="submit"
             className="bg-pink-500 text-white px-8 py-3 rounded-xl hover:bg-pink-600 shadow-lg transition"
           >
-            Submit
+            {loading ? "Creating..." : "Submit"}
           </button>
         </div>
 
