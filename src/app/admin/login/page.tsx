@@ -83,19 +83,12 @@ const AdminLogin = () => {
               Log in
             </button>
           </form>
-
-          <p className="text-sm text-gray-600 mt-6">
-            Don’t have an account?{" "}
-            <a href="#" className="text-pink-500 hover:underline">
-              Sign up
-            </a>
-          </p>
         </div>
 
         {/* Right: Image */}
         <div className="w-1/2 hidden md:block h-full">
           <img
-            src="/article.jpg"
+            src="/admin.jpg"
             alt="Login visual"
             className="object-cover w-full h-full"
           />

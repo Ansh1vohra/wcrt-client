@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
-import Header from "@/components/Header";
 import "./globals.css";
+import LayoutWrapper from "@/components/LayoutWrapper"; 
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -25,13 +25,8 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} antialiased`}
-      >
-        <Header />
-        <main className="px-10 mx-auto md:px-0 md:max-w-6xl py-10">
-          {children}
-        </main>
+      <body>
+        <LayoutWrapper>{children}</LayoutWrapper>
       </body>
     </html>
   );

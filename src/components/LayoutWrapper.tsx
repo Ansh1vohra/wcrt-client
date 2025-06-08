@@ -1,0 +1,22 @@
+'use client';
+
+import React from "react";
+import { usePathname } from "next/navigation";
+import Header from "@/components/Header";
+
+export default function LayoutWrapper({ children }: { children: React.ReactNode }) {
+  const pathname = usePathname();
+  const isAdmin = pathname?.startsWith("/admin");
+  const isWriter = pathname?.startsWith("/writer");
+
+  const showHeader = !isAdmin && !isWriter;
+
+  return (
+    <>
+      {showHeader && <Header />}
+      <main className="px-10 mx-auto md:px-0 md:max-w-6xl py-10">
+        {children}
+      </main>
+    </>
+  );
+}
