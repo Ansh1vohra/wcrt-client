@@ -19,14 +19,14 @@ function Promex() {
         </ol>
 
         <h3 className="mt-6 font-semibold underline text-base">Aim</h3>
-        <ol class="list-decimal pl-6 space-y-2 text-base" start="3">
+        <ol className="list-decimal pl-6 space-y-2 text-base" start={3}>
             <li>
                 To provide quality study material and guidance to service officers appearing in promotion exams Part B and Part D (less Special to Corps / Arm) to enable them to pass the same with ease.
             </li>
         </ol>
 
         <h3 className="mt-6 font-semibold underline text-base">Conduct of Pre-Course</h3>
-        <ol class="list-decimal pl-6 space-y-2 text-base" start="4">
+        <ol className="list-decimal pl-6 space-y-2 text-base" start={4}>
             <li>
                 The Correspondence pre-course will aim to build upon the study undertaken by the officers. It will be directed to channelise the focus and thought the process of the enrolled officers towards holistic preparation for the subject exam.
             </li>
@@ -42,7 +42,7 @@ function Promex() {
         </ol>
 
         <h3 className="mt-6 font-semibold underline text-base">Enrolment</h3>
-        <ol class="list-decimal pl-6 space-y-2 text-base" start="8">
+        <ol className="list-decimal pl-6 space-y-2 text-base" start={8}>
             <li>
                 Enrolment to PROMEX is open to all service officers at anytime during the currency of the respective pre-course, i.e. December to May for Part B and March to September for Part D. Interested officers are required to apply on the prescribed application form for PROMEX, which may be downloaded from web site: 
                 <a href="https://www.wcrt.co.in" className="text-red-600 underline">https://www.wcrt.co.in</a> and submitted online.
@@ -53,7 +53,7 @@ function Promex() {
         </ol>
 
         <h3 className="mt-6 font-semibold underline text-base">Time Lines for Dispatch of Course Material</h3>
-        <ol class="list-decimal pl-6 space-y-2 text-base" start="10">
+        <ol className="list-decimal pl-6 space-y-2 text-base" start={10}>
             <li>
                 The Study Material will be sent by post as per the following timelines keeping in mind the general schedule of Part B and Part D Exams in the past:
             </li>
@@ -101,7 +101,7 @@ function Promex() {
         <p className="mt-4 text-sm font-semibold"><span className="underline">Note:</span> In case of any change in the Exam schedule by the MT Dte, above schedule will be suitably modified.</p>
 
         <h3 className="mt-6 font-semibold underline text-base">Fee</h3>
-        <ol class="list-decimal pl-6 space-y-2 text-base" start="11">
+        <ol className="list-decimal pl-6 space-y-2 text-base" start={11}>
             <li>
                 PROMEX WILL BE WORKING ON "no profit no loss" basis and the subscription charges have been designed accordingly. These are as follows:-
             </li>
@@ -132,14 +132,14 @@ function Promex() {
         </div>
 
         <h3 className="mt-6 font-semibold underline text-base">Discount</h3>
-        <ol class="list-decimal pl-6 space-y-2 text-base" start="12">
+        <ol className="list-decimal pl-6 space-y-2 text-base" start={12}>
             <li className="hover:bg-blue-50 transition-colors p-1">
                 Individual Officer members of WCRT will be given 50% discount on the Complete Set/Subject Fees mentioned above. The WCRT member number should be mentioned in
             </li>
         </ol>
 
         <h3 className="mt-6 font-semibold underline text-base">Mode of Payment</h3>
-        <ol class="list-decimal pl-6 space-y-2 text-base" start="13">
+        <ol className="list-decimal pl-6 space-y-2 text-base" start={13}>
             <li>
                 MULTI CITY CHEQUE / DEMAND DRAFT IN FAVOUR OF PECPCC PAYABLE AT DELHI CANTT.
             </li>
@@ -173,10 +173,6 @@ function Promex() {
             <p>(c) E Mail: <a href="mailto:pecpcc.wcrt@gmail.com" className="text-red-600 underline">pecpcc.wcrt@gmail.com</a></p>
         </div>
     </div>
-
-    
-
-
   )
 }
 
