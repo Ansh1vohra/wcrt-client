@@ -3,30 +3,73 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 
-const writerLogin = () => {
+const WriterLogin = () => {
+  const [writerName, setWriterName] = useState("");
+  const [writerPassword, setWriterPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
+  const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault();
+    setLoading(true);
 
-  }
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_BACKEND}/api/writer/login`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            writerName,
+            writerPassword,
+          }),
+        }
+      );
+
+      const data = await response.json();
+
+      if (response.ok) {
+        localStorage.setItem("writer-token", data.token);
+        localStorage.setItem("writer-name", data.data.writerName);
+        localStorage.setItem("writer-categories", JSON.stringify(data.data.categories))
+        router.push("/writer");
+      } else {
+        alert(data.message || "Login failed");
+      }
+    } catch (error) {
+      console.error("Login error:", error);
+      alert("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-white">
       <div className="w-full max-w-4xl h-[600px] shadow-lg rounded-xl overflow-hidden flex">
         {/* Left: Form */}
         <div className="w-1/2 p-10 bg-white flex flex-col justify-center">
-          <h2 className="text-3xl font-semibold text-pink-600 mb-2">Writer Login</h2>
-          <p className="text-gray-600 mb-6">Welcome back! Please enter your details</p>
+          <h2 className="text-3xl font-semibold text-pink-600 mb-2">
+            Writer Login
+          </h2>
+          <p className="text-gray-600 mb-6">
+            Welcome back! Please enter your details
+          </p>
 
           <form className="space-y-4" onSubmit={handleLogin}>
             <div>
               <label className="block text-gray-700 mb-1">Username</label>
               <input
                 type="text"
+                value={writerName}
+                onChange={(e) => setWriterName(e.target.value)}
                 spellCheck="false"
                 className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200"
+                required
+                disabled={loading}
               />
             </div>
 
@@ -35,8 +78,11 @@ const writerLogin = () => {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  value={writerPassword}
+                  onChange={(e) => setWriterPassword(e.target.value)}
                   className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 pr-10"
-                  autoComplete="current-password"
+                  required
+                  disabled={loading}
                 />
                 <button
                   type="button"
@@ -66,33 +112,22 @@ const writerLogin = () => {
                   </svg>
                 </button>
               </div>
-              <div className="text-right text-sm mt-1">
-                <a href="#" className="text-pink-500 hover:underline">
-                  Forgot password?
-                </a>
-              </div>
             </div>
 
             <button
               type="submit"
-              className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-md transition duration-300"
+              disabled={loading}
+              className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-md transition duration-300 disabled:opacity-50"
             >
-              Log in
+              {loading ? "Logging in..." : "Log in"}
             </button>
           </form>
-
-          <p className="text-sm text-gray-600 mt-6">
-            Don’t have an account?{" "}
-            <a href="#" className="text-pink-500 hover:underline">
-              Sign up
-            </a>
-          </p>
         </div>
 
         {/* Right: Image */}
         <div className="w-1/2 hidden md:block h-full">
           <img
-            src="/article.jpg"
+            src="/writer.jpg"
             alt="Login visual"
             className="object-cover w-full h-full"
           />
@@ -102,4 +137,4 @@ const writerLogin = () => {
   );
 };
 
-export default writerLogin;
+export default WriterLogin;
