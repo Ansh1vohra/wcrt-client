@@ -3,14 +3,14 @@
 import React, { useState } from 'react';
 import { ShoppingCart, Search, Menu, X } from 'lucide-react';
 
-// E-commerce product data
+
 const products = [
   {
     id: 1,
     name: "Jane Smith",
     price: 2499.99,
     image: '/article.jpg',
-    category: 'Weekly Tech Digest',
+    category: 'DATA INSIGHTS',
     stock: 15,
     description: 'Articles are grouped into categories such as Newsletters, Tech, and Lifestyle.',
     features: [
@@ -22,7 +22,7 @@ const products = [
     name: 'John Doe',
     price: 999.99,
     image: '/article.jpg',
-    category: 'Climate Change Monthly',
+    category: 'JOURNALS',
     stock: 25,
     description: 'Governments worldwide are introducing stricter carbon emission policies, while startups are developing new green technologies...',
     features: [
@@ -35,7 +35,7 @@ const products = [
     name: 'Alice Johnson',
     price: 399.99,
     image: '/article.jpg',
-    category: 'The Future of Remote Work',
+    category: 'MAGAZINES',
     stock: 30,
     description: 'Companies are increasingly adopting hybrid work models, blending remote and in-office work. Studies show a 30% increase in productivity...',
     features: [
@@ -47,39 +47,14 @@ const products = [
     name: 'Bob Williams',
     price: 599.99,
     image: '/article.jpg',
-    category: 'Understanding Blockchain',
+    category: 'MERCHANT DICE',
     stock: 20,
     description: 'Blockchain is a decentralized ledger technology that ensures transparency and security. It powers cryptocurrencies like Bitcoin...',
     features: [
       "A beginner's guide to blockchain technology."
     ]
-  },
-  {
-    id: 5,
-    name: 'Michael Brown',
-    price: 1299.99,
-    image: '/article.jpg',
-    category: 'Economic Impact of AI',
-    stock: 10,
-    description: 'AI is expected to contribute over $15 trillion to the global economy by 2030. Key sectors include healthcare, finance, and logistics...',
-    features: [
-      'How AI is transforming global economies.',
-      'AI in healthcare, finance, and logistics.'
-    ]
-  },
-  {
-    id: 6,
-    name: 'Emily Davis',
-    price: 759.99,
-    image: '/article.jpg',
-    category: 'Drones',
-    stock: 8,
-    description: 'Solar panel efficiency has reached new highs, while offshore wind farms are expanding rapidly in Europe and Asia...',
-    features: [
-      'The latest developments in solar and wind energy.',
-      'How renewable energy is becoming more efficient.'
-    ]
   }
+  
 ];
 
 function App() {
@@ -116,7 +91,7 @@ function App() {
               >
                 {isMenuOpen ? <X size={24} /> : <Menu size={24} />}
               </button>
-              <span className="text-xl font-bold text-gray-800 ml-2">NEWS ARTICLES</span>
+              <span className="text-xl font-bold text-gray-800 ml-2"></span>
             </div>
 
             <div className="hidden sm:flex items-center space-x-4">
