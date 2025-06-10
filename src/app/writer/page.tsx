@@ -344,9 +344,10 @@ export default function WriterPage() {
                                 .map((post) => (
                                     <li key={post.postId} className="mb-4 p-4 bg-gray-100 rounded-lg shadow-sm">
                                         <h3 className="text-xl font-semibold">{post.title}</h3>
-                                        <p className="text-gray-700 mt-2">{post.content}</p>
+                                        <p className="text-sm text-gray-500">Status: <span className={`font-semibold ${post.post_status === 'approved' ? 'text-green-600' : 'text-yellow-600'}`}>{post.post_status}</span></p>
                                         <p className="text-sm text-gray-500 mt-1">Category: {post.category}</p>
                                         <p className="text-sm text-gray-500">Views: {post.viewCount}</p>
+                                        <p className="text-gray-700 mt-2 whitespace-pre-line">{post.content}</p>
                                     </li>
                                 ))
                         ) : (

@@ -150,7 +150,7 @@ const CreateWritersPage = () => {
   return (
     <div className="min-h-screen bg-white p-8">
       <h2 className="text-3xl font-bold text-pink-600 mb-10 text-center">
-        Create Writer Accounts
+        Create Writer Account
       </h2>
 
       {error && (
@@ -292,13 +292,13 @@ const CreateWritersPage = () => {
         ))}
 
         <div className="flex flex-wrap items-center justify-between gap-4">
-          <button
+          {/* <button
             type="button"
             onClick={addWriter}
             className="text-gray-700 border border-gray-300 px-5 py-2 rounded-xl hover:bg-gray-100"
           >
             + Add Writer
-          </button>
+          </button> */}
 
           <button
             type="submit"

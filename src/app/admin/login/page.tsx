@@ -37,7 +37,7 @@ const AdminLogin = () => {
 
       const data = await response.json();      if (response.ok && data.token) {
         localStorage.setItem("admin-token", data.token);
-        router.push("/admin");
+        window.location.href = "/admin";
       } else {
         setError(data.message || "Login failed");
       }

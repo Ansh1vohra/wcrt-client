@@ -15,7 +15,7 @@ export default function LayoutWrapper({ children }: { children: React.ReactNode 
   return (
     <>
       {showHeader && <Header />}
-      <main className="px-10 mx-auto md:px-0 md:max-w-6xl py-10">
+      <main className="px-8 mx-auto md:px-0 md:max-w-6xl py-10">
         {children}
       </main>
       {showHeader && <Footer />}
