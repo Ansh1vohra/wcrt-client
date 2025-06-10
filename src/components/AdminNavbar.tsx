@@ -29,14 +29,16 @@ export default function AdminNavbar() {
     <nav className="bg-gray-800 text-white p-4 md:p-6 fixed top-0 left-0 w-full z-50">
       <div className="max-w-7xl mx-auto flex items-center justify-between">
         {/* Logo or Title */}
-        <div className="text-lg font-semibold">Admin Panel</div>
+        <div className="text-lg font-semibold cursor-pointer"
+          onClick={()=>{router.push("/admin")}}
+        >WCRT Admin Pannel</div>
 
         {/* Desktop Nav Links */}
         <div className="hidden md:flex gap-6 items-center">
           <Link href="/admin">Dashboard</Link>
           <Link href="/admin/writers">Writers</Link>
           <Link href="/admin/posts">Posts</Link>
-          <Link href="/admin/settings">Website Content</Link>
+          <Link href="/admin/site-content">Website Content</Link>
 
           {isLoggedIn ? (
             <button
