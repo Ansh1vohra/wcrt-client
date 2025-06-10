@@ -1,6 +1,6 @@
 'use client'
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
-import axios, { AxiosError } from 'axios';
+import axios from 'axios';
 import { useRouter } from 'next/navigation';
 
 interface Post {
@@ -24,11 +24,14 @@ export default function WriterPage() {
     const [authorName, setAuthorName] = useState('');
     const [imageFile, setImageFile] = useState<File | null>(null);
     const [authorImageFile, setAuthorImageFile] = useState<File | null>(null);
+    const [imagePreviewUrl, setImagePreviewUrl] = useState<string | null>(null);
+    const [authorImagePreviewUrl, setAuthorImagePreviewUrl] = useState<string | null>(null);
     const [posts, setPosts] = useState<Post[]>([]);
     const [writerName, setWriterName] = useState('');
     const [writerCategories, setWriterCategories] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [loading, setLoading] = useState(true);
     const router = useRouter();
 
     useEffect(() => {
@@ -38,21 +41,24 @@ export default function WriterPage() {
 
         if (!token) {
             router.push('/writer/writerlogin');
-        } else {
-            if (name) setWriterName(name);
-            if (categories) {
-                try {
-                    setWriterCategories(JSON.parse(categories));
-                } catch (e) {
-                    console.error('Failed to parse categories:', e);
-                }
+            return; // Stop further execution
+        }
+
+        if (name) setWriterName(name);
+        if (categories) {
+            try {
+                setWriterCategories(JSON.parse(categories));
+            } catch (e) {
+                console.error('Failed to parse categories:', e);
             }
         }
-    }, [router]);
+
+        setLoading(false);
+    }, []);
+
 
     const handleFileUpload = async (file: File): Promise<string> => {
         try {
-            // Validate file type and size
             const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
             if (!validTypes.includes(file.type)) {
                 throw new Error('Invalid file type. Only JPEG, PNG, and GIF are allowed.');
@@ -63,7 +69,6 @@ export default function WriterPage() {
                 throw new Error('File size exceeds 5MB limit');
             }
 
-            // Get presigned URL from backend
             const presignedUrlResponse = await axios.get(
                 `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/s3/upload-url`,
                 {
@@ -81,13 +86,11 @@ export default function WriterPage() {
                 throw new Error('Failed to get upload URL from backend');
             }
 
-            // Upload to S3 using fetch
             const uploadResponse = await fetch(presignedUrlResponse.data.uploadURL, {
                 method: 'PUT',
                 body: file,
                 headers: {
                     'Content-Type': file.type,
-                    // No other headers should be included
                 },
             });
 
@@ -96,7 +99,6 @@ export default function WriterPage() {
                 throw new Error(`S3 upload failed: ${uploadResponse.status} - ${errorText}`);
             }
 
-            // Return the public URL
             return presignedUrlResponse.data.publicUrl;
         } catch (err) {
             console.error('File upload error:', err);
@@ -127,12 +129,12 @@ export default function WriterPage() {
 
             const imageUrl = await handleFileUpload(imageFile);
 
-            const response = await axios.post(
+            await axios.post(
                 `${process.env.NEXT_PUBLIC_BACKEND}/api/posts`,
                 {
                     title,
                     content,
-                    imageUrl, // <-- Now imageUrl is defined
+                    imageUrl,
                     authorName,
                     authorImage: authorImageUrl,
                     category,
@@ -151,6 +153,8 @@ export default function WriterPage() {
             setCategory('');
             setImageFile(null);
             setAuthorImageFile(null);
+            setImagePreviewUrl(null);
+            setAuthorImagePreviewUrl(null);
 
             const postsResponse = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND}/api/posts`, {
                 headers: {
@@ -160,16 +164,11 @@ export default function WriterPage() {
             setPosts(postsResponse.data.posts || []);
         } catch (err) {
             console.error('Submission error:', err);
-            setError(
-                err instanceof Error
-                    ? err.message
-                    : 'An unexpected error occurred'
-            );
+            setError(err instanceof Error ? err.message : 'An unexpected error occurred');
         } finally {
             setIsSubmitting(false);
         }
     };
-
 
     useEffect(() => {
         const fetchPosts = async () => {
@@ -190,6 +189,20 @@ export default function WriterPage() {
         };
         fetchPosts();
     }, []);
+
+    if (loading) {
+        return <div><div className="w-full gap-x-2 flex justify-center items-center">
+            <div
+                className="w-5 bg-[#d991c2] animate-pulse h-5 rounded-full animate-bounce"
+            ></div>
+            <div
+                className="w-5 animate-pulse h-5 bg-[#9869b8] rounded-full animate-bounce"
+            ></div>
+            <div
+                className="w-5 h-5 animate-pulse bg-[#6756cc] rounded-full animate-bounce"
+            ></div>
+        </div></div>;
+    }
 
     return (
         <div className="container mx-auto p-4">
@@ -217,15 +230,13 @@ export default function WriterPage() {
             <div className="flex mb-4 space-x-4">
                 <button
                     onClick={() => setActiveTab('createPost')}
-                    className={`py-2 px-4 rounded-lg focus:outline-none ${activeTab === 'createPost' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-                        }`}
+                    className={`py-2 px-4 rounded-lg ${activeTab === 'createPost' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                 >
                     Create Post
                 </button>
                 <button
                     onClick={() => setActiveTab('myPosts')}
-                    className={`py-2 px-4 rounded-lg focus:outline-none ${activeTab === 'myPosts' ? 'bg-blue-500 text-white' : 'bg-gray-200'
-                        }`}
+                    className={`py-2 px-4 rounded-lg ${activeTab === 'myPosts' ? 'bg-blue-500 text-white' : 'bg-gray-200'}`}
                 >
                     My Posts
                 </button>
@@ -237,54 +248,6 @@ export default function WriterPage() {
                     <h2 className="text-2xl font-semibold mb-4">Create a New Post</h2>
                     <form onSubmit={handleSubmit}>
                         <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Title</label>
-                            <input
-                                type="text"
-                                spellCheck='false'
-                                value={title}
-                                onChange={(e) => setTitle(e.target.value)}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Content</label>
-                            <textarea
-                                value={content}
-                                spellCheck='false'
-                                onChange={(e) => setContent(e.target.value)}
-                                rows={6}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Post Image</label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => setImageFile(e.target.files?.[0] || null)}
-                                className="w-full"
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Author Name</label>
-                            <input
-                                type="text"
-                                spellCheck='false'
-                                value={authorName}
-                                onChange={(e) => setAuthorName(e.target.value)}
-                                className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-                            />
-                        </div>
-                        <div className="mb-4">
-                            <label className="block text-sm font-medium text-gray-700">Author Image</label>
-                            <input
-                                type="file"
-                                accept="image/*"
-                                onChange={(e) => setAuthorImageFile(e.target.files?.[0] || null)}
-                                className="w-full"
-                            />
-                        </div>
-                        <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700">Category</label>
                             <select
                                 value={category}
@@ -293,17 +256,76 @@ export default function WriterPage() {
                             >
                                 <option value="">Select a category</option>
                                 {writerCategories.map((cat) => (
-                                    <option key={cat} value={cat}>
-                                        {cat}
-                                    </option>
+                                    <option key={cat} value={cat}>{cat}</option>
                                 ))}
                             </select>
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700">Title</label>
+                            <input
+                                type="text"
+                                spellCheck="false"
+                                value={title}
+                                onChange={(e) => setTitle(e.target.value)}
+                                className="w-full px-4 py-2 border rounded-lg"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700">Content</label>
+                            <textarea
+                                value={content}
+                                spellCheck="false"
+                                onChange={(e) => setContent(e.target.value)}
+                                rows={6}
+                                className="w-full px-4 py-2 border rounded-lg"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700">Post Image</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0] || null;
+                                    setImageFile(file);
+                                    setImagePreviewUrl(file ? URL.createObjectURL(file) : null);
+                                }}
+                                className="cursor-pointer bg-blue-100 p-3 my-4 rounded-lg hover:bg-blue-200"
+                            />
+                            {imagePreviewUrl && (
+                                <img src={imagePreviewUrl} alt="Post Preview" className="mt-2 w-48 h-32 object-cover rounded border" />
+                            )}
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700">Author Name</label>
+                            <input
+                                type="text"
+                                spellCheck="false"
+                                value={authorName}
+                                onChange={(e) => setAuthorName(e.target.value)}
+                                className="w-full px-4 py-2 border rounded-lg"
+                            />
+                        </div>
+                        <div className="mb-4">
+                            <label className="block text-sm font-medium text-gray-700">Author Image</label>
+                            <input
+                                type="file"
+                                accept="image/*"
+                                onChange={(e) => {
+                                    const file = e.target.files?.[0] || null;
+                                    setAuthorImageFile(file);
+                                    setAuthorImagePreviewUrl(file ? URL.createObjectURL(file) : null);
+                                }}
+                                className="cursor-pointer bg-blue-100 p-3 my-4 rounded-lg hover:bg-blue-200"
+                            />
+                            {authorImagePreviewUrl && (
+                                <img src={authorImagePreviewUrl} alt="Author Preview" className="mt-2 w-24 h-24 object-cover rounded-full border" />
+                            )}
                         </div>
                         <button
                             type="submit"
                             disabled={isSubmitting}
-                            className={`py-2 px-6 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition duration-300 ${isSubmitting ? 'opacity-50 cursor-not-allowed' : ''
-                                }`}
+                            className={`py-2 px-6 bg-blue-500 text-white rounded-lg ${isSubmitting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-blue-600'}`}
                         >
                             {isSubmitting ? 'Creating...' : 'Create Post'}
                         </button>
@@ -316,15 +338,17 @@ export default function WriterPage() {
                 <div className="bg-white shadow-lg p-6 rounded-lg mt-6">
                     <h2 className="text-2xl font-semibold mb-4">My Posts</h2>
                     <ul>
-                        {posts.length > 0 ? (
-                            posts.map((post) => (
-                                <li key={post.postId} className="mb-4 p-4 bg-gray-100 rounded-lg shadow-sm">
-                                    <h3 className="text-xl font-semibold">{post.title}</h3>
-                                    <p className="text-gray-700 mt-2">{post.content}</p>
-                                    <p className="text-sm text-gray-500 mt-1">Category: {post.category}</p>
-                                    <p className="text-sm text-gray-500">Views: {post.viewCount}</p>
-                                </li>
-                            ))
+                        {posts.filter(post => post.writerName === writerName).length > 0 ? (
+                            posts
+                                .filter(post => post.writerName === writerName)
+                                .map((post) => (
+                                    <li key={post.postId} className="mb-4 p-4 bg-gray-100 rounded-lg shadow-sm">
+                                        <h3 className="text-xl font-semibold">{post.title}</h3>
+                                        <p className="text-gray-700 mt-2">{post.content}</p>
+                                        <p className="text-sm text-gray-500 mt-1">Category: {post.category}</p>
+                                        <p className="text-sm text-gray-500">Views: {post.viewCount}</p>
+                                    </li>
+                                ))
                         ) : (
                             <p className="text-center text-gray-500">No posts found.</p>
                         )}

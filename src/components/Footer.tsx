@@ -106,6 +106,7 @@ export default function Footer() {
         <div className="flex flex-wrap gap-4 text-xs">
           <a href="#">Site Map</a>
           <a href="#">Tenders</a>
+          <a href="/writer">Writer</a>
           <a href="#">Advertise With Us</a>
           <a href="#">Terms of use</a>
           <a href="#">Privacy Policy</a>
