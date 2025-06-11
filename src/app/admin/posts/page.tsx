@@ -85,6 +85,7 @@ export default function OpenPostsPage() {
 
       const data = await res.json();
       if (res.ok) {
+        alert("Post Status Updated Success!");
         setSelectedPost(null);
         fetchOpenPosts();
       } else {
@@ -177,43 +178,43 @@ export default function OpenPostsPage() {
       {/* Modal */}
       {selectedPost && (
         <div
-          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50"
+          className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50 px-2 sm:px-6"
           onClick={() => !actionLoading && setSelectedPost(null)}
         >
           <div
-            className="bg-white rounded-lg max-w-3xl w-full p-6 relative overflow-auto max-h-[90vh]"
+            className="bg-white rounded-lg w-full max-w-3xl p-4 sm:p-6 relative overflow-y-auto max-h-[90vh]"
             onClick={(e) => e.stopPropagation()}
           >
             {/* Post Image */}
             <img
               src={selectedPost.imageUrl}
               alt={selectedPost.title}
-              className="w-full h-60 object-cover rounded mb-4"
+              className="w-full h-48 sm:h-60 object-cover rounded mb-4"
               loading="lazy"
             />
 
-            <h2 className="text-2xl font-bold mb-4">{selectedPost.title}</h2>
+            <h2 className="text-xl sm:text-2xl font-bold mb-4">{selectedPost.title}</h2>
 
             <div className="flex items-center gap-3 mb-4">
               <img
                 src={selectedPost.authorImage}
                 alt={selectedPost.authorName}
-                className="w-12 h-12 rounded-full object-cover"
+                className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover"
                 loading="lazy"
               />
               <div>
-                <p className="text-lg font-medium">{selectedPost.authorName}</p>
+                <p className="text-base sm:text-lg font-medium">{selectedPost.authorName}</p>
                 <p className="text-sm text-gray-600">Writer: {selectedPost.writerName}</p>
               </div>
             </div>
 
             <p className="text-sm text-gray-600 mb-2">Category: {selectedPost.category}</p>
 
-            <div className="mb-6 whitespace-pre-wrap">{selectedPost.content}</div>
+            <div className="mb-6 whitespace-pre-wrap text-sm sm:text-base">{selectedPost.content}</div>
 
             {error && <p className="text-red-500 mb-4">{error}</p>}
 
-            <div className="flex justify-end gap-4">
+            <div className="flex flex-col sm:flex-row justify-end gap-2 sm:gap-4">
               <button
                 onClick={() => updatePostStatus(selectedPost.postId, "approved")}
                 disabled={actionLoading}
@@ -238,6 +239,7 @@ export default function OpenPostsPage() {
           </div>
         </div>
       )}
+
     </div>
   );
 }
