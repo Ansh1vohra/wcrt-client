@@ -25,7 +25,7 @@ export default function Page() {
     async function fetchArticles() {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/category/web-articles`
+          `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/category/web-articles/approved`
         );
 
         const contentType = response.headers.get('content-type');
@@ -65,7 +65,7 @@ export default function Page() {
       {/* Main Article */}
       {mainArticle ? (
         <Link
-          href={`/article/${encodeURIComponent(mainArticle.title)}`}
+          href={`/post/${mainArticle.postId}`}
           className="lg:col-span-2 relative h-[500px] group overflow-hidden shadow-md transition-transform duration-300 hover:-translate-y-1"
         >
           <Image
@@ -99,7 +99,7 @@ export default function Page() {
           sideArticles.map((article) => (
             <Link
               key={article.postId}
-              href={`/article/${encodeURIComponent(article.title)}`}
+              href={`/post/${article.postId}`}
               className="relative h-[156px] flex-1 group overflow-hidden shadow-md transition-transform duration-300 hover:-translate-y-1"
             >
               <Image
@@ -150,7 +150,7 @@ export default function Page() {
 
                 <div className="flex flex-col justify-between">
                   <div>
-                    <Link href={`/article/${encodeURIComponent(article.title)}`}>
+                    <Link href={`/post/${article.postId}`}>
                       <h2 className="text-black text-xl font-bold hover:text-red-600 transition-colors cursor-pointer no-underline">
                         {article.title}
                       </h2>
@@ -163,7 +163,7 @@ export default function Page() {
                       {article.content}
                     </p>
                   </div>
-                  <Link href={`/article/${encodeURIComponent(article.title)}`}>
+                  <Link href={`/post/${article.postId}`}>
                     <button className="mt-4 w-max px-4 py-1 text-sm text-gray-700 border border-gray-400 bg-white transition-all duration-300 ease-in-out hover:bg-red-500 hover:text-white hover:scale-105 active:scale-95 active:bg-red-400 shadow-sm hover:shadow-lg">
                       Read More
                     </button>
