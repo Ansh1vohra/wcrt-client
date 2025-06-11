@@ -1,109 +1,85 @@
+// components/WebUpdates.tsx
 "use client";
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { useState, useEffect } from 'react';
+import { formatDate } from '@/lib/utils'; // Create a utils file for shared functions
+
+const API_URL = `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/status/approved`;
 
 interface Article {
   title: string;
   content: string;
-  authorName?: string;
   uploadDate: string;
   imageUrl?: string;
-  authorImage?: string;
-  category: string;
   postId: string;
-  viewCount: number;
-  post_status?: string;
-  writerName?: string;
 }
 
-interface WebUpdatesProps {
-  updates: Article[];
-  validateImage: (imagePath: string) => Promise<string>;
-}
-
-const defaultImage = "/article.jpg";
-
-const WebUpdates = ({ updates, validateImage }: WebUpdatesProps) => {
-  const [validatedImages, setValidatedImages] = useState<Record<string, string>>({});
-  const [mounted, setMounted] = useState(false);
+export default function WebUpdates() {
+  const [updates, setUpdates] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
-
-  useEffect(() => {
-    const validateImages = async () => {
-      const imagePromises = updates.map(async (article) => {
-        let imageUrl = article.imageUrl || '';
-        // Convert s3:// URLs to https://
-        if (imageUrl.startsWith('s3://')) {
-          const bucketPath = imageUrl.replace('s3://wcrt-content-images/', '');
-          imageUrl = `${process.env.NEXT_PUBLIC_S3_BUCKET_URL}/${bucketPath}`;
+    const fetchUpdates = async () => {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error('Failed to fetch updates');
         }
-        const validImage = await validateImage(imageUrl);
-        return [article.imageUrl, validImage];
-      });
-
-      const validatedPairs = await Promise.all(imagePromises);
-      const validatedMap = Object.fromEntries(validatedPairs);
-      setValidatedImages(validatedMap);
+        const data = await response.json();
+        setUpdates(data.posts.slice(0, 4) || []); // Get first 4 approved posts
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch updates');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    validateImages();
-  }, [updates, validateImage]);
+    fetchUpdates();
+  }, []);
 
-  const formatDate = (dateString: string) => {
-    if (!mounted) return ''; // Return empty string during server-side rendering
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      timeZone: 'UTC'
-    }).split(',')[0];
-  };
+  if (loading) return <div>Loading updates...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="web-updates">
-      <h2 className="text-base lg:text-lg font-bold mb-4 text-pink-600 border-b-2 border-pink-600 inline-block pb-1">Web Updates</h2>
-      <div className="space-y-2 lg:space-y-3">
-        {updates.map((update) => (
+      <h2 className="text-base lg:text-lg font-bold text-pink-600 border-b-2 border-pink-600 inline-block pb-1 mb-4">
+        Web Updates
+      </h2>
+      <div className="space-y-4">
+        {updates.map((article) => (
           <Link 
-            href={`/publication/web-articles/${update.postId}`} 
-            key={update.postId}
-            className="block group"
+            href={`/publication/web-articles/${article.postId}`} 
+            key={article.postId}
+            className="flex gap-3 group"
           >
-            <div className="flex gap-3">
-              <div className="relative w-16 h-16 flex-shrink-0">
-                <Image
-                  src={validatedImages[update.imageUrl || ''] || defaultImage}
-                  alt={update.title}
-                  fill
-                  className="object-cover rounded-lg transition-opacity duration-300"
-                  sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                  priority={false}
-                  loading="lazy"
-                  onError={(e) => {
-                    const target = e.target as HTMLImageElement;
-                    target.src = defaultImage;
-                  }}
-                />
+            <div className="relative w-24 h-20 flex-shrink-0 rounded overflow-hidden">
+              <Image
+                src={article.imageUrl || '/article.jpg'}
+                alt={article.title}
+                fill
+                className="object-cover"
+                sizes="100vw"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-gray-900 group-hover:text-pink-600 transition-colors text-base line-clamp-2">
+                {article.title}
+              </h3>
+              <div className="flex items-center gap-2 text-xs text-gray-500 mt-1 mb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block align-middle">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                {formatDate(article.uploadDate)}
               </div>
-              <div className="flex-1 text-sm">
-                <span className="text-gray-500 text-xs">
-                  {formatDate(update.uploadDate)}
-                </span>
-                <h3 className="font-medium mt-1 group-hover:text-pink-600 transition-colors line-clamp-2">
-                  {update.title}
-                </h3>
-              </div>
+              <p className="text-sm text-gray-700 line-clamp-2">
+                {article.content}
+              </p>
             </div>
           </Link>
         ))}
       </div>
     </div>
   );
-};
-
-export default WebUpdates;
+}

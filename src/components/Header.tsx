@@ -168,7 +168,7 @@ const Header = () => {
                             {/* Logo */}
                             <Link href="/" className="flex items-center md:invisible">
                                 <Image
-                                    src="/wcrt-logo.png"
+                                    src="/wcrt-logo2.png"
                                     width={180}
                                     height={60}
                                     alt="Logo"

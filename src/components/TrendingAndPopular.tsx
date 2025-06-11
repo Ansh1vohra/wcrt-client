@@ -1,166 +1,129 @@
+// components/TrendingAndPopular.tsx
 "use client";
-import Image from 'next/image';
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { formatDate } from '@/lib/utils';
 
-//       if (article) {
+const API_URL = `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/status/approved`;
+
 interface Article {
   title: string;
-  content: string;
-  authorName?: string;
   uploadDate: string;
   imageUrl?: string;
-  authorImage?: string;
-  category: string;
   postId: string;
   viewCount: number;
-  post_status?: string;
-  writerName?: string;
 }
 
-interface TrendingAndPopularProps {
-  articles: Article[];
-  latestArticles: Article[];
-  trendingArticles: Article[];
-  validateImage: (imagePath: string) => Promise<string>;
-}
-
-const defaultImage = "/article.jpg";
-
-const TrendingAndPopular = ({ articles, latestArticles, trendingArticles, validateImage }: TrendingAndPopularProps) => {
-  const [activeTab, setActiveTab] = useState<'latest' | 'trending'>('latest');
-  const [validatedImages, setValidatedImages] = useState<Record<string, string>>({});
-  const [mounted, setMounted] = useState(false);
+export default function TrendingAndPopular() {
+  const [trendingArticles, setTrendingArticles] = useState<Article[]>([]);
+  const [latestArticles, setLatestArticles] = useState<Article[]>([]);
+  const [activeTab, setActiveTab] = useState<'trending' | 'latest'>('trending');
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    setMounted(true);
-  }, []);
+    const fetchArticles = async () => {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error('Failed to fetch articles');
+        const data = await response.json();
+        const articles = data.posts || [];
 
-  useEffect(() => {
-    const validateImages = async () => {
-      const allArticles = [...latestArticles, ...trendingArticles];
-      const uniqueArticles = Array.from(new Set(allArticles.map(a => JSON.stringify(a)))).map(a => JSON.parse(a));
-      
-      const imagePromises = uniqueArticles.map(async (article) => {
-        let imageUrl = article.imageUrl || '';
-        // Convert s3:// URLs to https://
-        if (imageUrl.startsWith('s3://')) {
-          const bucketPath = imageUrl.replace('s3://wcrt-content-images/', '');
-          imageUrl = `${process.env.NEXT_PUBLIC_S3_BUCKET_URL}/${bucketPath}`;
-        }
-        const validImage = await validateImage(imageUrl);
-        return [article.imageUrl, validImage];
-      });
+        setTrendingArticles(
+          [...articles].sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0)).slice(0, 4)
+        );
 
-      const validatedPairs = await Promise.all(imagePromises);
-      const validatedMap = Object.fromEntries(validatedPairs);
-      setValidatedImages(validatedMap);
+        setLatestArticles(
+          [...articles].sort(
+            (a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()
+          ).slice(0, 4)
+        );
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Error fetching articles');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    validateImages();
-  }, [latestArticles, trendingArticles, validateImage]);
+    fetchArticles();
+  }, []);
 
-  // Format date for display with client-side only rendering
-  const formatDate = (dateString: string) => {
-    if (!mounted) return ''; // Return empty string during server-side rendering
-    const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      timeZone: 'UTC'
-    }).split(',')[0];
-  };
+  if (loading) return <div>Loading articles...</div>;
+  if (error) return <div>Error: {error}</div>;
+
+  const articlesToShow = activeTab === 'trending' ? trendingArticles : latestArticles;
 
   return (
-    <div className="bg-white rounded-lg shadow-sm p-3 lg:p-4 transition-all duration-300 ease-in-out">
-      <div className="flex border-b border-gray-200">
+    <div className="trending-section">
+      {/* Tab Buttons */}
+      <div className="flex gap-4 mb-6 border-b border-pink-300">
         <button
-          className={`px-2 lg:px-4 py-1.5 lg:py-2 -mb-px text-xs lg:text-sm font-medium relative transition-colors duration-200 ${
-            activeTab === 'latest'
-              ? 'text-pink-600'
-              : 'text-gray-500 hover:text-gray-700'
-          }`}
-          onClick={() => setActiveTab('latest')}
-        >
-          Latest
-          {activeTab === 'latest' && (
-            <div className="absolute bottom-0 left-0 w-full h-0.5 bg-pink-600 transition-all duration-300 ease-out"></div>
-          )}
-        </button>
-        <button
-          className={`px-2 lg:px-4 py-1.5 lg:py-2 -mb-px text-xs lg:text-sm font-medium relative transition-colors duration-200 ${
+          className={`font-semibold pb-1 ${
             activeTab === 'trending'
-              ? 'text-pink-600'
-              : 'text-gray-500 hover:text-gray-700'
+              ? 'text-pink-600 border-b-2 border-pink-600'
+              : 'text-gray-600'
           }`}
           onClick={() => setActiveTab('trending')}
         >
           Trending
-          {activeTab === 'trending' && (
-            <div className="absolute bottom-0 left-0 w-full h-0.5 bg-pink-600 transition-all duration-300 ease-out"></div>
-          )}
+        </button>
+        <button
+          className={`font-semibold pb-1 ${
+            activeTab === 'latest'
+              ? 'text-pink-600 border-b-2 border-pink-600'
+              : 'text-gray-600'
+          }`}
+          onClick={() => setActiveTab('latest')}
+        >
+          Latest
         </button>
       </div>
 
-      <div className="mt-4">
-        <div className={`space-y-3 ${activeTab === 'latest' ? 'block' : 'hidden'}`}>
-          {latestArticles.map((article) => (
-            <Link
-              key={article.postId}
-              href={`/publication/web-articles/${article.postId}`}
-              className="flex items-start space-x-3 group"
-            >
+      {/* Articles List */}
+      <div className="space-y-3">
+        {articlesToShow.map((article) => (
+          <Link
+            href={`/publication/web-articles/${article.postId}`}
+            key={article.postId}
+            className="block group"
+          >
+            <div className="flex gap-3">
               <div className="relative w-16 h-16 flex-shrink-0">
                 <Image
-                  src={validatedImages[article.imageUrl || ''] || defaultImage}
+                  src={article.imageUrl || '/article.jpg'}
                   alt={article.title}
                   fill
                   className="object-cover rounded-lg"
+                  sizes="100vw"
                 />
               </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-medium group-hover:text-pink-600 transition-colors line-clamp-2">
+              <div className="flex-1 text-sm">
+                <h3 className="font-medium group-hover:text-pink-600 transition-colors line-clamp-2">
                   {article.title}
                 </h3>
-                <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block align-middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+                <div className="flex items-center gap-1 text-xs text-gray-500 mt-1">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    width="12"
+                    height="12"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="#ec4899"
+                    strokeWidth="2"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <circle cx="12" cy="12" r="10" />
+                    <polyline points="12 6 12 12 16 14" />
+                  </svg>
                   {formatDate(article.uploadDate)}
-                </p>
+                </div>
               </div>
-            </Link>
-          ))}
-        </div>
-        <div className={`space-y-3 ${activeTab === 'trending' ? 'block' : 'hidden'}`}>
-          {trendingArticles.map((article) => (
-            <Link
-              key={article.postId}
-              href={`/publication/web-articles/${article.postId}`}
-              className="flex items-start space-x-3 group"
-            >
-              <div className="relative w-16 h-16 flex-shrink-0">
-                <Image
-                  src={validatedImages[article.imageUrl || ''] || defaultImage}
-                  alt={article.title}
-                  fill
-                  className="object-cover rounded-lg"
-                />
-              </div>
-              <div className="flex-1 min-w-0">
-                <h3 className="text-sm font-medium group-hover:text-pink-600 transition-colors line-clamp-2">
-                  {article.title}
-                </h3>
-                <p className="text-xs text-gray-500 mt-1 flex items-center gap-1">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block align-middle"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
-                  {formatDate(article.uploadDate)} • {article.viewCount} views
-                </p>
-              </div>
-            </Link>
-          ))}
-        </div>
+            </div>
+          </Link>
+        ))}
       </div>
     </div>
   );
-};
-
-export default TrendingAndPopular;
+}
