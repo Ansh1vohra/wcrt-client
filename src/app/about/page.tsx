@@ -20,6 +20,7 @@ export default function AboutPage() {
                 <p>Since our inception, we have conducted awareness campaigns, legal aid drives, workshops, and outreach programs that have touched the lives of thousands. Whether it’s ensuring safe spaces, facilitating access to justice, or supporting survivors — our efforts are grounded in empathy, resilience, and action.</p>
                 <p>At Women and Child Rights Thrust, we believe change begins with awareness and grows through collective responsibility. Join us as we continue to advocate for the rights, safety, and well-being of every woman and child.</p>
             </section>
+            
         </div>
     )
 }
