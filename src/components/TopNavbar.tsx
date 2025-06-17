@@ -32,16 +32,13 @@ export default function TopNavbar(){
                     ADVERTISE WITH US
                 </Link>
                 <Link href="/support" className="text-gray-600 hover:text-gray-900">
-                    SUPPORT US
+                    SUPPORT US (Donate)
                 </Link>
                 <Link href="/write" className="text-gray-600 hover:text-gray-900">
                     WRITE FOR US
                 </Link>
                 <Link href="/shop" className="text-gray-600 hover:text-gray-900">
                     SHOP(FUND RAISER)
-                </Link>
-                <Link href="/donate" className="text-gray-600 hover:text-gray-900">
-                    DONATE
                 </Link>
             </div>
             <div className="relative">

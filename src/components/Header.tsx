@@ -200,7 +200,7 @@ const Header = () => {
                                     <div className="flex items-center">
                                         <Link
                                             href={item.href || '#'}
-                                            className={`text-sm font-medium px-3 py-2 relative transition-colors duration-200
+                                            className={`text-sm font-semibold text-black px-3 py-2 relative transition-colors duration-200
                                                 ${isActivePage(item) ? 'text-pink-600' : 'text-gray-700 hover:text-pink-600'}
                                             `}
                                         >

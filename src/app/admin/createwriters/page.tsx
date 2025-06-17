@@ -3,28 +3,50 @@
 import React, { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
-const publicationOptions = [
-  "web-articles",
-  "issue-briefs",
-  "manekshaw-papers",
-  "newsletter",
-  "wcrt-journal",
-  "scholar-warrior",
-  "books",
-  "essay",
-  "intern-articles",
-  "external-publications"
-];
+// Organized categories with subcategories
+const categoryGroups = {
+  "Publications": [
+    "web-articles",
+    "issue-briefs",
+    "anna-chandy-papers",
+    "newsletters",
+    "wcrt-journal",
+    "scholar-warrier",
+    "books",
+    "rajkumari-kaul-essay-competitions",
+    "intern-articles",
+    "external-publications"
+  ],
+  "Research Areas": [
+    "women-rights-and-development",
+    "child-rights-and-development",
+    "national-data-for-atrocities-on-women",
+    "child-development-and-malnutritions"
+  ],
+  "Web Archive": [
+    "biography-matriarchs",
+    "stalwart-woman",
+    "archive-books",
+    "research-papers"
+  ],
+  "Events": [
+    "seminars",
+    "webinars"
+  ]
+};
+
+// Flattened array for the original functionality
+const allPublicationOptions = Object.values(categoryGroups).flat();
 
 const CreateWritersPage = () => {
   const [writers, setWriters] = useState([
-    { 
-      writerName: "", 
-      writerPassword: "", 
+    {
+      writerName: "",
+      writerPassword: "",
       fullName: "",
       email: "",
-      categories: [] as string[], 
-      other: "" 
+      categories: [] as string[],
+      other: ""
     },
   ]);
   const [success, setSuccess] = useState(false);
@@ -74,13 +96,13 @@ const CreateWritersPage = () => {
   const addWriter = () => {
     setWriters([
       ...writers,
-      { 
-        writerName: "", 
-        writerPassword: "", 
+      {
+        writerName: "",
+        writerPassword: "",
         fullName: "",
         email: "",
-        categories: [], 
-        other: "" 
+        categories: [],
+        other: ""
       },
     ]);
   };
@@ -124,13 +146,13 @@ const CreateWritersPage = () => {
         setSuccess(true);
         setTimeout(() => setSuccess(false), 4000);
         // Clear form after successful creation
-        setWriters([{ 
-          writerName: "", 
-          writerPassword: "", 
+        setWriters([{
+          writerName: "",
+          writerPassword: "",
           fullName: "",
           email: "",
-          categories: [], 
-          other: "" 
+          categories: [],
+          other: ""
         }]);
       } else {
         if (response.status === 401) {
@@ -210,6 +232,7 @@ const CreateWritersPage = () => {
               <input
                 type="text"
                 value={writer.fullName}
+                spellCheck='false'
                 onChange={(e) => handleChange(index, "fullName", e.target.value)}
                 className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 pr-10"
                 required
@@ -231,62 +254,57 @@ const CreateWritersPage = () => {
               <label className="block mb-2 text-gray-700 font-medium">
                 Types of Publications <span className="text-red-500">*</span>
               </label>
-              <div className="space-y-2 pl-1">
-                <div className="mb-2">
-                  <button
-                    type="button"
-                    onClick={() => {
-                      const updated = [...writers];
-                      if (updated[index].categories.length === publicationOptions.length) {
-                        updated[index].categories = [];
-                      } else {
-                        updated[index].categories = [...publicationOptions];
-                      }
-                      setWriters(updated);
-                    }}
-                    className="text-sm text-pink-600 hover:text-pink-700 underline mb-2"
-                  >
-                    {writers[index].categories.length === publicationOptions.length ? 'Unselect All' : 'Select All'}
-                  </button>
-                </div>
-                {publicationOptions.map((option) => (
-                  <div key={option} className="flex items-center gap-2">
-                    <input
-                      type="checkbox"
-                      id={`cat-${index}-${option}`}
-                      checked={writer.categories.includes(option)}
-                      onChange={() => handleCategoryToggle(index, option)}
-                      className="accent-pink-500"
-                    />
-                    <label htmlFor={`cat-${index}-${option}`} className="text-gray-800">
-                      {option}
-                    </label>
-                  </div>
-                ))}
 
-                <div className="flex items-center gap-2">
-                  <input
-                    type="checkbox"
-                    id={`cat-${index}-other`}
-                    checked={writer.categories.includes("Other")}
-                    onChange={() => handleCategoryToggle(index, "Other")}
-                    className="accent-pink-500"
-                  />
-                  <label htmlFor={`cat-${index}-other`} className="text-gray-800">
-                    Other
-                  </label>
-                </div>
-
-                {writer.categories.includes("Other") && (
-                  <input
-                    type="text"
-                    placeholder="Specify other"
-                    value={writer.other}
-                    onChange={(e) => handleChange(index, "other", e.target.value)}
-                    className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 pr-10"
-                  />
-                )}
+              <div className="flex flex-wrap gap-2 mb-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    const updated = [...writers];
+                    if (updated[index].categories.length === allPublicationOptions.length) {
+                      updated[index].categories = [];
+                    } else {
+                      updated[index].categories = [...allPublicationOptions];
+                    }
+                    setWriters(updated);
+                  }}
+                  className="text-sm text-pink-600 hover:text-pink-700 underline"
+                >
+                  {writers[index].categories.length === allPublicationOptions.length 
+                    ? "Unselect All" 
+                    : "Select All"}
+                </button>
               </div>
+
+              {/* Render categorized options */}
+              {Object.entries(categoryGroups).map(([groupName, options]) => (
+                <div key={groupName} className="mb-6">
+                  <h4 className="text-lg font-semibold text-gray-800 mb-3">{groupName}</h4>
+                  <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+                    {options.map((option) => (
+                      <label
+                        key={option}
+                        htmlFor={`cat-${index}-${option}`}
+                        className={`flex items-center p-4 border rounded cursor-pointer transition-all
+                          ${writer.categories.includes(option)
+                            ? "bg-pink-100 border-pink-400 text-pink-600 font-medium"
+                            : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                          }`}
+                      >
+                        <input
+                          type="checkbox"
+                          id={`cat-${index}-${option}`}
+                          checked={writer.categories.includes(option)}
+                          onChange={() => handleCategoryToggle(index, option)}
+                          className="hidden"
+                        />
+                        <span className="text-sm capitalize">
+                          {option.replace(/-/g, " ")}
+                        </span>
+                      </label>
+                    ))}
+                  </div>
+                </div>
+              ))}
             </div>
           </div>
         ))}
@@ -303,6 +321,7 @@ const CreateWritersPage = () => {
           <button
             type="submit"
             className="bg-pink-500 text-white px-8 py-3 rounded-xl hover:bg-pink-600 shadow-lg transition"
+            disabled={loading}
           >
             {loading ? "Creating..." : "Submit"}
           </button>

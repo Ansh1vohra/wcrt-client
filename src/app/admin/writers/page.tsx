@@ -168,7 +168,7 @@ export default function WriterManage() {
           </thead>
           <tbody className="bg-white divide-y divide-gray-200">
             {writers.map((writer) => (
-              <tr key={writer.email} className="hover:bg-gray-50">
+              <tr key={writer.writerName} className="hover:bg-gray-50">
                 <td className="px-4 py-3 text-gray-900">{writer.writerName}</td>
                 <td className="px-4 py-3 text-gray-900">{writer.fullName}</td>
                 <td className="px-4 py-3 text-gray-900">{writer.email}</td>
@@ -176,12 +176,12 @@ export default function WriterManage() {
                 <td className="px-4 py-3 text-right font-medium">
                   <div className="relative inline-block text-left">
                     <button
-                      onClick={() => setOpenMenuId(openMenuId === writer.email ? null : writer.email)}
+                      onClick={() => setOpenMenuId(openMenuId === writer.writerName ? null : writer.writerName)}
                       className="text-gray-400 hover:text-gray-600"
                     >
                       <Menu className="h-5 w-5" />
                     </button>
-                    {openMenuId === writer.email && (
+                    {openMenuId === writer.writerName && (
                       <div className="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
                         <div className="py-1">
                           <button
