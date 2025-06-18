@@ -7,6 +7,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import WebUpdates from '@/components/WebUpdates';
 import TrendingAndPopular from '@/components/TrendingAndPopular';
+import Section from '@/components/Section';
 
 const API_URL = `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/status/approved`;
 
@@ -85,16 +86,14 @@ export default function Home() {
 
   const allArticles = articles;
 
-  // Format date for display
+  // format date same as WebUpdates
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
-    return date.toLocaleString('en-US', {
-      year: 'numeric',
-      month: '2-digit',
-      day: '2-digit',
-      hour12: true,
-      timeZone: 'UTC'  // Ensure consistent timezone handling
-    }).split(',')[0];  // Only take the date part
+    return date.toLocaleDateString('en-US', {
+      month: 'short',
+      day:   '2-digit',
+      year:  'numeric'
+    });
   };
 
   // Ensure dates are formatted consistently for sorting
@@ -103,7 +102,7 @@ export default function Home() {
   });
 
   // Get featured articles for the main slider (first 5)
-  const featuredArticles = sortedArticles.slice(0, 5);
+  const featuredArticles = sortedArticles.slice(0, 7);
 
   // Get latest 4 updates for web updates section
   const webUpdates = sortedArticles.slice(0, 4);
@@ -244,7 +243,10 @@ export default function Home() {
   // Get articles for current page in all articles section
   const startIndex = (currentPage - 1) * articlesPerPage;
   const paginatedArticles = sortedArticles.slice(startIndex, startIndex + articlesPerPage);
-  const totalPages = Math.ceil(sortedArticles.length / articlesPerPage); const sliderSettings = {
+  const totalPages = Math.ceil(sortedArticles.length / articlesPerPage);
+  // Custom arrows for image slider with minimal padding and grey icons
+  // Custom navigation arrows for main slider
+  const sliderSettings = {
     dots: false,
     infinite: true,
     speed: 800,
@@ -258,6 +260,7 @@ export default function Home() {
     useCSS: true,
     useTransform: true,
     fade: false,
+    arrows: false  // disable default arrows; using custom bottom-right buttons
   };
 
   // Handle slider navigation
@@ -311,6 +314,74 @@ export default function Home() {
   const latestPostEnd = latestPostStart + postsPerPage;
   const paginatedLatestPosts = sortedArticles.slice(latestPostStart, latestPostEnd);
 
+  // New category arrays for additional homepage sections
+  const comments = sortedArticles.filter(article => article.category?.toLowerCase() === 'comment');
+  const recentEvents = sortedArticles.filter(article => article.category?.toLowerCase() === 'recent event');
+  const internshipCapsule = sortedArticles.filter(article => article.category?.toLowerCase() === 'summer internship capsule');
+  const youtubePodcast = sortedArticles.filter(article => article.category?.toLowerCase() === 'youtube podcast');
+  const susmaSwarajJournal = sortedArticles.filter(article => article.category?.toLowerCase() === 'susma swaraj journal');
+
+  // Get current news flash article and compute time ago
+  const newsArticle = sortedArticles[newsIndex];
+  const calculateTimeAgo = (dateStr: string) => {
+    const diffMs = Date.now() - new Date(dateStr).getTime();
+    const diffHrs = Math.floor(diffMs / (1000 * 60 * 60));
+    if (diffHrs < 24) return `${diffHrs} hours ago`;
+    const diffDays = Math.floor(diffHrs / 24);
+    return `${diffDays} days ago`;
+  };
+  const newsTimeAgo = newsArticle ? calculateTimeAgo(newsArticle.uploadDate) : '';
+  const newsLabel = newsArticle ? `${newsArticle.category || ''} | ${newsArticle.title}` : '';
+
+  // Add missing useState and pagination logic for Susma Swaraj Journal section
+  const [susmaPage, setSusmaPage] = useState<number>(1);
+  const susmaPerPage = 5;
+  const totalSusmaPages = Math.ceil(susmaSwarajJournal.length / susmaPerPage);
+  const paginatedSusma = susmaSwarajJournal.slice((susmaPage - 1) * susmaPerPage, susmaPage * susmaPerPage);
+
+  // Add pagination state for Latest, Recent Event, Summer Internship Capsule, YouTube Podcast, and WCRT Web Articles sections
+  const [latestPage, setLatestPage] = useState<number>(1);
+  const latestPerPage = 3;  // show 3 posts before Load More
+  const totalLatestPages = Math.ceil(latestArticles.length / latestPerPage);
+  const paginatedLatest = latestArticles.slice((latestPage - 1) * latestPerPage, latestPage * latestPerPage);
+
+  const [recentEventPage, setRecentEventPage] = useState<number>(1);
+  const recentEventPerPage = 3;
+  const totalRecentEventPages = Math.ceil(recentEvents.length / recentEventPerPage);
+  const paginatedRecentEvents = recentEvents.slice((recentEventPage - 1) * recentEventPerPage, recentEventPage * recentEventPerPage);
+
+  const [internshipPage, setInternshipPage] = useState<number>(1);
+  const internshipPerPage = 6;
+  const totalInternshipPages = Math.ceil(internshipCapsule.length / internshipPerPage);
+  const paginatedInternship = internshipCapsule.slice((internshipPage - 1) * internshipPerPage, internshipPage * internshipPerPage);
+
+  const [podcastPage, setPodcastPage] = useState<number>(1);
+  const podcastPerPage = 4;
+  const totalPodcastPages = Math.ceil(youtubePodcast.length / podcastPerPage);
+  const paginatedPodcast = youtubePodcast.slice((podcastPage - 1) * podcastPerPage, podcastPage * podcastPerPage);
+
+  const [wcrtArticlesPage, setWcrtArticlesPage] = useState<number>(1);
+  const wcrtArticlesPerPage = 3;
+  const totalWcrtArticlesPages = Math.ceil(webArticles.length / wcrtArticlesPerPage);
+  const paginatedWcrtArticles = webArticles.slice((wcrtArticlesPage - 1) * wcrtArticlesPerPage, wcrtArticlesPage * wcrtArticlesPerPage);
+  // add cumulative slices for Load More
+  const displayedRecentArticles = recentArticlesAll.slice(0, recentPage * recentPerPage);
+  const displayedRecentEvents   = recentEvents.slice(  0, recentEventPage * recentEventPerPage);
+
+  // Render helper for 230x164 card
+  const renderCard = (article: Article) => (
+    <Link key={article.postId} href={`/post/${article.postId}`} className="group inline-block w-[230px] bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+      <div className="relative w-[230px] h-[164px] overflow-hidden">
+        <Image src={validatedImages[article.imageUrl || ''] || defaultImage} alt={article.title} width={230} height={164} className="object-cover" />
+        <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1 rounded">{article.category?.toUpperCase() || 'POST'}</span>
+      </div>
+      <div className="pl-0 pr-4 py-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200">{article.title}</h3>
+        <div className="flex items-center text-sm text-gray-500"><svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3M16 7V3M4 11h16M5 19h14a2 2 0 002-2V11a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg><span>{formatDate(article.uploadDate)}</span></div>
+      </div>
+    </Link>
+  );
+
   return (
     <main className="container mx-auto px-4 max-w-full overflow-x-hidden">
       {loading ? (
@@ -323,116 +394,93 @@ export default function Home() {
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 mt-[30px]">
             {/* Left Column: Newsflash and Content */}
             <div className="lg:col-span-2 space-y-6 lg:space-y-8">
-              {/* Newsflash Banner with animation */}
-              <div className="bg-pink-600 text-white p-2 flex items-center transform transition-transform duration-300 hover:scale-[1.01] rounded-lg">
-                <span className="bg-yellow-400 text-pink-600 px-2 py-1 text-xs lg:text-sm font-bold mr-2 lg:mr-4 whitespace-nowrap">NEWSFLASH</span>
-                <div className="flex-1 overflow-hidden">
-                  <div className="animate-marquee whitespace-nowrap text-sm lg:text-base">
-                    {sortedArticles[newsIndex]?.title}
-                  </div>
-                </div>
-                <div className="flex gap-1 lg:gap-2">
-                  <button
-                    className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 flex items-center justify-center text-white focus:outline-none focus:ring-2 focus:ring-white/50"
-                    onClick={() => setNewsIndex((prev) => (prev - 1 + sortedArticles.length) % sortedArticles.length)}
-                    aria-label="Previous news"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                    </svg>
-                  </button>
-                  <button
-                    className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-white/10 hover:bg-white/20 transition-all duration-300 flex items-center justify-center text-white focus:outline-none focus:ring-2 focus:ring-white/50"
-                    onClick={() => setNewsIndex((prev) => (prev + 1) % sortedArticles.length)}
-                    aria-label="Next news"
-                  >
-                    <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                    </svg>
-                  </button>
-                </div>
-              </div>
-
-              {/* Main Article Section */}
-              <div className="relative group">
-                <div className="overflow-hidden rounded-lg relative">
+              {/* Newsflash Banner matching design */}
+              <div className="bg-white shadow-sm rounded-none flex items-center px-4 py-2 space-x-3">
+                <span className="bg-red-600 text-white text-xs font-bold uppercase px-2 py-0.5 rounded">NEWSFLASH</span>
+                <p className="flex-1 text-gray-900 text-sm truncate">{newsLabel}</p>
+                <span className="text-gray-500 text-xs">{newsTimeAgo}</span>
+                <button onClick={() => setNewsIndex(prev => (prev - 1 + sortedArticles.length) % sortedArticles.length)} aria-label="Previous news" className="text-gray-500 hover:text-gray-700 p-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#6B7280">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                  </svg>
+                </button>
+                <button onClick={() => setNewsIndex(prev => (prev + 1) % sortedArticles.length)} aria-label="Next news" className="text-gray-500 hover:text-gray-700 p-1">
+                  <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="#6B7280">
+                    <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                  </svg>
+                </button>
+              </div>              {/* Main Article Section */}
+              <div>
+                <div className="w-[750px] mx-auto relative overflow-hidden rounded-none">
                   <Slider ref={sliderRef} {...sliderSettings}>
                     {featuredArticles.map((article, index) => (
-                      <Link
-                        key={article.postId}
-                        href={`/post/${article.postId}`}
-                      >
-                        <div className="relative aspect-[16/9] group overflow-hidden">                          <Image
-                          src={validatedImages[article.imageUrl || ''] || defaultImage}
-                          alt={article.title}
-                          fill
-                          priority={index === currentImageIndex}
-                          className="object-cover transform transition-all duration-700 ease-in-out group-hover:scale-105"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                          onError={(e) => {
-                            const target = e.target as HTMLImageElement;
-                            target.src = defaultImage;
-                          }}
-                        />
+                      <Link key={article.postId} href={`/post/${article.postId}`}>
+                        <div className="relative aspect-[16/9] overflow-hidden group">
+                          <Image
+                            src={validatedImages[article.imageUrl || ''] || defaultImage}
+                            alt={article.title}
+                            fill
+                            priority={index === currentImageIndex}
+                            className="object-cover transform transition-all duration-700 ease-in-out group-hover:scale-105"
+                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                            onError={(e) => {
+                              const target = e.target as HTMLImageElement;
+                              target.src = defaultImage;
+                            }}
+                          />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-80" />
-                          <div className="absolute bottom-0 left-0 right-0 p-6 transform transition-all duration-300 ease-out group-hover:translate-y-[-5px]">
-                            <div className="inline-block bg-pink-600 text-white text-xs px-2 py-1 mb-2">
+                          <div className="absolute bottom-0 left-0 right-0 p-6 group-hover:translate-y-[-5px] transition-transform duration-300">
+                            <div className="inline-block bg-red-600 text-white text-xs uppercase px-2 py-1 mb-2">
                               {article.category?.toUpperCase() || 'POST'}
                             </div>
-                            <h2 className="text-white text-2xl font-bold">
+                            <h2 className="text-white text-[34px] font-bold">
                               {article.title}
                             </h2>
-                            <p className="text-gray-200 text-sm mt-2">
-                              By {article.authorName} | {formatDate(article.uploadDate)}
+                            <p className="text-gray-200 text-[11px] mt-2 uppercase font-bold">
+                              BY {article.authorName} | {new Date(article.uploadDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()}
                             </p>
                           </div>
                         </div>
                       </Link>
                     ))}
                   </Slider>
+                  {/* Bottom-right navigation arrows */}
+                  <div className="absolute bottom-4 right-4 flex flex-col items-center space-y-2 z-10">
+                    <button onClick={() => sliderRef.current?.slickNext()} aria-label="Next slide" className="bg-red-600 hover:bg-red-700 p-2 rounded-l-md">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                      </svg>
+                    </button>
+                    <button onClick={() => sliderRef.current?.slickPrev()} aria-label="Previous slide" className="bg-white hover:bg-gray-100 p-2 rounded-l-md">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 text-gray-500" fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={2}>
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-
                 {/* Thumbnails */}
-                <div className="flex justify-center mt-8 gap-4">
+                <div className="grid grid-cols-7 justify-items-center mt-4 gap-2 w-[750px] mx-auto">
                   {featuredArticles.map((article, index) => (
                     <button
-                      key={article.postId}
-                      onClick={() => {
-                        if (sliderRef.current) {
-                          sliderRef.current.slickGoTo(index);
-                        }
-                      }}
-                      className={`relative w-24 h-16 flex-shrink-0 rounded-lg overflow-hidden group transform transition-all duration-300
-                        ${index === currentImageIndex
-                          ? 'ring-2 ring-pink-600 ring-offset-2 scale-105'
-                          : 'hover:ring-2 hover:ring-pink-300 hover:ring-offset-1 hover:scale-105'
-                        }`}
+                      key={article.postId} onClick={() => sliderRef.current?.slickGoTo(index)}
+                      className={`relative w-[98.5677px] h-[70.638px] rounded-none overflow-hidden transition-transform ${index === currentImageIndex ? 'ring-2 ring-pink-600 scale-105' : 'hover:ring-2 hover:ring-pink-300'}`}
                     >
-                      <Image
-                        src={validatedImages[article.imageUrl || ''] || defaultImage}
-                        alt={article.title}
-                        fill
-                        className="object-cover transition-all duration-300 ease-in-out"
-                      />
-                      <div
-                        className={`absolute inset-0 transition-colors duration-300 
-                          ${index === currentImageIndex
-                            ? 'bg-pink-600/20'
-                            : 'bg-black/0 group-hover:bg-pink-600/10'
-                          }`}
-                      />
+                      {index === currentImageIndex && (
+                        <div className="absolute -top-2 left-1/2 transform -translate-x-1/2 w-0 h-0 border-l-4 border-r-4 border-l-transparent border-r-transparent border-b-4 border-b-white" />
+                      )}
+                      <Image src={validatedImages[article.imageUrl || ''] || defaultImage} alt={article.title} fill className="object-cover" />
                     </button>
                   ))}
                 </div>
               </div>
 
               {/* Recent Articles Section */}
-              <div className="transform transition-all duration-300">
+              <div id="recent-articles" className="w-[750px] mx-auto mb-4 transform transition-all duration-300">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2">Recent Articles</h2>
+                  <h2 className="text-xl lg:text-2xl font-bold text-pink-600 inline-block border-b-2 border-pink-600 pb-2">Recent Articles</h2>
                   <div className="flex gap-2">
                     <button
                       className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
@@ -456,36 +504,30 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  {recentArticles.map((article) => (
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
+                  {displayedRecentArticles.map((article) => (
                     <Link
                       key={article.postId}
                       href={`/post/${article.postId}`}
-                      className="group block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
+                      className="group inline-block w-[230px] bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
                     >
-                      <div className="relative aspect-[16/9] overflow-hidden">
-                        <div className="absolute top-4 left-4 z-10">
-                          <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded">
-                            {article.category?.toUpperCase() || 'POST'}
-                          </span>
-                        </div>
+                      <div className="relative w-[230px] h-[164px] overflow-hidden">
                         <Image
                           src={validatedImages[article.imageUrl || ''] || defaultImage}
                           alt={article.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 33vw"
+                          width={230}
+                          height={164}
+                          className="object-cover"
                         />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
+                        <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1 rounded">{article.category?.toUpperCase() || 'POST'}</span>
                       </div>
-                      <div className="p-4">
-                        <h3 className="font-bold text-gray-800 group-hover:text-pink-600 transition-colors line-clamp-2 min-h-[3rem]">
+                      <div className="pl-0 pr-4 py-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200">
                           {article.title}
                         </h3>
-                        <div className="mt-3 flex items-center text-sm text-gray-500">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
+                        <div className="flex items-center text-sm text-gray-500">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3M16 7V3M4 11h16M5 19h14a2 2 0 002-2V11a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z" />
                           </svg>
                           <span>{formatDate(article.uploadDate)}</span>
                         </div>
@@ -493,135 +535,53 @@ export default function Home() {
                     </Link>
                   ))}
                 </div>
-              </div>
-
-              {/* Issue Briefs Section */}
-              <div className="mb-8">
+               <div className="flex justify-center mt-4">
+                 <button
+                   onClick={() => setRecentPage(prev => Math.min(recentTotalPages, prev + 1))}
+                   disabled={recentPage === recentTotalPages}
+                   className="px-6 py-2 uppercase font-medium text-sm border border-pink-600 text-pink-600 rounded-none hover:bg-pink-600 hover:text-white transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+                 >
+                   Load More
+                 </button>
+               </div>
+              </div>              {/* Latest Section: same layout as Recent Articles, 3 items per page */}
+              <div className="w-[750px] mx-auto mb-4 transform transition-all duration-300">
                 <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2">Issue Briefs</h2>
+                  <h2 className="text-xl lg:text-2xl font-bold text-pink-600 inline-block border-b-2 border-pink-600 pb-2">Latest</h2>
                   <div className="flex gap-2">
                     <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setIssuePage((prev) => Math.max(1, prev - 1))}
-                      aria-label="Previous issue briefs"
-                      disabled={issuePage === 1}
+                      onClick={() => setLatestPage(prev => Math.max(1, prev - 1))}
+                      disabled={latestPage === 1}
+                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 disabled:opacity-50"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 lg:w-4 lg:h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                       </svg>
                     </button>
                     <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setIssuePage((prev) => Math.min(totalIssuePages, prev + 1))}
-                      aria-label="Next issue briefs"
-                      disabled={issuePage === totalIssuePages}
+                      onClick={() => setLatestPage(prev => Math.min(totalLatestPages, prev + 1))}
+                      disabled={latestPage === totalLatestPages}
+                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 disabled:opacity-50"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 lg:w-4 lg:h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                       </svg>
                     </button>
                   </div>
                 </div>
-                <div className="flex flex-col gap-6">
-                  {paginatedIssueBriefs.map((article) => (
-                    <div key={article.postId} className="flex flex-row gap-4 bg-white rounded-lg shadow-md overflow-hidden">
-                      <div className="relative w-48 h-36 flex-shrink-0">
-                        <Image
-                          src={validatedImages[article.imageUrl || ''] || defaultImage}
-                          alt={article.title}
-                          fill
-                          className="object-cover rounded-l-lg"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        />
-                        <div className="absolute top-2 left-2 z-10">
-                          <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded">
-                            ISSUE BRIEFS
-                          </span>
-                        </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
+                  {paginatedLatest.map(article => (
+                    /* reuse same card markup as Recent Articles */
+                    <Link key={article.postId} href={`/post/${article.postId}`} className="group inline-block w-[230px] bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1">
+                      <div className="relative w-[230px] h-[164px] overflow-hidden">
+                        <Image src={validatedImages[article.imageUrl || ''] || defaultImage} alt={article.title} width={230} height={164} className="object-cover" />
+                        <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1 rounded">{article.category?.toUpperCase() || 'POST'}</span>
                       </div>
-                      <div className="flex-1 flex flex-col justify-between p-3">
-                        <div>
-                          <h3 className="font-bold text-gray-800 text-lg mb-1 group-hover:text-pink-600 transition-colors line-clamp-2">
-                            {article.title}
-                          </h3>
-                          <div className="flex items-center text-xs text-gray-500 gap-2 mb-2">
-                            {article.authorName && (
-                              <span className="text-pink-600 font-semibold">BY {article.authorName.toUpperCase()}</span>
-                            )}
-                            <span>• {formatDate(article.uploadDate)}</span>
-                            <span>• {article.viewCount || 0}</span>
-                          </div>
-                          <p className="text-sm text-gray-600 line-clamp-3 mb-2">
-                            {article.content}
-                          </p>
-                        </div>
-                        <div>
-                          <Link href={`/post/${article.postId}`}>
-                            <button className="px-3 py-1 border border-gray-300 rounded text-xs font-medium hover:bg-pink-50 transition-all">READ MORE</button>
-                          </Link>
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                </div>
-              </div>
-
-              {/* Web Articles Section */}
-              <div className="transform transition-all duration-300">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2">Web Articles</h2>
-                  <div className="flex gap-2">
-                    <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setWebArticlePage((prev) => Math.max(1, prev - 1))}
-                      aria-label="Previous web articles"
-                      disabled={webArticlePage === 1}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                      </svg>
-                    </button>
-                    <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setWebArticlePage((prev) => Math.min(totalWebArticlePages, prev + 1))}
-                      aria-label="Next web articles"
-                      disabled={webArticlePage === totalWebArticlePages}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  {paginatedWebArticles.map((article) => (
-                    <Link
-                      key={article.postId}
-                      href={`/post/${article.postId}`}
-                      className="group block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                    >
-                      <div className="relative aspect-[16/9] overflow-hidden">
-                        <div className="absolute top-4 left-4 z-10">
-                          <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded">
-                            {article.category?.toUpperCase() || 'POST'}
-                          </span>
-                        </div>
-                        <Image
-                          src={validatedImages[article.imageUrl || ''] || defaultImage}
-                          alt={article.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-bold text-gray-800 group-hover:text-pink-600 transition-colors line-clamp-2 min-h-[3rem]">
-                          {article.title}
-                        </h3>
-                        <div className="mt-3 flex items-center text-sm text-gray-500">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
+                      <div className="pl-0 pr-4 py-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200">{article.title}</h3>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3M16 7V3M4 11h16M5 19h14a2 2 0 002-2V11a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z" />
                           </svg>
                           <span>{formatDate(article.uploadDate)}</span>
                         </div>
@@ -629,468 +589,110 @@ export default function Home() {
                     </Link>
                   ))}
                 </div>
-              </div>
-
-              {/* Manekshaw Papers Section */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2">Manekshaw Papers</h2>
-                  <div className="flex gap-2">
-                    <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setManekshawPage((prev) => Math.max(1, prev - 1))}
-                      aria-label="Previous manekshaw papers"
-                      disabled={manekshawPage === 1}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                      </svg>
-                    </button>
-                    <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setManekshawPage((prev) => Math.min(totalManekshawPages, prev + 1))}
-                      aria-label="Next manekshaw papers"
-                      disabled={manekshawPage === totalManekshawPages}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                      </svg>
-                    </button>
+                {latestArticles.length > latestPerPage && (
+                  <div className="flex justify-center mt-4">
+                    <a href="#recent-articles" className="px-6 py-2 uppercase font-medium text-sm border border-pink-600 text-pink-600 rounded-none hover:bg-pink-600 hover:text-white transition-colors duration-300">
+                      Load More
+                    </a>
                   </div>
-                </div>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {paginatedManekshawPapers.map((article) => (
-                    <Link
-                      key={article.postId}
-                      href={`/post/${article.postId}`}
-                      className="group block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                    >
-                      <div className="relative aspect-[16/9] overflow-hidden">
-                        <div className="absolute top-4 left-4 z-10">
-                          <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded">
-                            MANEKSHAW PAPERS
-                          </span>
-                        </div>
-                        <Image
-                          src={validatedImages[article.imageUrl || ''] || defaultImage}
-                          alt={article.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-bold text-gray-800 group-hover:text-pink-600 transition-colors line-clamp-2 min-h-[3rem]">
-                          {article.title}
-                        </h3>
-                        <div className="mt-3 flex items-center text-sm text-gray-500">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                          </svg>
-                          <span>{formatDate(article.uploadDate)}</span>
-                        </div>
-                        {article.authorName && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            By {article.authorName}
-                          </p>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
+                )}
+              </div>              {/* Recent Event Section */}
+              <Section
+                title="Recent Event"
+                items={recentEvents}
+                page={recentEventPage}
+                setPage={setRecentEventPage}
+                itemsPerPage={recentEventPerPage}
+                totalPages={totalRecentEventPages}
+                renderItem={renderCard}
+              />              {/* Summer Internship Capsule Section */}
+              <Section
+                title="Summer Internship Capsule"
+                items={internshipCapsule}
+                page={internshipPage}
+                setPage={setInternshipPage}
+                itemsPerPage={internshipPerPage}
+                totalPages={totalInternshipPages}
+                renderItem={renderCard}
+              />              {/* YouTube Podcast Section */}
+              <Section
+                title="YouTube Podcast"
+                items={youtubePodcast}
+                page={podcastPage}
+                setPage={setPodcastPage}
+                itemsPerPage={podcastPerPage}
+                totalPages={totalPodcastPages}
+                renderItem={renderCard}
+              />              {/* WCRT Web Articles Section */}
+              <Section
+                title="WCRT Web Articles"
+                items={webArticles}
+                page={webArticlePage}
+                setPage={setWcrtArticlesPage}
+                itemsPerPage={wcrtArticlesPerPage}
+                totalPages={totalWcrtArticlesPages}
+                renderItem={renderCard}
+              />              {/* Rajkumari Kaul Essay Competitions Section */}
+              <Section
+                title="Rajkumari Kaul Essay Competitions"
+                items={essays}
+                page={essaysPage}
+                setPage={setEssaysPage}
+                itemsPerPage={essaysPerPage}
+                totalPages={totalEssaysPages}
+                renderItem={renderCard}
+              />              {/* Susma Swaraj Journal Section */}
+              <Section
+                title="Susma Swaraj Journal"
+                items={susmaSwarajJournal}
+                page={susmaPage}
+                setPage={setSusmaPage}
+                itemsPerPage={susmaPerPage}
+                totalPages={totalSusmaPages}
+                renderItem={renderCard}
+              />              {/* Add Issue Briefs Section */}
+              <Section
+                title="Issue Briefs"
+                items={issueBriefs}
+                page={issuePage}
+                setPage={setIssuePage}
+                itemsPerPage={issuePerPage}
+                totalPages={totalIssuePages}
+                renderItem={renderCard}
+              />
 
-              {/* WCRT Journal Section */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2">WCRT Journal</h2>
-                  <div className="flex gap-2">
-                    <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setWcrtJournalPage((prev) => Math.max(1, prev - 1))}
-                      aria-label="Previous WCRT journal"
-                      disabled={wcrtJournalPage === 1}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                      </svg>
-                    </button>
-                    <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setWcrtJournalPage((prev) => Math.min(totalWcrtJournalPages, prev + 1))}
-                      aria-label="Next WCRT journal"
-                      disabled={wcrtJournalPage === totalWcrtJournalPages}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  {paginatedWcrtJournal.map((article) => (
-                    <Link
-                      key={article.postId}
-                      href={`/post/${article.postId}`}
-                      className="group block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                    >
-                      <div className="relative aspect-[16/9] overflow-hidden">
-                        <div className="absolute top-4 left-4 z-10">
-                          <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded">
-                            WCRT JOURNAL
-                          </span>
-                        </div>
-                        <Image
-                          src={validatedImages[article.imageUrl || ''] || defaultImage}
-                          alt={article.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-bold text-gray-800 group-hover:text-pink-600 transition-colors line-clamp-2 min-h-[3rem]">
-                          {article.title}
-                        </h3>
-                        <div className="mt-3 flex items-center text-sm text-gray-500">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                          </svg>
-                          <span>{formatDate(article.uploadDate)}</span>
-                        </div>
-                        {article.authorName && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            By {article.authorName}
-                          </p>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Scholar Warrior Section */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2">Scholar Warrior</h2>
-                  <div className="flex gap-2">
-                    <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setScholarWarriorPage((prev) => Math.max(1, prev - 1))}
-                      aria-label="Previous scholar warrior"
-                      disabled={scholarWarriorPage === 1}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                      </svg>
-                    </button>
-                    <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setScholarWarriorPage((prev) => Math.min(totalScholarWarriorPages, prev + 1))}
-                      aria-label="Next scholar warrior"
-                      disabled={scholarWarriorPage === totalScholarWarriorPages}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  {paginatedScholarWarrior.map((article) => (
-                    <Link
-                      key={article.postId}
-                      href={`/post/${article.postId}`}
-                      className="group block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                    >
-                      <div className="relative aspect-[16/9] overflow-hidden">
-                        <div className="absolute top-4 left-4 z-10">
-                          <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded">
-                            SCHOLAR WARRIOR
-                          </span>
-                        </div>
-                        <Image
-                          src={validatedImages[article.imageUrl || ''] || defaultImage}
-                          alt={article.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-bold text-gray-800 group-hover:text-pink-600 transition-colors line-clamp-2 min-h-[3rem]">
-                          {article.title}
-                        </h3>
-                        <div className="mt-3 flex items-center text-sm text-gray-500">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                          </svg>
-                          <span>{formatDate(article.uploadDate)}</span>
-                        </div>
-                        {article.authorName && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            By {article.authorName}
-                          </p>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Books Section */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2">Books</h2>
-                  <div className="flex gap-2">
-                    <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setBooksPage((prev) => Math.max(1, prev - 1))}
-                      aria-label="Previous books"
-                      disabled={booksPage === 1}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                      </svg>
-                    </button>
-                    <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setBooksPage((prev) => Math.min(totalBooksPages, prev + 1))}
-                      aria-label="Next books"
-                      disabled={booksPage === totalBooksPages}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  {paginatedBooks.map((article) => (
-                    <Link
-                      key={article.postId}
-                      href={`/post/${article.postId}`}
-                      className="group block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                    >
-                      <div className="relative aspect-[16/9] overflow-hidden">
-                        <div className="absolute top-4 left-4 z-10">
-                          <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded">
-                            BOOKS
-                          </span>
-                        </div>
-                        <Image
-                          src={validatedImages[article.imageUrl || ''] || defaultImage}
-                          alt={article.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-bold text-gray-800 group-hover:text-pink-600 transition-colors line-clamp-2 min-h-[3rem]">
-                          {article.title}
-                        </h3>
-                        <div className="mt-3 flex items-center text-sm text-gray-500">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                          </svg>
-                          <span>{formatDate(article.uploadDate)}</span>
-                        </div>
-                        {article.authorName && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            By {article.authorName}
-                          </p>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* Essays Section */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2">Essays</h2>
-                  <div className="flex gap-2">
-                    <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setEssaysPage((prev) => Math.max(1, prev - 1))}
-                      aria-label="Previous essays"
-                      disabled={essaysPage === 1}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                      </svg>
-                    </button>
-                    <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setEssaysPage((prev) => Math.min(totalEssaysPages, prev + 1))}
-                      aria-label="Next essays"
-                      disabled={essaysPage === totalEssaysPages}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  {paginatedEssays.map((article) => (
-                    <Link
-                      key={article.postId}
-                      href={`/post/${article.postId}`}
-                      className="group block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                    >
-                      <div className="relative aspect-[16/9] overflow-hidden">
-                        <div className="absolute top-4 left-4 z-10">
-                          <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded">
-                            ESSAYS
-                          </span>
-                        </div>
-                        <Image
-                          src={validatedImages[article.imageUrl || ''] || defaultImage}
-                          alt={article.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-bold text-gray-800 group-hover:text-pink-600 transition-colors line-clamp-2 min-h-[3rem]">
-                          {article.title}
-                        </h3>
-                        <div className="mt-3 flex items-center text-sm text-gray-500">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                          </svg>
-                          <span>{formatDate(article.uploadDate)}</span>
-                        </div>
-                        {article.authorName && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            By {article.authorName}
-                          </p>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
-
-              {/* External Publications Section */}
-              <div className="mb-8">
-                <div className="flex items-center justify-between mb-4">
-                  <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2">External Publications</h2>
-                  <div className="flex gap-2">
-                    <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setExternalPublicationsPage((prev) => Math.max(1, prev - 1))}
-                      aria-label="Previous external publications"
-                      disabled={externalPublicationsPage === 1}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                      </svg>
-                    </button>
-                    <button
-                      className="w-6 h-6 lg:w-8 lg:h-8 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                      onClick={() => setExternalPublicationsPage((prev) => Math.min(totalExternalPublicationsPages, prev + 1))}
-                      aria-label="Next external publications"
-                      disabled={externalPublicationsPage === totalExternalPublicationsPages}
-                    >
-                      <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3 lg:w-4 lg:h-4">
-                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                      </svg>
-                    </button>
-                  </div>
-                </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
-                  {paginatedExternalPublications.map((article) => (
-                    <Link
-                      key={article.postId}
-                      href={`/post/${article.postId}`}
-                      className="group block bg-white rounded-lg overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1"
-                    >
-                      <div className="relative aspect-[16/9] overflow-hidden">
-                        <div className="absolute top-4 left-4 z-10">
-                          <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded">
-                            EXTERNAL PUBLICATIONS
-                          </span>
-                        </div>
-                        <Image
-                          src={validatedImages[article.imageUrl || ''] || defaultImage}
-                          alt={article.title}
-                          fill
-                          className="object-cover transition-transform duration-300 group-hover:scale-110"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 33vw, 33vw"
-                        />
-                        <div className="absolute inset-0 bg-gradient-to-t from-black/60 via-transparent to-transparent" />
-                      </div>
-                      <div className="p-4">
-                        <h3 className="font-bold text-gray-800 group-hover:text-pink-600 transition-colors line-clamp-2 min-h-[3rem]">
-                          {article.title}
-                        </h3>
-                        <div className="mt-3 flex items-center text-sm text-gray-500">
-                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="mr-2">
-                            <circle cx="12" cy="12" r="10" />
-                            <polyline points="12 6 12 12 16 14" />
-                          </svg>
-                          <span>{formatDate(article.uploadDate)}</span>
-                        </div>
-                        {article.authorName && (
-                          <p className="text-xs text-gray-500 mt-1">
-                            By {article.authorName}
-                          </p>
-                        )}
-                      </div>
-                    </Link>
-                  ))}
-                </div>
-              </div>
               {/* Latest Post Section */}
-              <div className="mb-8 pr-0 lg:pr-8">
+              <div className="w-[750px] mx-auto mb-8 pr-0 lg:pr-8">
                 <div className="flex justify-between items-center mb-4">
-                  <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2">Latest Post</h2>
+                  <h2 className="text-xl lg:text-2xl font-bold text-pink-600 inline-block border-b-2 border-pink-600 pb-2">Latest Post</h2>
                 </div>
                 <div className="flex flex-col gap-6">
                   {paginatedLatestPosts.map((article) => (
-                    <div key={article.postId} className="flex flex-row gap-4 bg-white rounded-lg shadow-md overflow-hidden">
-                      <div className="relative w-48 h-36 flex-shrink-0">
+                    <div key={article.postId} className="flex flex-row gap-4 bg-white rounded-none shadow-md overflow-hidden">
+                      <div className="relative w-[360px] h-[258px] flex-shrink-0">
+                        <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold uppercase w-[91.625px] h-[17px] flex items-center justify-center">
+                          {article.category?.toUpperCase() || 'POST'}
+                        </span>
                         <Image
                           src={validatedImages[article.imageUrl || ''] || defaultImage}
                           alt={article.title}
                           fill
-                          className="object-cover rounded-l-lg"
-                          sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
+                          className="object-cover"
                         />
-                        <div className="absolute top-2 left-2 z-10">
-                          <span className="bg-red-600 text-white text-xs font-bold px-3 py-1 rounded">
-                            {article.category?.toUpperCase() || 'POST'}
-                          </span>
-                        </div>
                       </div>
                       <div className="flex-1 flex flex-col justify-between p-3">
                         <div>
-                          <h3 className="font-bold text-gray-800 text-lg mb-1 group-hover:text-pink-600 transition-colors line-clamp-2">
+                          <h3 className="text-[22px] font-bold text-gray-800 leading-[30px] mb-2 group-hover:text-pink-600 transition-colors line-clamp-2">
                             {article.title}
                           </h3>
-                          <div className="flex items-center text-xs text-gray-500 gap-2 mb-2">
-                            {article.authorName && (
-                              <span className="text-pink-600 font-semibold">BY {article.authorName.toUpperCase()}</span>
-                            )}
-                            <span>• {formatDate(article.uploadDate)}</span>
-                            <span>• {article.viewCount || 0}</span>
-                          </div>
-                          <p className="text-sm text-gray-600 line-clamp-3 mb-2">
+                           <div className="flex items-center text-xs text-gray-500 gap-2 mb-2">
+                             {article.authorName && (
+                               <span className="text-pink-600 font-semibold">BY {article.authorName.toUpperCase()}</span>
+                             )}
+                             <span>• {formatDate(article.uploadDate)}</span>
+                             <span>• {article.viewCount || 0}</span>
+                           </div>
+                          <p className="text-[14px] text-gray-600 line-clamp-2 mb-2">
                             {article.content}
                           </p>
                         </div>
@@ -1102,6 +704,32 @@ export default function Home() {
                       </div>
                     </div>
                   ))}
+                </div>
+                {/* Pagination numbers at the bottom */}
+                <div className="flex justify-center items-center gap-2 mt-4">
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
+                    disabled={currentPage === 1}
+                    className="px-3 py-1 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 disabled:opacity-50"
+                  >
+                    Prev
+                  </button>
+                  {Array.from({ length: totalPages }).map((_, i) => (
+                    <button
+                      key={i}
+                      onClick={() => setCurrentPage(i + 1)}
+                      className={`px-3 py-1 rounded font-medium ${currentPage === i + 1 ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                    >
+                      {i + 1}
+                    </button>
+                  ))}
+                  <button
+                    onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
+                    disabled={currentPage === totalPages}
+                    className="px-3 py-1 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 disabled:opacity-50"
+                  >
+                    Next
+                  </button>
                 </div>
               </div>
             </div>
@@ -1109,80 +737,13 @@ export default function Home() {
             {/* Right Column: Web Updates and Trending */}
             <div className="lg:col-span-1 space-y-6 lg:space-y-8 lg:sticky lg:top-4 lg:self-start">
               {/* Web Updates Section */}
-              <div className="transform transition-all duration-300 hover:translate-y-[-2px]">
-                <WebUpdates  />
+              <div className="w-[345px] h-[320px] mb-5 transform transition-all duration-300 hover:translate-y-[-2px]">
+                <WebUpdates />
               </div>
 
               {/* Trending Section */}
-              <div className="transform transition-all duration-300 hover:translate-y-[-2px]">
-                <TrendingAndPopular
-                />
-              </div>
-
-              {/* Newsletter Section */}
-              <div className="transform transition-all duration-300 hover:translate-y-[-2px]">
-                <div className="web-updates">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-base lg:text-lg font-bold text-pink-600 border-b-2 border-pink-600 inline-block pb-1">Newsletter</h2>
-                    <div className="flex gap-2">
-                      <button
-                        className="w-6 h-6 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                        onClick={() => setNewsletterPage((prev) => Math.max(1, prev - 1))}
-                        disabled={newsletterPage === 1}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                        </svg>
-                      </button>
-                      <button
-                        className="w-6 h-6 rounded-full bg-pink-600 text-white flex items-center justify-center hover:bg-pink-700 transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-pink-400"
-                        onClick={() => setNewsletterPage((prev) => Math.min(totalNewsletterPages, prev + 1))}
-                        disabled={newsletterPage === totalNewsletterPages}
-                      >
-                        <svg xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor" className="w-3 h-3">
-                          <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                        </svg>
-                      </button>
-                    </div>
-                  </div>
-                  <div className="space-y-4">
-                    {paginatedNewsletters.map((article) => (
-                      <Link
-                        href={`/post/${article.postId}`}
-                        key={article.postId}
-                        className="flex gap-3 group"
-                      >
-                        <div className="relative w-24 h-20 flex-shrink-0 rounded overflow-hidden">
-                          <Image
-                            src={validatedImages[article.imageUrl || ''] || defaultImage}
-                            alt={article.title}
-                            fill
-                            className="object-cover"
-                            sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
-                            priority={false}
-                            loading="lazy"
-                            onError={(e) => {
-                              const target = e.target as HTMLImageElement;
-                              target.src = defaultImage;
-                            }}
-                          />
-                        </div>
-                        <div className="flex-1 min-w-0">
-                          <h3 className="font-bold text-gray-900 group-hover:text-pink-600 transition-colors text-base line-clamp-2">
-                            {article.title}
-                          </h3>
-                          <div className="flex items-center gap-2 text-xs text-gray-500 mt-1 mb-1">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block align-middle"><circle cx="12" cy="12" r="10" /><polyline points="12 6 12 12 16 14" /></svg>
-                            {formatDate(article.uploadDate)}
-                          </div>
-                          <p className="text-sm text-gray-700 line-clamp-2">
-                            {article.content}
-                          </p>
-                        </div>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
+              <div className="w-[345px] h-[462px] mb-5 transform transition-all duration-300 hover:translate-y-[-2px] overflow-y-auto">
+                <TrendingAndPopular />
               </div>
 
               {/* Intern Articles Section */}
@@ -1227,15 +788,10 @@ export default function Home() {
                               className="object-cover rounded-lg transition-opacity duration-300"
                               sizes="(max-width: 640px) 100vw, (max-width: 1024px) 50vw, 33vw"
                               priority={false}
-                              loading="lazy"
-                              onError={(e) => {
-                                const target = e.target as HTMLImageElement;
-                                target.src = defaultImage;
-                              }}
                             />
                           </div>
                           <div className="flex-1 text-sm">
-                            <span className="text-gray-500 text-xs">
+                                                                                                             <span className="text-gray-500 text-xs">
                               {formatDate(article.uploadDate)}
                             </span>
                             <h3 className="font-medium mt-1 group-hover:text-pink-600 transition-colors line-clamp-2">
@@ -1246,10 +802,10 @@ export default function Home() {
                       </Link>
                     ))}
                   </div>
-                </div>
+                               </div>
               </div>
             </div>
-          </div>
+                   </div>
 
           {/* All Articles Section - always last in vertical stack on mobile */}
           <div className="block lg:hidden mt-8">
@@ -1308,12 +864,12 @@ export default function Home() {
         ))}
         <button
           onClick={() => setCurrentPage(prev => Math.min(totalPages, prev + 1))}
-          disabled={currentPage === totalPages}
+          // disabled={currentPage === totalPages}
           className="px-4 lg:px-6 py-2 lg:py-3 bg-gray-100 text-gray-500 rounded-none font-medium text-sm lg:text-lg hover:bg-gray-200 transition-all duration-200 whitespace-nowrap"
         >
           Next
         </button>
       </div> */}
     </main>
-  );
+   );
 }

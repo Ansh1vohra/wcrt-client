@@ -26,19 +26,27 @@ export default function TopNavbar(){
 
     return (
         <div className="bg-neutral-100 py-2 flex items-center justify-around hidden text-xs md:flex">
-            <div className="flex gap-6 md:max-w-6xl">
-                <div>{formattedDate}</div>
+            <div className="flex items-center md:max-w-6xl">
+                <span className="text-gray-600">{formattedDate}</span>
+                <span className="mx-3 text-gray-400">|</span>
                 <Link href="/advertise" className="text-gray-600 hover:text-gray-900">
                     ADVERTISE WITH US
                 </Link>
+                <span className="mx-3 text-gray-400">|</span>
                 <Link href="/support" className="text-gray-600 hover:text-gray-900">
-                    SUPPORT US (Donate)
+                    SUPPORT US
                 </Link>
+                <span className="mx-3 text-gray-400">|</span>
                 <Link href="/write" className="text-gray-600 hover:text-gray-900">
                     WRITE FOR US
                 </Link>
+                <span className="mx-3 text-gray-400">|</span>
                 <Link href="/shop" className="text-gray-600 hover:text-gray-900">
                     SHOP(FUND RAISER)
+                </Link>
+                <span className="mx-3 text-gray-400">|</span>
+                <Link href="/donate" className="text-gray-600 hover:text-gray-900">
+                    DONATE
                 </Link>
             </div>
             <div className="relative">
