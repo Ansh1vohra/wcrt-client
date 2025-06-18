@@ -1,4 +1,3 @@
-
 "use client"
 import { useState, useRef, useEffect } from 'react';
 import Link from 'next/link';
@@ -16,36 +15,40 @@ const menuItems: MenuItem[] = [
     { title: 'HOME', href: '/', dropdown: null },
     { title: 'ABOUT US', href: '/about', dropdown: null },
     {
-        title: 'PUBLICATION',
-        dropdown: [
-            { name: "Web Articles", href: "/publication/web-articles" },
-            { name: "Issue Briefs", href: "/publication/issue-briefs" },
-            { name: "Research reports", href: "/publication/research-reports" },
-            { name: "Newsletters", href: "/publication/newsletters" },
-            { name: "WCRT Journal", href: "/publication/wcrt-journal" },
-            { name: "Scholar Warrior", href: "/publication/scholar-warrior" },
-            { name: "Books", href: "/publication/books" },
-            { name: "Essays", href: "/publication/essays" }
+        title: 'PUBLICATIONS', href: '/publication', dropdown: [
+            { name: 'Web Articles', href: '/publication/web-articles' },
+            { name: 'Issue Briefs', href: '/publication/issue-briefs' },
+            { name: 'Anna Chandy Papers', href: '/publication/anna-chandy-papers' },
+            { name: 'NewsLetters', href: '/publication/newsletters' },
+            { name: 'WCRT Journal', href: '/publication/wcrt-journal' },
+            { name: 'Scholar Warrior', href: '/publication/scholar-warrior' },
+            { name: 'Books', href: '/publication/books' },
+            { name: 'Essays', href: '/publication/essays' },
+            { name: 'Rajkumari Kaul Essay Competitions', href: '/publication/rajkumari-kaul-essay-competitions' },
+            { name: 'Intern Articles', href: '/publication/intern-articles' },
+            { name: 'External Publications', href: '/publication/external-publications' }
         ]
     },
     {
-        title: 'RESEARCH AREAS',
-        dropdown: [
-            { name: 'Defense & Security', href: '/research/defense' },
-            { name: 'Politics & Governance', href: '/research/politics' },
-            { name: 'Economics & Trade', href: '/research/economics' }
+        title: 'RESEARCH AREAS', href: '/research', dropdown: [
+            { name: 'Women Rights and Development', href: '/research/women-rights-development' },
+            { name: 'Child Rights and Development', href: '/research/child-rights-development' },
+            { name: 'National Data for Atrocities on Women', href: '/research/national-data-atrocities-women' },
+            { name: 'Child Development and Malnutrition', href: '/research/child-development-malnutrition' }
         ]
     },
-    { title: 'WEB ARCHIVE', href: '/archive', dropdown: null },
+    {
+        title: 'ARCHIVE', href: '/archive', dropdown: null
+    },
     {
         title: 'EVENTS', href: '/events', dropdown: [
             { name: 'Seminars', href: '/events/seminars' },
             { name: 'Webinars', href: '/events/webinars' }
         ]
     },
-    { title: 'PROMEX', href: '/promex', dropdown: null },
+    { title: 'EXAM', href: '/exam', dropdown: null },
     { title: 'CAREERS', href: '/careers', dropdown: null },
-    { title: 'CONTACT', href: '/contact', dropdown: null },
+    { title: 'CONTACT', href: '/contact', dropdown: null }
 ];
 
 const Header = () => {
@@ -200,7 +203,7 @@ const Header = () => {
                                     <div className="flex items-center">
                                         <Link
                                             href={item.href || '#'}
-                                            className={`text-sm font-semibold text-black px-3 py-2 relative transition-colors duration-200
+                                            className={`text-sm font-medium px-3 py-2 relative transition-colors duration-200
                                                 ${isActivePage(item) ? 'text-pink-600' : 'text-gray-700 hover:text-pink-600'}
                                             `}
                                         >

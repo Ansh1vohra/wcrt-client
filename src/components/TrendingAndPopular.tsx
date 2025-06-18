@@ -89,7 +89,7 @@ export default function TrendingAndPopular() {
             className="block group"
           >
             <div className="flex gap-3">
-              <div className="relative w-16 h-16 flex-shrink-0">
+              <div className="relative w-[120px] h-[85px] flex-shrink-0">
                 <Image
                   src={article.imageUrl || '/article.jpg'}
                   alt={article.title}
