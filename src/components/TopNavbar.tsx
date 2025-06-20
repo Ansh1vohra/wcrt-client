@@ -44,7 +44,6 @@ export default function TopNavbar(){
                 <Link href="/shop" className="text-gray-600 hover:text-gray-900">
                     SHOP(FUND RAISER)
                 </Link>
-                <span className="mx-3 text-gray-400">|</span>
             </div>
             <div className="relative">
                 <input
