@@ -5,31 +5,74 @@ import { useRouter } from "next/navigation";
 
 const AdminLogin = () => {
   const [showPassword, setShowPassword] = useState(false);
+  const [formData, setFormData] = useState({
+    adminUserName: "",
+    adminPassword: ""
+  });
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
   const router = useRouter();
 
-  const handleLogin = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({
+      ...prev,
+      [name]: value
+    }));
+  };
 
-    // TODO: Add your real API call and validation here
-    // If successful:
-    router.push("/admin/admindashboard");
+  const handleLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    setError("");
+
+    try {
+      const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/admin/login`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();      if (response.ok && data.token) {
+        localStorage.setItem("admin-token", data.token);
+        window.location.href = "/admin";
+      } else {
+        setError(data.message || "Login failed");
+      }
+    } catch (err) {
+      setError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-white">
-      <div className="w-full max-w-4xl h-[600px] shadow-lg rounded-xl overflow-hidden flex">
+    <div className="min-h-screen flex items-center justify-center bg-white px-4">
+      <div className="w-full max-w-4xl shadow-lg rounded-xl overflow-hidden flex flex-col md:flex-row h-auto md:h-[600px]">
         {/* Left: Form */}
-        <div className="w-1/2 p-10 bg-white flex flex-col justify-center">
+        <div className="w-full md:w-1/2 p-8 sm:p-10 bg-white flex flex-col justify-center">
           <h2 className="text-3xl font-semibold text-pink-600 mb-2">Admin Login</h2>
           <p className="text-gray-600 mb-6">Welcome back! Please enter your details</p>
+
+          {error && (
+            <div className="bg-red-50 text-red-500 p-3 rounded-md mb-4">
+              {error}
+            </div>
+          )}
 
           <form className="space-y-4" onSubmit={handleLogin}>
             <div>
               <label className="block text-gray-700 mb-1">Username</label>
               <input
                 type="text"
+                name="adminUserName"
+                value={formData.adminUserName}
+                onChange={handleChange}
                 spellCheck="false"
                 className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200"
+                required
               />
             </div>
 
@@ -38,8 +81,12 @@ const AdminLogin = () => {
               <div className="relative">
                 <input
                   type={showPassword ? "text" : "password"}
+                  name="adminPassword"
+                  value={formData.adminPassword}
+                  onChange={handleChange}
                   className="w-full border border-gray-300 px-4 py-2 rounded-md focus:outline-none focus:ring-2 focus:ring-gray-200 pr-10"
                   autoComplete="current-password"
+                  required
                 />
                 <button
                   type="button"
@@ -78,24 +125,20 @@ const AdminLogin = () => {
 
             <button
               type="submit"
-              className="w-full bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-md transition duration-300"
+              disabled={loading}
+              className={`w-full bg-pink-500 hover:bg-pink-600 text-white py-2 rounded-md transition duration-300 ${
+                loading ? 'opacity-70 cursor-not-allowed' : ''
+              }`}
             >
-              Log in
+              {loading ? 'Logging in...' : 'Log in'}
             </button>
           </form>
-
-          <p className="text-sm text-gray-600 mt-6">
-            Don’t have an account?{" "}
-            <a href="#" className="text-pink-500 hover:underline">
-              Sign up
-            </a>
-          </p>
         </div>
 
         {/* Right: Image */}
-        <div className="w-1/2 hidden md:block h-full">
+        <div className="w-full md:w-1/2 h-64 md:h-auto hidden sm:block">
           <img
-            src="/article.jpg"
+            src="/admin.jpg"
             alt="Login visual"
             className="object-cover w-full h-full"
           />

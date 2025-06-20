@@ -79,7 +79,7 @@ export default function Comments() {
           />
         </div>
         
-        <div className="flex items-center gap-2">
+        {/* <div className="flex items-center gap-2">
           <input
             type="checkbox"
             id="save-info"
@@ -90,11 +90,11 @@ export default function Comments() {
           <label htmlFor="save-info" className="text-gray-700">
             Save my name, email, and website in this browser for the next time I comment.
           </label>
-        </div>
+        </div> */}
         
         <button
           type="submit"
-          className="bg-red-600 text-white px-6 py-3 rounded-lg hover:bg-red-700"
+          className="bg-pink-600 text-white px-6 py-3 rounded-lg hover:bg-pink-700"
         >
           Post Comment
         </button>

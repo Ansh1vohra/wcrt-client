@@ -1,71 +1,85 @@
+// components/WebUpdates.tsx
 "use client";
+import { useEffect, useState } from 'react';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import Image from 'next/image';
+import { formatDate } from '@/lib/utils'; // Create a utils file for shared functions
+
+const API_URL = `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/status/approved`;
 
 interface Article {
   title: string;
-  abstract: string;
-  author: string;
-  postDate: string;
-  image?: string;
+  content: string;
+  uploadDate: string;
+  imageUrl?: string;
+  postId: string;
 }
 
-interface WebUpdatesProps {
-  updates: Article[];
-  validateImage: (imagePath: string) => Promise<string>;
-}
-
-const defaultImage = "/article.jpg";
-
-const WebUpdates = ({ updates, validateImage }: WebUpdatesProps) => {
-  const [validatedImages, setValidatedImages] = useState<Record<string, string>>({});
+export default function WebUpdates() {
+  const [updates, setUpdates] = useState<Article[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    const validateImages = async () => {
-      const imagePromises = updates.map(async (article) => {
-        const validImage = await validateImage(article.image || '');
-        return [article.image, validImage];
-      });
-
-      const validatedPairs = await Promise.all(imagePromises);
-      const validatedMap = Object.fromEntries(validatedPairs);
-      setValidatedImages(validatedMap);
+    const fetchUpdates = async () => {
+      try {
+        const response = await fetch(API_URL);
+        if (!response.ok) {
+          throw new Error('Failed to fetch updates');
+        }
+        const data = await response.json();
+        setUpdates(data.posts.slice(0, 4) || []); // Get first 4 approved posts
+      } catch (err) {
+        setError(err instanceof Error ? err.message : 'Failed to fetch updates');
+      } finally {
+        setLoading(false);
+      }
     };
 
-    validateImages();
-  }, [updates, validateImage]);
+    fetchUpdates();
+  }, []);
+
+  if (loading) return <div>Loading updates...</div>;
+  if (error) return <div>Error: {error}</div>;
 
   return (
     <div className="web-updates">
-      <h2 className="text-base lg:text-lg font-bold mb-4 text-pink-600 border-b-2 border-pink-600 inline-block pb-1">Web Updates</h2>
-      <div className="space-y-2 lg:space-y-3">
-        {updates.map((update, index) => (
+      <h2 className="text-base lg:text-lg font-bold text-pink-600 border-b-2 border-pink-600 inline-block pb-1 mb-4">
+        Web Updates
+      </h2>
+      <div className="space-y-4">
+        {updates.map((article) => (
           <Link 
-            href={`/publication/web-articles/${encodeURIComponent(update.title.toLowerCase().replace(/\s+/g, '-'))}`} 
-            key={index}
-            className="block group"
+            href={`/publication/web-articles/${article.postId}`} 
+            key={article.postId}
+            className="flex gap-3 group"
           >
-            <div className="flex items-start gap-2 lg:gap-3 border-b border-gray-200 pb-2 lg:pb-3">
-              <div className="w-1.5 h-1.5 lg:w-2 lg:h-2 bg-pink-600 rounded-full mt-2 flex-shrink-0" />
-              <div className="flex-grow min-w-0">
-                <h3 className="text-xs lg:text-sm group-hover:text-pink-600 transition-colors line-clamp-2">{update.title}</h3>
-                <p className="text-[10px] lg:text-xs text-gray-500 mt-0.5 lg:mt-1">
-                  {new Date(update.postDate).toLocaleDateString('en-US', {
-                    year: 'numeric',
-                    month: '2-digit',
-                    day: '2-digit'
-                  })}
-                </p>
+            <div className="relative w-24 h-20 flex-shrink-0 rounded overflow-hidden">
+              <Image
+                src={article.imageUrl || '/article.jpg'}
+                alt={article.title}
+                fill
+                className="object-cover"
+                sizes="100vw"
+              />
+            </div>
+            <div className="flex-1 min-w-0">
+              <h3 className="font-bold text-gray-900 group-hover:text-pink-600 transition-colors text-base line-clamp-2">
+                {article.title}
+              </h3>
+              <div className="flex items-center gap-2 text-xs text-gray-500 mt-1 mb-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#ec4899" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" className="inline-block align-middle">
+                  <circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/>
+                </svg>
+                {formatDate(article.uploadDate)}
               </div>
-              <svg className="w-3 h-3 lg:w-4 lg:h-4 text-pink-600 flex-shrink-0 mt-1 transform transition-transform duration-200 group-hover:translate-x-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-              </svg>
+              <p className="text-sm text-gray-700 line-clamp-2">
+                {article.content}
+              </p>
             </div>
           </Link>
         ))}
       </div>
     </div>
   );
-};
-
-export default WebUpdates;
+}

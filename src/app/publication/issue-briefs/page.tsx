@@ -25,7 +25,7 @@ export default function Page() {
     async function fetchArticles() {
       try {
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/category/web-articles/approved`
+          `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/category/issue-briefs/approved`
         );
 
         const contentType = response.headers.get('content-type');
