@@ -3,12 +3,13 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
+import { useParams } from 'next/navigation';
 
 interface Article {
   postId: string;
   title: string;
   imageUrl: string;
-  writerName: string;
+  authorName: string;
   uploadDate: string;
   content: string;
   category: string;
@@ -18,14 +19,19 @@ interface Article {
 const ARTICLES_PER_PAGE = 10;
 
 export default function Page() {
+  const params = useParams();
+  const slug = params?.slug as string; // Get the slug from URL params
   const [articles, setArticles] = useState<Article[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
     async function fetchArticles() {
       try {
+        setIsLoading(true);
+        // Use the slug in the API endpoint
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/category/issue-briefs/approved`
+          `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/category/${slug || 'web-articles'}/approved`
         );
 
         const contentType = response.headers.get('content-type');
@@ -42,11 +48,22 @@ export default function Page() {
         }
       } catch (error) {
         console.error('Error fetching articles:', error);
+      } finally {
+        setIsLoading(false);
       }
     }
 
     fetchArticles();
-  }, []);
+  }, [slug]);
+
+   // Show loading spinner while data is being fetched
+   if (isLoading) {
+    return (
+      <div className="h-full inset-0 flex items-center justify-center bg-white bg-opacity-90 z-50">
+        <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-red-500"></div>
+      </div>
+    );
+  }
 
   const mainArticle = articles[0];
   const sideArticles = articles.slice(1, 4);
@@ -82,7 +99,7 @@ export default function Page() {
               {mainArticle.title}
             </h2>
             <p className="text-white text-sm mt-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-              By <strong className="text-red-500">{mainArticle.writerName}</strong> ●{' '}
+              By <strong className="text-red-500">{mainArticle.authorName}</strong> ●{' '}
               {new Date(mainArticle.uploadDate).toLocaleDateString()}
             </p>
           </div>
@@ -116,7 +133,7 @@ export default function Page() {
                   {article.title}
                 </h3>
                 <p className="text-white text-sm mt-1 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-                  By <strong className="text-red-500">{article.writerName}</strong> ●{' '}
+                  By <strong className="text-red-500">{article.authorName}</strong> ●{' '}
                   {new Date(article.uploadDate).toLocaleDateString()}
                 </p>
               </div>
@@ -156,7 +173,7 @@ export default function Page() {
                       </h2>
                     </Link>
                     <p className="text-gray-600 text-sm mt-1">
-                      By <strong className="text-red-500">{article.writerName}</strong> ●{' '}
+                      By <strong className="text-red-500">{article.authorName}</strong> ●{' '}
                       {new Date(article.uploadDate).toLocaleDateString()}
                     </p>
                     <p className="text-gray-800 mt-2 line-clamp-3">

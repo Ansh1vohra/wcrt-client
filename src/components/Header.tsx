@@ -148,12 +148,12 @@ const Header = () => {
 
     return (
         <>
-            {/* Top section with background image - scrolls normally */}
             <TopNavbar />
             <div
                 className="max-w-[100vw] w-6xl mx-auto bg-cover bg-center 
-                bg-[image:url('/headerbanner.png')] 
-                md:bg-[image:url('/BannerNew.png')]"
+                bg-[#d50b8b] 
+                md:bg-[image:url('/BannerNew.png')]
+                md:cursor-pointer"
             >
                 <div className="container mx-auto px-4 md:w-6xl py-5 md:py-10">
                     <div className="flex items-center justify-between">
@@ -171,7 +171,7 @@ const Header = () => {
                             {/* Logo */}
                             <Link href="/" className="flex items-center md:invisible">
                                 <Image
-                                    src="/wcrt-logo2.png"
+                                    src="/wcrt-logo.png"
                                     width={180}
                                     height={60}
                                     alt="Logo"
@@ -203,7 +203,7 @@ const Header = () => {
                                     <div className="flex items-center">
                                         <Link
                                             href={item.href || '#'}
-                                            className={`text-sm font-medium px-3 py-2 relative transition-colors duration-200
+                                            className={`text-sm font-semibold px-3 py-2 relative transition-colors duration-200
                                                 ${isActivePage(item) ? 'text-pink-600' : 'text-gray-700 hover:text-pink-600'}
                                             `}
                                         >

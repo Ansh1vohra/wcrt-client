@@ -33,8 +33,8 @@ export default function TopNavbar(){
                     ADVERTISE WITH US
                 </Link>
                 <span className="mx-3 text-gray-400">|</span>
-                <Link href="/support" className="text-gray-600 hover:text-gray-900">
-                    SUPPORT US
+                <Link href="/donate" className="text-gray-600 hover:text-gray-900">
+                    SUPPORT US(Donate)
                 </Link>
                 <span className="mx-3 text-gray-400">|</span>
                 <Link href="/write" className="text-gray-600 hover:text-gray-900">
@@ -45,9 +45,6 @@ export default function TopNavbar(){
                     SHOP(FUND RAISER)
                 </Link>
                 <span className="mx-3 text-gray-400">|</span>
-                <Link href="/donate" className="text-gray-600 hover:text-gray-900">
-                    DONATE
-                </Link>
             </div>
             <div className="relative">
                 <input

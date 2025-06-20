@@ -43,7 +43,7 @@ export default function WebUpdates() {
   if (error) return <div>Error: {error}</div>;
 
   return (
-    <div className="web-updates w-full h-full overflow-auto">
+    <div className="web-updates w-full overflow-auto">
       <h2 className="text-base lg:text-lg font-bold text-pink-600 border-b-2 border-pink-600 inline-block pb-1 mb-4">
         Web Updates
       </h2>
