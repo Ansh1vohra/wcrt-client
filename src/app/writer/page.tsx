@@ -2,6 +2,9 @@
 import React, { useState, useEffect, ChangeEvent, FormEvent } from 'react';
 import axios from 'axios';
 import { useRouter } from 'next/navigation';
+import TextEditor from '@/components/TextEditor';
+import SafeHTML from '@/components/SafeHTML'
+
 
 interface Post {
     postId: string;
@@ -9,6 +12,7 @@ interface Post {
     content: string;
     imageUrl: string;
     authorImage: string;
+    authorName: string;
     category: string;
     writerName: string;
     uploadDate: string;
@@ -31,6 +35,9 @@ export default function WriterPage() {
     const [writerCategories, setWriterCategories] = useState<string[]>([]);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const [error, setError] = useState<string | null>(null);
+    const [selectedPost, setSelectedPost] = useState<Post | null>(null);
+    const [showModal, setShowModal] = useState(false);
+
     const [loading, setLoading] = useState(true);
     const router = useRouter();
 
@@ -272,13 +279,17 @@ export default function WriterPage() {
                         </div>
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700">Content</label>
-                            <textarea
+                            <TextEditor
+                                content={content}
+                                onChange={(html) => setContent(html)}
+                            />
+                            {/* <textarea
                                 value={content}
                                 spellCheck="false"
                                 onChange={(e) => setContent(e.target.value)}
                                 rows={6}
                                 className="w-full px-4 py-2 border rounded-lg"
-                            />
+                            /> */}
                         </div>
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700">Post Image</label>
@@ -335,27 +346,68 @@ export default function WriterPage() {
 
             {/* My Posts */}
             {activeTab === 'myPosts' && (
-                <div className="bg-white shadow-lg p-6 rounded-lg mt-6">
-                    <h2 className="text-2xl font-semibold mb-4">My Posts</h2>
-                    <ul>
-                        {posts.filter(post => post.writerName === writerName).length > 0 ? (
-                            posts
-                                .filter(post => post.writerName === writerName)
-                                .map((post) => (
-                                    <li key={post.postId} className="mb-4 p-4 bg-gray-100 rounded-lg shadow-sm">
-                                        <h3 className="text-xl font-semibold">{post.title}</h3>
-                                        <p className="text-sm text-gray-500">Status: <span className={`font-semibold ${post.post_status === 'approved' ? 'text-green-600' : 'text-yellow-600'}`}>{post.post_status}</span></p>
-                                        <p className="text-sm text-gray-500 mt-1">Category: {post.category}</p>
-                                        <p className="text-sm text-gray-500">Views: {post.viewCount}</p>
-                                        <p className="text-gray-700 mt-2 whitespace-pre-line">{post.content}</p>
-                                    </li>
-                                ))
-                        ) : (
-                            <p className="text-center text-gray-500">No posts found.</p>
-                        )}
-                    </ul>
+                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+                    {posts.filter(post => post.writerName === writerName).map((post) => (
+                        <div
+                            key={post.postId}
+                            className="bg-gray-50 rounded-lg overflow-hidden shadow-md cursor-pointer hover:shadow-lg transition"
+                            onClick={() => {
+                                setSelectedPost(post);
+                                setShowModal(true);
+                            }}
+                        >
+                            <img
+                                src={post.imageUrl}
+                                alt={post.title}
+                                className="w-full h-48 object-cover"
+                            />
+                            <div className="p-4">
+                                <h3 className="text-lg font-semibold truncate">{post.title}</h3>
+                                <p className="text-sm text-gray-500 mt-1">{post.category}</p>
+                                <p className="text-sm text-gray-400">Status: {post.post_status}</p>
+                                <div className="mt-2 line-clamp-3 text-sm text-gray-700">
+                                    <SafeHTML html={post.content} />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                    {showModal && selectedPost && (
+                        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                            <div className="bg-white rounded-lg max-w-2xl w-full overflow-y-auto max-h-[90vh] p-6 relative">
+                                <button
+                                    onClick={() => setShowModal(false)}
+                                    className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+                                >
+                                    ✕
+                                </button>
+
+                                <img
+                                    src={selectedPost.imageUrl}
+                                    alt={selectedPost.title}
+                                    className="w-full h-64 object-cover rounded mb-4"
+                                />
+                                <h2 className="text-2xl font-bold mb-2">{selectedPost.title}</h2>
+                                <p className="text-sm text-gray-600 mb-1">By: {selectedPost.writerName}</p>
+                                <p className="text-sm text-gray-500 mb-4">Category: {selectedPost.category} | Views: {selectedPost.viewCount}</p>
+
+                                {selectedPost.authorImage && (
+                                    <div className="flex items-center mb-4">
+                                        <img src={selectedPost.authorImage} alt="Author" className="w-10 h-10 rounded-full mr-2" />
+                                        <span className="text-sm text-gray-700">{selectedPost.authorName}</span>
+                                    </div>
+                                )}
+
+                                <div className="text-gray-800">
+                                    <SafeHTML html={selectedPost.content} />
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
                 </div>
+
             )}
         </div>
+
     );
 }

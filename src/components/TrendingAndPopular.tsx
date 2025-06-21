@@ -84,7 +84,7 @@ export default function TrendingAndPopular() {
       <div className="space-y-3">
         {articlesToShow.map((article) => (
           <Link
-            href={`/publication/web-articles/${article.postId}`}
+            href={`/post/${article.postId}`}
             key={article.postId}
             className="block group"
           >

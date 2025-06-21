@@ -4,6 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import SafeHTML from '@/components/SafeHTML';
 
 interface Article {
   postId: string;
@@ -176,9 +177,9 @@ export default function Page() {
                       By <strong className="text-red-500">{article.authorName}</strong> ●{' '}
                       {new Date(article.uploadDate).toLocaleDateString()}
                     </p>
-                    <p className="text-gray-800 mt-2 line-clamp-3">
-                      {article.content}
-                    </p>
+                    <div className="text-gray-800 mt-2 line-clamp-3">
+                      <SafeHTML html={article.content} />
+                    </div>
                   </div>
                   <Link href={`/post/${article.postId}`}>
                     <button className="mt-4 w-max px-4 py-1 text-sm text-gray-700 border border-gray-400 bg-white transition-all duration-300 ease-in-out hover:bg-red-500 hover:text-white hover:scale-105 active:scale-95 active:bg-red-400 shadow-sm hover:shadow-lg">

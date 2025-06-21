@@ -14,6 +14,7 @@ import {
 import Comments from './comment';
 import TrendingAndPopular from '@/components/TrendingAndPopular';
 import WebUpdates from '@/components/WebUpdates';
+import SafeHTML from '@/components/SafeHTML';
 
 interface Article {
     postId: string;
@@ -145,7 +146,11 @@ export default function ArticleDetailsPage() {
 
                 {/* Content */}
                 <div className="prose prose-lg max-w-none text-gray-800 mb-10">
-                    <div className="mb-6 whitespace-pre-wrap text-sm sm:text-base">{article.content}</div>
+                    
+                    {/* <div className="mb-6 whitespace-pre-wrap text-sm sm:text-base">{article.content}</div> */}
+                    <div className="mb-6 whitespace-pre-wrap text-sm sm:text-base">
+                        <SafeHTML html={article.content} />
+                    </div>
 
                 </div>
 

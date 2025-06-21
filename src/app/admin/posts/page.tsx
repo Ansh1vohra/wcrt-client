@@ -1,6 +1,7 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { useRouter } from "next/navigation";
+import SafeHTML from "@/components/SafeHTML";
 
 interface Post {
   postId: string;
@@ -97,10 +98,11 @@ export default function OpenPostsPage() {
     setActionLoading(false);
   }
 
-  function previewText(text: string, maxLength = 100): string {
-    if (!text) return "";
-    return text.length <= maxLength ? text : text.slice(0, maxLength) + "...";
+  function previewText(html: string): string {
+    const plainText = html.replace(/<[^>]+>/g, ''); // Remove HTML tags
+    return plainText.length > 200 ? plainText.slice(0, 200) + '...' : plainText;
   }
+  
 
   if (loading) {
     return (
@@ -210,7 +212,11 @@ export default function OpenPostsPage() {
 
             <p className="text-sm text-gray-600 mb-2">Category: {selectedPost.category}</p>
 
-            <div className="mb-6 whitespace-pre-wrap text-sm sm:text-base">{selectedPost.content}</div>
+            <div className="mb-6 whitespace-pre-wrap text-sm sm:text-base">
+              <SafeHTML html={selectedPost.content} />
+            </div>
+
+            {/* <div className="mb-6 whitespace-pre-wrap text-sm sm:text-base">{selectedPost.content}</div> */}
 
             {error && <p className="text-red-500 mb-4">{error}</p>}
 
