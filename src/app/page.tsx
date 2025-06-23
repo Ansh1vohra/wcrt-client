@@ -368,17 +368,16 @@ export default function Home() {
   const paginatedWcrtArticles = webArticles.slice((wcrtArticlesPage - 1) * wcrtArticlesPerPage, wcrtArticlesPage * wcrtArticlesPerPage);
   // add cumulative slices for Load More
   const displayedRecentArticles = recentArticlesAll.slice(0, recentPage * recentPerPage);
-  const displayedRecentEvents   = recentEvents.slice(  0, recentEventPage * recentEventPerPage);
-  // Render helper for 230x164 card
+  const displayedRecentEvents   = recentEvents.slice(  0, recentEventPage * recentEventPerPage);  // Render helper for 230x164 card
   const renderCard = (article: Article) => (
     <Link key={article.postId} href={`/post/${article.postId}`} className="group inline-block w-[230px] bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-300">
       <div className="relative w-[230px] h-[164px] overflow-hidden">
         <Image src={validatedImages[article.imageUrl || ''] || defaultImage} alt={article.title} width={230} height={164} className="object-cover" />
         <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1 rounded">{article.category?.toUpperCase() || 'POST'}</span>
       </div>
-      <div className="pl-0 pr-4 py-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200">{article.title}</h3>
-        <div className="flex items-center text-sm text-gray-500"><svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3M16 7V3M4 11h16M5 19h14a2 2 0 002-2V11a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg><span>{formatDate(article.uploadDate)}</span></div>
+      <div className="px-4 py-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200 px-2">{article.title}</h3>
+        <div className="flex items-center text-sm text-gray-500 px-2"><svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3M16 7V3M4 11h16M5 19h14a2 2 0 002-2V11a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg><span>{formatDate(article.uploadDate)}</span></div>
       </div>
     </Link>
   );
@@ -580,9 +579,9 @@ export default function Home() {
                         <Image src={validatedImages[article.imageUrl || ''] || defaultImage} alt={article.title} width={230} height={164} className="object-cover" />
                         <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1 rounded">{article.category?.toUpperCase() || 'POST'}</span>
                       </div>
-                      <div className="pl-0 pr-4 py-4">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-2 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200">{article.title}</h3>
-                        <div className="flex items-center text-sm text-gray-500">
+                      <div className="px-4 py-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200 px-2">{article.title}</h3>
+                        <div className="flex items-center text-sm text-gray-500 px-2">
                           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3M16 7V3M4 11h16M5 19h14a2 2 0 002-2V11a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z" />
                           </svg>
@@ -673,16 +672,16 @@ export default function Home() {
                 </div>
                 <div className="flex flex-col gap-6">                  {paginatedLatestPosts.map((article) => (
                     <div key={article.postId} className="flex flex-row gap-4 bg-white rounded-none shadow-md overflow-hidden border border-gray-300">
-                      <div className="relative w-[360px] h-[258px] flex-shrink-0">
-                        <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold uppercase w-[91.625px] h-[17px] flex items-center justify-center">
-                          {article.category?.toUpperCase() || 'POST'}
-                        </span>
+                      <div className="relative w-[360px] h-[258px] flex-shrink-0 overflow-hidden">
                         <Image
                           src={validatedImages[article.imageUrl || ''] || defaultImage}
                           alt={article.title}
                           fill
                           className="object-cover"
                         />
+                        <span className="absolute top-2 left-2 bg-red-600 text-white text-[10px] font-bold uppercase w-[91.625px] h-[17px] flex items-center justify-center z-10">
+                          {article.category?.toUpperCase() || 'POST'}
+                        </span>
                       </div>
                       <div className="flex-1 flex flex-col justify-between p-3">
                         <div>
