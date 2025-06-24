@@ -30,6 +30,17 @@ const FacultyofPOSH =[{
     role: "Advisor",
     image: "/president.jpg",
     info: "Finance Minister of India. Supports funding and resources for POSH programs.",
+},{
+    name: "Shri Piyush Goyal",
+    role: "Advisor",
+    image: "/president.jpg",
+    info: "Minister of Commerce and Industry. Promotes POSH policies in the business sector.",
+},{
+    name: "Smt. Smriti Irani",
+    role: "Advisor",
+    image: "/president.jpg",
+    info: "Minister"
+
 }];
 
 export default function FacultyofPOSHPage() {
