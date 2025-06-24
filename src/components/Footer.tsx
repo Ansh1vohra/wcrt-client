@@ -19,7 +19,7 @@ export default function Footer() {
             className="h-16 w-auto mb-4"
           />
           <p className="text-gray-300 text-sm mb-4">
-            WCRT - Women & Child Right Trust. Committed to advancing rights and development for women and children.
+            WCRT - Women & Child Rights Trust. Committed to advancing rights and development for women and children.
           </p>
           <div className="flex gap-3">
             <a href="#" className="p-2 bg-gray-700 rounded hover:bg-pink-600 transition-colors">
@@ -111,7 +111,7 @@ export default function Footer() {
       {/* Bottom Footer */}
       <div className="py-6">
         <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-400 text-sm">© {new Date().getFullYear()} WCRT - Women & Child Right Trust. All rights reserved.</p>
+          <p className="text-gray-400 text-sm">© {new Date().getFullYear()} WCRT - Women & Child Rights Trust. All rights reserved.</p>
           
           <div className="flex flex-wrap gap-4 text-sm">
             <Link href="/privacy" className="text-gray-400 hover:text-pink-500 transition-colors">Privacy Policy</Link>

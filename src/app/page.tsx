@@ -7,6 +7,7 @@ import "slick-carousel/slick/slick.css";
 import "slick-carousel/slick/slick-theme.css";
 import WebUpdates from '@/components/WebUpdates';
 import TrendingAndPopular from '@/components/TrendingAndPopular';
+import PopularStories from '@/components/PopularStories';
 import Section from '@/components/Section';
 import SafeHTML from '@/components/SafeHTML';
 import { FaBullhorn } from 'react-icons/fa';
@@ -322,6 +323,8 @@ export default function Home() {
   const internshipCapsule = sortedArticles.filter(article => article.category?.toLowerCase() === 'summer internship capsule');
   const youtubePodcast = sortedArticles.filter(article => article.category?.toLowerCase() === 'youtube podcast');
   const susmaSwarajJournal = sortedArticles.filter(article => article.category?.toLowerCase() === 'susma swaraj journal');
+  const annaChangyMagazine = sortedArticles.filter(article => article.category?.toLowerCase() === 'anna chandy magazine');
+  const workshopWebinars = sortedArticles.filter(article => article.category?.toLowerCase() === 'workshop and webinars');
 
   // Get current news flash article and compute time ago
   const newsArticle = sortedArticles[newsIndex];
@@ -366,18 +369,53 @@ export default function Home() {
   const wcrtArticlesPerPage = 3;
   const totalWcrtArticlesPages = Math.ceil(webArticles.length / wcrtArticlesPerPage);
   const paginatedWcrtArticles = webArticles.slice((wcrtArticlesPage - 1) * wcrtArticlesPerPage, wcrtArticlesPage * wcrtArticlesPerPage);
-  // add cumulative slices for Load More
-  const displayedRecentArticles = recentArticlesAll.slice(0, recentPage * recentPerPage);
-  const displayedRecentEvents   = recentEvents.slice(  0, recentEventPage * recentEventPerPage);  // Render helper for 230x164 card
+
+  // Add pagination for new sections
+  const [commentsPage, setCommentsPage] = useState<number>(1);
+  const commentsPerPage = 10;
+  const totalCommentsPages = Math.ceil(comments.length / commentsPerPage);
+
+  const [annaChangyPage, setAnnaChangyPage] = useState<number>(1);
+  const annaChangyPerPage = 8;
+  const totalAnnaChangyPages = Math.ceil(annaChangyMagazine.length / annaChangyPerPage);
+
+  const [workshopPage, setWorkshopPage] = useState<number>(1);
+  const workshopPerPage = 8;
+  const totalWorkshopPages = Math.ceil(workshopWebinars.length / workshopPerPage);
+  // Render helper for 230x164 card
   const renderCard = (article: Article) => (
     <Link key={article.postId} href={`/post/${article.postId}`} className="group inline-block w-[230px] bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-300">
       <div className="relative w-[230px] h-[164px] overflow-hidden">
-        <Image src={validatedImages[article.imageUrl || ''] || defaultImage} alt={article.title} width={230} height={164} className="object-cover" />
-        <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1 rounded">{article.category?.toUpperCase() || 'POST'}</span>
+        <Image src={validatedImages[article.imageUrl || ''] || defaultImage} alt={article.title} fill className="object-cover" sizes="230px" />
+        <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1">{article.category?.toUpperCase() || 'POST'}</span>
       </div>
-      <div className="px-4 py-4">
-        <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200 px-2">{article.title}</h3>
-        <div className="flex items-center text-sm text-gray-500 px-2"><svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3M16 7V3M4 11h16M5 19h14a2 2 0 002-2V11a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg><span>{formatDate(article.uploadDate)}</span></div>
+      <div className="px-3 py-4">
+        <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200">{article.title}</h3>
+        <div className="flex items-center text-sm text-gray-500"><svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3M16 7V3M4 11h16M5 19h14a2 2 0 002-2V11a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"/></svg><span>{formatDate(article.uploadDate)}</span></div>
+      </div>
+    </Link>
+  );
+  // Render helper for "details without photo" format (for Summer Internship Capsule)
+  const renderDetailsOnly = (article: Article) => (
+    <Link key={article.postId} href={`/post/${article.postId}`} className="group block w-full bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300 p-4 col-span-full">
+      <div className="mb-2">
+        <span className="bg-red-600 text-white text-xs font-bold uppercase px-2 py-1">{article.category?.toUpperCase() || 'POST'}</span>
+      </div>
+      <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200">{article.title}</h3>
+      <div className="flex items-center text-sm text-gray-500 mb-2">
+        <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3M16 7V3M4 11h16M5 19h14a2 2 0 002-2V11a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+        </svg>
+        <span>{formatDate(article.uploadDate)}</span>
+        {article.authorName && (
+          <>
+            <span className="mx-2">•</span>
+            <span>By {article.authorName}</span>
+          </>
+        )}
+      </div>
+      <div className="text-sm text-gray-600 line-clamp-3">
+        <SafeHTML html={article.content} className="prose prose-sm max-w-none" />
       </div>
     </Link>
   );
@@ -397,25 +435,48 @@ export default function Home() {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 mt-[30px]">
             {/* Left Column: Newsflash and Content */}
             <div className="lg:col-span-2 space-y-6 lg:space-y-8">              {/* Newsflash Banner matching design */}
-              <div className="flex items-center h-9 overflow-hidden rounded-none border border-gray-300">
+              <div className="flex items-center h-12 overflow-hidden rounded-none border border-gray-300">
                 <div className="flex items-center bg-red-600 text-white px-4 space-x-2 h-full">
                   <FaBullhorn className="text-2xl" />
                   <span className="text-xs font-bold uppercase">NEWSFLASH</span>
+                </div>                <div className="flex items-center flex-1 bg-white px-3 h-full min-w-0">
+                  {/* Post Image */}
+                  {newsArticle && (
+                    <div className="relative w-12 h-10 flex-shrink-0 mr-4 overflow-hidden rounded">
+                      <Image 
+                        src={validatedImages[newsArticle.imageUrl || ''] || defaultImage}
+                        alt={newsArticle.title}
+                        fill
+                        className="object-cover"
+                        sizes="48px"
+                      />
+                    </div>
+                  )}
+                  {/* News Text */}
+                  <p className="flex-1 text-black text-sm font-bold truncate min-w-0 mr-4">{newsLabel}</p>
+                  {/* Navigation Buttons - Fixed Width Container */}
+                  <div className="flex space-x-2 flex-shrink-0">
+                    <button 
+                      onClick={() => setNewsIndex(prev => (prev - 1 + sortedArticles.length) % sortedArticles.length)} 
+                      aria-label="Previous news" 
+                      className="text-gray-500 hover:text-gray-700 p-1 w-7 h-7 flex items-center justify-center"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
+                      </svg>
+                    </button>
+                    <button 
+                      onClick={() => setNewsIndex(prev => (prev + 1) % sortedArticles.length)} 
+                      aria-label="Next news" 
+                      className="text-gray-500 hover:text-gray-700 p-1 w-7 h-7 flex items-center justify-center"
+                    >
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                        <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
+                      </svg>
+                    </button>
+                  </div>
                 </div>
-                <div className="flex items-center flex-1 bg-white px-4 space-x-2">
-                  <p className="flex-1 text-gray-900 text-sm truncate">{newsLabel}</p>
-                  <button onClick={() => setNewsIndex(prev => (prev - 1 + sortedArticles.length) % sortedArticles.length)} aria-label="Previous news" className="text-gray-500 hover:text-gray-700 p-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
-                    </svg>
-                  </button>
-                  <button onClick={() => setNewsIndex(prev => (prev + 1) % sortedArticles.length)} aria-label="Next news" className="text-gray-500 hover:text-gray-700 p-1">
-                    <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
-                      <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
-                    </svg>
-                  </button>
-                </div>
-              </div>              {/* Main Article Section */}
+              </div>{/* Main Article Section */}
               <div>
                 <div className="w-[750px] mx-auto relative overflow-hidden rounded-none">
                   <Slider ref={sliderRef} {...sliderSettings}>
@@ -507,8 +568,7 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
-                  {displayedRecentArticles.map((article) => (                    <Link
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">                  {recentArticles.map((article: Article) => (                    <Link
                       key={article.postId}
                       href={`/post/${article.postId}`}
                       className="group inline-block w-[230px] bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-300"
@@ -517,16 +577,16 @@ export default function Home() {
                         <Image
                           src={validatedImages[article.imageUrl || ''] || defaultImage}
                           alt={article.title}
-                          width={230}
-                          height={164}
+                          fill
                           className="object-cover"
+                          sizes="230px"
                         />
-                        <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1 rounded">{article.category?.toUpperCase() || 'POST'}</span>
-                      </div>                      <div className="px-4 py-4">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200 px-2">
+                        <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1">{article.category?.toUpperCase() || 'POST'}</span>
+                      </div>                      <div className="px-3 py-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200">
                           {article.title}
                         </h3>
-                        <div className="flex items-center text-sm text-gray-500 px-2">
+                        <div className="flex items-center text-sm text-gray-500">
                           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3M16 7V3M4 11h16M5 19h14a2 2 0 002-2V11a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z" />
                           </svg>
@@ -572,16 +632,15 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
-                  {paginatedLatest.map(article => (                    /* reuse same card markup as Recent Articles */
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">                  {paginatedLatest.map(article => (                    /* reuse same card markup as Recent Articles */
                     <Link key={article.postId} href={`/post/${article.postId}`} className="group inline-block w-[230px] bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-300">
                       <div className="relative w-[230px] h-[164px] overflow-hidden">
-                        <Image src={validatedImages[article.imageUrl || ''] || defaultImage} alt={article.title} width={230} height={164} className="object-cover" />
-                        <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1 rounded">{article.category?.toUpperCase() || 'POST'}</span>
+                        <Image src={validatedImages[article.imageUrl || ''] || defaultImage} alt={article.title} fill className="object-cover" sizes="230px" />
+                        <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1">{article.category?.toUpperCase() || 'POST'}</span>
                       </div>
-                      <div className="px-4 py-4">
-                        <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200 px-2">{article.title}</h3>
-                        <div className="flex items-center text-sm text-gray-500 px-2">
+                      <div className="px-3 py-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200">{article.title}</h3>
+                        <div className="flex items-center text-sm text-gray-500">
                           <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3M16 7V3M4 11h16M5 19h14a2 2 0 002-2V11a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z" />
                           </svg>
@@ -617,8 +676,8 @@ export default function Home() {
                 setPage={setInternshipPage}
                 itemsPerPage={internshipPerPage}
                 totalPages={totalInternshipPages}
-                renderItem={renderCard}
-              />              {/* YouTube Podcast Section */}
+                renderItem={renderDetailsOnly}
+              />{/* YouTube Podcast Section */}
               <Section
                 title="YouTube Podcast"
                 items={youtubePodcast}
@@ -663,9 +722,70 @@ export default function Home() {
                 itemsPerPage={issuePerPage}
                 totalPages={totalIssuePages}
                 renderItem={renderCard}
-              />
-
-              {/* Latest Post Section */}
+              />              {/* Add WCRT Journal Section */}
+              <Section
+                title="WCRT Journal"
+                items={wcrtJournal}
+                page={wcrtJournalPage}
+                setPage={setWcrtJournalPage}
+                itemsPerPage={wcrtJournalPerPage}
+                totalPages={totalWcrtJournalPages}
+                renderItem={renderCard}
+              />              {/* Add Comment Section */}
+              <Section
+                title="Comment"
+                items={comments}
+                page={commentsPage}
+                setPage={setCommentsPage}
+                itemsPerPage={commentsPerPage}
+                totalPages={totalCommentsPages}
+                renderItem={renderCard}
+              />              {/* Add Anna Chandy Magazine Section */}
+              <Section
+                title="Anna Chandy Magazine"
+                items={annaChangyMagazine}
+                page={annaChangyPage}
+                setPage={setAnnaChangyPage}
+                itemsPerPage={annaChangyPerPage}
+                totalPages={totalAnnaChangyPages}
+                renderItem={renderCard}
+              />              {/* Add Books Section */}
+              <Section
+                title="Books"
+                items={books}
+                page={booksPage}
+                setPage={setBooksPage}
+                itemsPerPage={booksPerPage}
+                totalPages={totalBooksPages}
+                renderItem={renderCard}
+              />              {/* Add Scholar Warrior Section */}
+              <Section
+                title="Scholar Warrior"
+                items={scholarWarrior}
+                page={scholarWarriorPage}
+                setPage={setScholarWarriorPage}
+                itemsPerPage={scholarWarriorPerPage}
+                totalPages={totalScholarWarriorPages}
+                renderItem={renderCard}
+              />              {/* Add Workshop and Webinars Section */}
+              <Section
+                title="Workshop and Webinars"
+                items={workshopWebinars}
+                page={workshopPage}
+                setPage={setWorkshopPage}
+                itemsPerPage={workshopPerPage}
+                totalPages={totalWorkshopPages}
+                renderItem={renderCard}
+              />              {/* Add NewsLetters Section */}
+              <Section
+                title="NewsLetters"
+                items={newsletters}
+                page={newsletterPage}
+                setPage={setNewsletterPage}
+                itemsPerPage={newsletterPerPage}
+                totalPages={totalNewsletterPages}
+                renderItem={renderCard}
+              />              {/* Latest Post Section */}
               <div className="w-[750px] mx-auto mb-8 pr-0 lg:pr-8">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl lg:text-2xl font-bold text-pink-600 inline-block border-b-2 border-pink-600 pb-2">Latest Post</h2>
@@ -740,11 +860,12 @@ export default function Home() {
             {/* Right Column: Sticky Sidebar */}
             <div className="lg:col-span-1">
               <div className="sticky top-4 w-full max-w-sm">
-                <div className="space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm p-6">
-                  {/* Web Updates Section */}
+                <div className="space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm p-6">                  {/* Web Updates Section */}
                   <WebUpdates />
                   {/* Trending Section */}
                   <TrendingAndPopular />
+                  {/* Popular Stories Section */}
+                  <PopularStories limit={5} />
                   {/* Intern Articles Section */}
                   <div className="web-updates">
                     <div className="flex justify-between items-center mb-4">
