@@ -14,6 +14,7 @@ type MenuItem = {
 const menuItems: MenuItem[] = [
     { title: 'HOME', href: '/', dropdown: null },
     { title: 'ABOUT US', href: '/about', dropdown: null },
+    { title: 'POPULAR', href: '/popular', dropdown: null },
     {
         title: 'PUBLICATIONS', href: '/publication', dropdown: [
             { name: 'Web Articles', href: '/publication/web-articles' },
