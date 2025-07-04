@@ -19,6 +19,13 @@ interface Article {
 
 const ARTICLES_PER_PAGE = 10;
 
+const slugToCategoryMap: Record<string, string> = {
+  'women-rights-development': 'women-rights-and-development',
+  'child-rights-development': 'child-rights-development',
+  'national-data-atrocities-women': 'national-data-atrocities-women',
+  'child-development-malnutrition': 'child-development-malnutrition',
+};
+
 export default function Page() {
   const params = useParams();
   const slug = params?.slug as string; // Get the slug from URL params
@@ -30,9 +37,11 @@ export default function Page() {
     async function fetchArticles() {
       try {
         setIsLoading(true);
-        // Use the slug in the API endpoint
+        // Map slug to category or use slug directly
+        const category = slugToCategoryMap[slug] || slug;
+
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/category/${slug || 'web-articles'}/approved`
+          `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/category/${category}/approved`
         );
 
         const contentType = response.headers.get('content-type');
