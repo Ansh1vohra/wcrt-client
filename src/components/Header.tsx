@@ -13,7 +13,17 @@ type MenuItem = {
 
 const menuItems: MenuItem[] = [
     { title: 'HOME', href: '/', dropdown: null },
-    { title: 'ABOUT US', href: '/about', dropdown: null },
+    {
+        title: 'ABOUT US', href: '/about', dropdown: [
+            { name: 'POSH Advocates', href: '/about/poshAadvocates' },
+            { name: 'Advisors', href: '/about/advisors' },
+            { name: 'Arbitrators', href: '/about/arbitrators' },
+            { name: 'Board Members', href: '/about/boardmembers' },
+            { name: 'Faculty of POSH', href: '/about/facultyofposh' },
+            { name: 'President', href: '/about/president' },
+            { name: 'Vice President', href: '/about/vicepresident' },
+        ]
+    },
     { title: 'PROMEX', href: '/promex', dropdown: null },
     {
         title: 'PUBLICATIONS', href: '/publication', dropdown: [
