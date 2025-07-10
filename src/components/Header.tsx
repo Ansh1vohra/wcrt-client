@@ -13,8 +13,17 @@ type MenuItem = {
 
 const menuItems: MenuItem[] = [
     { title: 'HOME', href: '/', dropdown: null },
-    { title: 'ABOUT US', href: '/about', dropdown: null },
-    { title: 'POPULAR', href: '/popular', dropdown: null },
+    {
+        title: 'ABOUT US', href: '/about', dropdown: [
+            { name: 'POSH Advocates', href: '/about/poshAadvocates' },
+            { name: 'Advisors', href: '/about/advisors' },
+            { name: 'Arbitrators', href: '/about/arbitrators' },
+            { name: 'Board Members', href: '/about/boardmembers' },
+            { name: 'Faculty of POSH', href: '/about/facultyofposh' },
+            { name: 'President', href: '/about/president' },
+            { name: 'Vice President', href: '/about/vicepresident' },
+        ]
+    },
     {
         title: 'PUBLICATIONS', href: '/publication', dropdown: [
             { name: 'Web Articles', href: '/publication/web-articles' },
@@ -39,6 +48,15 @@ const menuItems: MenuItem[] = [
         ]
     },
     {
+        title: 'POLICY', href: '/policy', dropdown: [
+            { name: 'Privacy Policy', href: '/policy/privacy-policy' },
+            { name: 'Refund Policy', href: '/policy/refund-policy' },
+            { name: 'Return Policy', href: '/policy/return-policy' },
+            { name: 'Terms & Conditions', href: '/policy/terms-and-conditions' },
+            { name: 'Shipping Policy', href: '/policy/shipping-policy' },
+        ]
+    },
+    {
         title: 'ARCHIVE', href: '/archive', dropdown: null
     },
     {
@@ -48,7 +66,7 @@ const menuItems: MenuItem[] = [
         ]
     },
     { title: 'EXAM', href: '/exam', dropdown: null },
-    { title: 'CAREERS', href: '/careers', dropdown: null },
+    { title: 'CAREERS', href: '/career', dropdown: null },
     { title: 'CONTACT', href: '/contact', dropdown: null }
 ];
 
