@@ -1,0 +1,17 @@
+.article-content p {
+  margin: 0.5rem 0;
+  line-height: 1.7;
+}
+
+.article-content ul,
+.article-content ol {
+  margin: 1rem 0 1rem 2rem;
+}
+
+.article-content blockquote {
+  margin: 1rem 0;
+  padding-left: 1rem;
+  border-left: 3px solid #eee;
+  color: #555;
+  font-style: italic;
+}

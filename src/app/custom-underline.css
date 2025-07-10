@@ -1,0 +1,6 @@
+.custom-underline {
+  display: inline-block;
+  border-bottom: 2px solid #e6007a; /* Tailwind's pink-600 */
+  padding-bottom: 0.5rem;
+  margin-bottom: 1rem;
+}

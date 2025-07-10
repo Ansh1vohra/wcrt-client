@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import SafeHTML from '@/components/SafeHTML';
+import '@/components/article-content.css';
 
 const API_URL = `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/status/approved`;
 
@@ -230,7 +231,7 @@ export default function PopularPage() {
                         </div>
 
                         <div className="text-gray-600 line-clamp-3">
-                          <SafeHTML html={article.content} className="prose prose-sm max-w-none" />
+                          <SafeHTML html={article.content} className="article-content" />
                         </div>
                       </div>
                     </div>

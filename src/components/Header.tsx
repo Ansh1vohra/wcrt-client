@@ -24,7 +24,6 @@ const menuItems: MenuItem[] = [
             { name: 'Vice President', href: '/about/vicepresident' },
         ]
     },
-    { title: 'PROMEX', href: '/promex', dropdown: null },
     {
         title: 'PUBLICATIONS', href: '/publication', dropdown: [
             { name: 'Web Articles', href: '/publication/web-articles' },
@@ -49,6 +48,15 @@ const menuItems: MenuItem[] = [
         ]
     },
     {
+        title: 'POLICY', href: '/policy', dropdown: [
+            { name: 'Privacy Policy', href: '/policy/privacy-policy' },
+            { name: 'Refund Policy', href: '/policy/refund-policy' },
+            { name: 'Return Policy', href: '/policy/return-policy' },
+            { name: 'Terms & Conditions', href: '/policy/terms-and-conditions' },
+            { name: 'Shipping Policy', href: '/policy/shipping-policy' },
+        ]
+    },
+    {
         title: 'ARCHIVE', href: '/archive', dropdown: null
     },
     {
@@ -58,7 +66,7 @@ const menuItems: MenuItem[] = [
         ]
     },
     { title: 'EXAM', href: '/exam', dropdown: null },
-    { title: 'CAREERS', href: '/careers', dropdown: null },
+    { title: 'CAREERS', href: '/career', dropdown: null },
     { title: 'CONTACT', href: '/contact', dropdown: null }
 ];
 

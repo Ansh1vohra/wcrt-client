@@ -43,7 +43,7 @@ export default function Footer() {
           <ul className="space-y-2 text-gray-300">
             <li><Link href="/about" className="hover:text-pink-500 transition-colors">About Us</Link></li>
             <li><Link href="/archive" className="hover:text-pink-500 transition-colors">Archive</Link></li>
-            <li><Link href="/careers" className="hover:text-pink-500 transition-colors">Careers</Link></li>
+            <li><Link href="/career" className="hover:text-pink-500 transition-colors">Careers</Link></li>
             <li><Link href="/contact" className="hover:text-pink-500 transition-colors">Contact Us</Link></li>
             <li><Link href="/exam" className="hover:text-pink-500 transition-colors">Exam</Link></li>
           </ul>
@@ -98,7 +98,7 @@ export default function Footer() {
             SUPPORT US (Donate)
           </Link>
           <span className="text-white">|</span>
-          <Link href="/write" className="text-white hover:text-gray-200 text-sm">
+          <Link href="/writeforus" className="text-white hover:text-gray-200 text-sm">
             WRITE FOR US
           </Link>
           <span className="text-white">|</span>

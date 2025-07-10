@@ -11,7 +11,7 @@ interface Member {
 const vicePresidentData: Member = {
   name: "Shri Jagdeep Dhankhar",
   role: "Vice President",
-  image: "/vicepresident.jpg",
+  image: "/assets/Shri Jagdeep Dhankhar.jpg",
   info: (
     <>
       Shri Jagdeep Dhankhar is the 14th and current Vice-President of India, having assumed office on August 11, 2022. Born on May 18, 1951, in Kithana village of Rajasthan Jhunjhunu district

@@ -3,32 +3,32 @@ import MemberCard from "@/components/MemberCard";
 const Arbitrators =[{
   name: "Shri Jagdeep Dhankhar",
   role: "Advisor",
-  image: "/vicepresident.jpg",
+  image: "/assets/Shri Jagdeep Dhankhar.jpg",
   info: "Supports the President and oversees awareness programs.",
 },{
     name: "Droupadi Murmu",
     role: "Advisor",
-    image: "/president.jpg",
+    image: "/assets/droupadi-murmu.jpg",
     info: "Head of the POSH committee. Leads initiatives and supervises policy implementations.",
 },{
     name: "Shri Narendra Modi",
     role: "Advisor",
-    image: "/president.jpg",
+    image: "/assets/The_Prime_Minister_of_India,_Shri_Narendra_Modi.jpg",
     info: "Prime Minister of India. Provides strategic direction and support for the POSH committee.",
 },{
     name: "Shri Amit Shah",
     role: "Advisor",
-    image: "/president.jpg",
+    image: "/assets/Amit Shah.jpg",
     info: "Home Minister of India. Ensures the implementation of POSH policies across the country.",
 },{
     name: "Shri Rajnath Singh",
     role: "Advisor",
-    image: "/president.jpg",
+    image: "/assets/The_official_portrait_of_Defence_Minister_Shri_Rajnath_Singh.jpg",
     info: "Defence Minister of India. Advocates for POSH initiatives within the armed forces.",
 },{
     name: "Smt. Nirmala Sitharaman",
     role: "Advisor",
-    image: "/president.jpg",
+    image: "/assets/Smt._Nirmala_Sitharaman_in_February_2023.jpg",
     info: "Finance Minister of India. Supports funding and resources for POSH programs.",
 }];
 

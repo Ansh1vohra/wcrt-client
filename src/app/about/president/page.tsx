@@ -11,7 +11,7 @@ interface Member {
 const presidentData: Member = {
   name: "Droupadi Murmu",
   role: "President",
-  image: "/president.jpg",
+  image: "/assets/droupadi-murmu.jpg",
   info: (
     <>
       Droupadi Murmu is the 15th and current President of India, having assumed office on July 25, 2022. She made history by becoming the first tribal person and the second woman to hold the highest constitutional position in the country.

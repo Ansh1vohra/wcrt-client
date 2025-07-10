@@ -28,7 +28,11 @@ export default function WebUpdates() {
           throw new Error('Failed to fetch updates');
         }
         const data = await response.json();
-        setUpdates(data.posts.slice(0, 6) || []); // Get first 6 approved posts
+        setUpdates(
+          [...(data.posts || [])]
+            .sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime())
+            .slice(0, 6)
+        ); // Get 6 most recent approved posts in descending order
       } catch (err) {
         setError(err instanceof Error ? err.message : 'Failed to fetch updates');
       } finally {

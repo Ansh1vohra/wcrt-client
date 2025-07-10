@@ -10,7 +10,10 @@ import WebUpdates from '@/components/WebUpdates';
 import TrendingAndPopular from '@/components/TrendingAndPopular';
 import PopularStories from '@/components/PopularStories';
 import Section from '@/components/Section';
+import LoadMoreSection from '@/components/LoadMoreSection';
 import SafeHTML from '@/components/SafeHTML';
+import '@/components/article-content.css';
+import './custom-underline.css';
 import { FaBullhorn } from 'react-icons/fa';
 
 const API_URL = `${process.env.NEXT_PUBLIC_BACKEND}/api/posts/status/approved`;
@@ -105,11 +108,11 @@ export default function Home() {
     return new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime();
   });
 
-  // Get featured articles for the main slider (first 5)
-  const featuredArticles = sortedArticles.slice(0, 7);
+  // Get featured articles for the main slider (most recent 7)
+  const featuredArticles = [...sortedArticles].sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()).slice(0, 7);
 
-  // Get latest 4 updates for web updates section
-  const webUpdates = sortedArticles.slice(0, 4);
+  // Get latest 4 updates for web updates section (most recent 4)
+  const webUpdates = [...sortedArticles].sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime()).slice(0, 4);
 
   // Get latest articles for the trending tabs
   const latestArticles = sortedArticles.slice(0, 4);
@@ -299,13 +302,8 @@ export default function Home() {
   const workshopWebinars = sortedArticles.filter(article => article.category?.toLowerCase() === 'workshop and webinars');
   // Women's Rights and Development Section data
   const womensRights = sortedArticles.filter(article => article.category?.toLowerCase() === 'women-rights-and-development');
-  const [womenRightsPage, setWomenRightsPage] = useState<number>(1);
   const womensRightsPerPage = 3;
-  const totalWomensRightsPages = Math.ceil(womensRights.length / womensRightsPerPage);
-  const paginatedWomensRights = womensRights.slice(
-    (womenRightsPage - 1) * womensRightsPerPage,
-    womenRightsPage * womensRightsPerPage
-  );
+  const [womensRightsVisibleCount, setWomensRightsVisibleCount] = useState(womensRightsPerPage);
 
   // Get current news flash article and compute time ago
   const newsArticle = sortedArticles[newsIndex];
@@ -396,7 +394,7 @@ export default function Home() {
         )}
       </div>
       <div className="text-sm text-gray-600 line-clamp-3">
-        <SafeHTML html={article.content} className="prose prose-sm max-w-none" />
+        <SafeHTML html={article.content} className="article-content" />
       </div>
     </Link>
   );
@@ -679,7 +677,7 @@ export default function Home() {
               </div>
               {/* Rajkumari Kaul Essay Competitions Section - Cumulative Load More */}
               <div className="w-[750px] mx-auto mb-4">
-                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">Rajkumari Kaul Essay Competitions</h2>
+                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Rajkumari Kaul Essay Competitions</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedEssays.map(renderCard)}
                 </div>
@@ -697,7 +695,7 @@ export default function Home() {
               </div>
               {/* Susma Swaraj Journal Section - Cumulative Load More */}
               <div className="w-[750px] mx-auto mb-4">
-                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">Susma Swaraj Journal</h2>
+                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Susma Swaraj Journal</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {susmaSwarajJournal.slice(0, 5).map(renderCard)}
                 </div>
@@ -715,7 +713,7 @@ export default function Home() {
               </div>
               {/* Issue Briefs Section - Cumulative Load More */}
               <div className="w-[750px] mx-auto mb-4">
-                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">Issue Briefs</h2>
+                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Issue Briefs</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedIssueBriefs.map(renderCard)}
                 </div>
@@ -733,7 +731,7 @@ export default function Home() {
               </div>
               {/* WCRT Journal Section - Cumulative Load More */}
               <div className="w-[750px] mx-auto mb-4">
-                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">WCRT Journal</h2>
+                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">WCRT Journal</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedWcrtJournal.map(renderCard)}
                 </div>
@@ -751,7 +749,7 @@ export default function Home() {
               </div>
               {/* Comment Section - Cumulative Load More */}
               <div className="w-[750px] mx-auto mb-4">
-                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">Comment</h2>
+                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Comment</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {comments.slice(0, 10).map(renderCard)}
                 </div>
@@ -769,7 +767,7 @@ export default function Home() {
               </div>
               {/* Anna Chandy Magazine Section - Cumulative Load More */}
               <div className="w-[750px] mx-auto mb-4">
-                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">Anna Chandy Magazine</h2>
+                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Anna Chandy Magazine</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {annaChangyMagazine.slice(0, 8).map(renderCard)}
                 </div>
@@ -787,7 +785,7 @@ export default function Home() {
               </div>
               {/* Books Section - Cumulative Load More */}
               <div className="w-[750px] mx-auto mb-4">
-                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">Books</h2>
+                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Books</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedBooks.map(renderCard)}
                 </div>
@@ -805,7 +803,7 @@ export default function Home() {
               </div>
               {/* Scholar Warrior Section - Cumulative Load More */}
               <div className="w-[750px] mx-auto mb-4">
-                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">Scholar Warrior</h2>
+                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Scholar Warrior</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedScholarWarrior.map(renderCard)}
                 </div>
@@ -823,7 +821,7 @@ export default function Home() {
               </div>
               {/* Workshop and Webinars Section - Cumulative Load More */}
               <div className="w-[750px] mx-auto mb-4">
-                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">Workshop and Webinars</h2>
+                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Workshop and Webinars</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {workshopWebinars.slice(0, 8).map(renderCard)}
                 </div>
@@ -839,14 +837,13 @@ export default function Home() {
                   </div>
                 )}
               </div>
-              {/* Women's Rights and Development Section */}
-              <Section
+              {/* Women's Rights and Development Section (Load More) */}
+              <LoadMoreSection
                 title="Women's Rights and Development"
                 items={womensRights}
-                page={womenRightsPage}
-                setPage={setWomenRightsPage}
+                visibleCount={womensRightsVisibleCount}
+                setVisibleCount={setWomensRightsVisibleCount}
                 itemsPerPage={womensRightsPerPage}
-                totalPages={totalWomensRightsPages}
                 renderItem={renderCard}
               />
               {/* Add NewsLetters Section */}
