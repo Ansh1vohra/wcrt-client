@@ -21,7 +21,43 @@ export default function WriterManage() {
   const [selectedWriter, setSelectedWriter] = useState<Writer | null>(null);
   const [newPassword, setNewPassword] = useState("");
   const [isUpdating, setIsUpdating] = useState(false);
+  const [categoryUpdateWriter, setCategoryUpdateWriter] = useState<Writer | null>(null);
+  const [updatedCategories, setUpdatedCategories] = useState<string[]>([]);
   const router = useRouter();
+
+
+  // Organized categories with subcategories
+const categoryGroups = {
+  "Publications": [
+    "web-articles",
+    "issue-briefs",
+    "anna-chandy-papers",
+    "newsletters",
+    "wcrt-journal",
+    "scholar-warrier",
+    "books",
+    "rajkumari-kaul-essay-competitions",
+    "intern-articles",
+    "external-publications"
+  ],
+  "Research Areas": [
+    "women-rights-and-development",
+    "child-rights-and-development",
+    "national-data-for-atrocities-on-women",
+    "child-development-and-malnutritions"
+  ],
+  "Web Archive": [
+    "biography-matriarchs",
+    "stalwart-woman",
+    "archive-books",
+    "research-papers"
+  ],
+  "Events": [
+    "seminars",
+    "webinars"
+  ]
+};
+
 
   useEffect(() => {
     const token = localStorage.getItem("admin-token");
@@ -191,6 +227,16 @@ export default function WriterManage() {
                             Change Password
                           </button>
                           <button
+                            onClick={() => {
+                              setCategoryUpdateWriter(writer);
+                              setUpdatedCategories(writer.categories || []);
+                            }}
+                            className="block w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100"
+                          >
+                            Update Categories
+                          </button>
+
+                          <button
                             onClick={() => handleDelete(writer.email, writer.writerName)}
                             className="block w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-gray-100"
                           >
@@ -239,6 +285,100 @@ export default function WriterManage() {
           </div>
         </div>
       )}
+
+      {categoryUpdateWriter && (
+        <div className="fixed inset-0 bg-gray-600 bg-opacity-50 flex justify-center items-center z-50 px-4">
+          <div className="bg-white rounded-lg p-6 w-full max-w-2xl mx-auto max-h-[90vh] overflow-y-auto">
+            <h2 className="text-xl font-semibold mb-4">Update Categories</h2>
+            <p className="mb-4 text-gray-700">
+              Writer: <strong>{categoryUpdateWriter.writerName}</strong>
+            </p>
+
+            {/* Categories Grid */}
+            {Object.entries(categoryGroups).map(([groupName, options]) => (
+              <div key={groupName} className="mb-6">
+                <h4 className="text-md font-semibold text-gray-800 mb-2">{groupName}</h4>
+                <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2">
+                  {options.map((option) => (
+                    <label
+                      key={option}
+                      htmlFor={`update-cat-${option}`}
+                      className={`cursor-pointer px-3 py-2 rounded-md border
+                  ${updatedCategories.includes(option)
+                          ? "bg-pink-100 border-pink-400 text-pink-600 font-medium"
+                          : "bg-white border-gray-300 text-gray-700 hover:bg-gray-50"
+                        }`}
+                    >
+                      <input
+                        type="checkbox"
+                        id={`update-cat-${option}`}
+                        checked={updatedCategories.includes(option)}
+                        onChange={() => {
+                          setUpdatedCategories(prev =>
+                            prev.includes(option)
+                              ? prev.filter(c => c !== option)
+                              : [...prev, option]
+                          );
+                        }}
+                        className="hidden"
+                      />
+                      <span className="text-sm capitalize">{option.replace(/-/g, " ")}</span>
+                    </label>
+                  ))}
+                </div>
+              </div>
+            ))}
+
+            <div className="flex justify-end gap-2 pt-4">
+              <button
+                onClick={() => setCategoryUpdateWriter(null)}
+                className="px-4 py-2 bg-gray-300 text-black rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={async () => {
+                  if (!categoryUpdateWriter) return;
+                  const token = localStorage.getItem("admin-token");
+                  if (!token) {
+                    router.push("/admin/login");
+                    return;
+                  }
+                  try {
+                    const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND}/api/writer/${categoryUpdateWriter.writerName}/categories`, {
+                      method: "PATCH",
+                      headers: {
+                        "Content-Type": "application/json",
+                        Authorization: `Bearer ${token}`,
+                      },
+                      body: JSON.stringify({ categories: updatedCategories }),
+                    });
+                    if (!response.ok) throw new Error("Failed to update categories");
+
+                    // Refresh local state
+                    setWriters((prev) =>
+                      prev.map((w) =>
+                        w.writerName === categoryUpdateWriter.writerName
+                          ? { ...w, categories: updatedCategories }
+                          : w
+                      )
+                    );
+                    alert("Categories updated successfully");
+                    setCategoryUpdateWriter(null);
+                  } catch (err) {
+                    setError("Failed to update categories");
+                    setTimeout(() => setError(""), 3000);
+                  }
+                }}
+                className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+              >
+                Update Categories
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
     </div>
   );
 }

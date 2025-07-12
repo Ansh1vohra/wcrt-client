@@ -294,8 +294,7 @@ export default function WriterPage() {
                         </div>
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700">Post Image</label>
-            <label className="block text-sm font-medium text-gray-700">Post Image</label>
-            <span className="text-xs text-gray-500 ml-1">(Recommended size: 800px wide × 400px tall)</span>
+                            <span className="text-xs text-gray-500 ml-1">(Recommended Ratio: 16:9) </span>
                             <input
                                 type="file"
                                 accept="image/*"
