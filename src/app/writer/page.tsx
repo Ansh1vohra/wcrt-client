@@ -4,6 +4,7 @@ import axios from 'axios';
 import { useRouter } from 'next/navigation';
 import TextEditor from '@/components/TextEditor';
 import SafeHTML from '@/components/SafeHTML'
+import '@/components/article-content.css'
 
 
 interface Post {
@@ -293,6 +294,7 @@ export default function WriterPage() {
                         </div>
                         <div className="mb-4">
                             <label className="block text-sm font-medium text-gray-700">Post Image</label>
+                            <span className="text-xs text-gray-500 ml-1">(Recommended Ratio: 16:9) </span>
                             <input
                                 type="file"
                                 accept="image/*"
@@ -366,7 +368,7 @@ export default function WriterPage() {
                                 <p className="text-sm text-gray-500 mt-1">{post.category}</p>
                                 <p className="text-sm text-gray-400">Status: {post.post_status}</p>
                                 <div className="mt-2 line-clamp-3 text-sm text-gray-700">
-                                    <SafeHTML html={post.content} />
+                                    <SafeHTML html={post.content} className="article-content" />
                                 </div>
                             </div>
                         </div>
@@ -398,7 +400,7 @@ export default function WriterPage() {
                                 )}
 
                                 <div className="text-gray-800">
-                                    <SafeHTML html={selectedPost.content} />
+                                    <SafeHTML html={selectedPost.content} className="article-content" />
                                 </div>
                             </div>
                         </div>

@@ -21,7 +21,7 @@ const TextEditor = ({ content, onChange }: { content: string; onChange: (content
       }),
     ],
     content,
-    onUpdate: ({ editor }) => {
+    onUpdate: ({ editor }: { editor: any }) => {
       onChange(editor.getHTML())
     },
   })

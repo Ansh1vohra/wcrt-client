@@ -45,7 +45,7 @@ export default function TopNavbar() {
                         SUPPORT US (DONATE)
                     </Link>
                     <span className="mx-3 text-gray-400">|</span>
-                    <Link href="/write" className="text-gray-600 hover:text-gray-900">
+                    <Link href="/writeforus" className="text-gray-600 hover:text-gray-900">
                         WRITE FOR US
                     </Link>
                     <span className="mx-3 text-gray-400">|</span>

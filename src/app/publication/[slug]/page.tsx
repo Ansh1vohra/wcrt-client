@@ -5,6 +5,7 @@ import Link from 'next/link';
 import React, { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
 import SafeHTML from '@/components/SafeHTML';
+import '@/components/article-content.css';
 
 interface Article {
   postId: string;
@@ -66,9 +67,11 @@ export default function Page() {
     );
   }
 
-  const mainArticle = articles[0];
-  const sideArticles = articles.slice(1, 4);
-  const remainingArticles = articles.slice(4);
+  // Sort articles by uploadDate descending (latest first)
+  const sortedArticles = [...articles].sort((a, b) => new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime());
+  const mainArticle = sortedArticles[0];
+  const sideArticles = sortedArticles.slice(1, 4);
+  const remainingArticles = sortedArticles.slice(4);
   const totalPages = Math.max(
     1,
     Math.ceil(remainingArticles.length / ARTICLES_PER_PAGE)
@@ -94,7 +97,7 @@ export default function Page() {
           />
           <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 p-4 flex flex-col justify-end">
             <span className="bg-red-600 text-white text-[10px] px-2 py-0.5 font-semibold tracking-wide w-fit">
-              ARTICLES
+              {mainArticle.category ? mainArticle.category.toUpperCase() : 'ARTICLE'}
             </span>
             <h2 className="text-white text-2xl font-bold cursor-pointer transition-all duration-300 group-hover:translate-y-[-4px] no-underline">
               {mainArticle.title}
@@ -128,7 +131,7 @@ export default function Page() {
               />
               <div className="absolute inset-0 bg-black/20 group-hover:bg-black/40 transition-all duration-300 p-4 flex flex-col justify-end">
                 <span className="bg-red-600 text-white text-[10px] px-2 py-0.5 font-semibold tracking-wide w-fit">
-                  ARTICLES
+                  {article.category ? article.category.toUpperCase() : 'ARTICLE'}
                 </span>
                 <h3 className="text-white text-xl font-semibold cursor-pointer transition-all duration-300 group-hover:translate-y-[-4px] no-underline">
                   {article.title}
@@ -178,7 +181,7 @@ export default function Page() {
                       {new Date(article.uploadDate).toLocaleDateString()}
                     </p>
                     <div className="text-gray-800 mt-2 line-clamp-3">
-                      <SafeHTML html={article.content} />
+                      <SafeHTML html={article.content} className="article-content" />
                     </div>
                   </div>
                   <Link href={`/post/${article.postId}`}>

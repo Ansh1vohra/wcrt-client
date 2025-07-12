@@ -19,7 +19,7 @@ export default function Footer() {
             className="h-16 w-auto mb-4"
           />
           <p className="text-gray-300 text-sm mb-4">
-            WCRT - Women & Child Right Trust. Committed to advancing rights and development for women and children.
+            WCRT - Women & Child Rights Trust. Committed to advancing rights and development for women and children.
           </p>
           <div className="flex gap-3">
             <a href="#" className="p-2 bg-gray-700 rounded hover:bg-pink-600 transition-colors">
@@ -43,7 +43,7 @@ export default function Footer() {
           <ul className="space-y-2 text-gray-300">
             <li><Link href="/about" className="hover:text-pink-500 transition-colors">About Us</Link></li>
             <li><Link href="/archive" className="hover:text-pink-500 transition-colors">Archive</Link></li>
-            <li><Link href="/careers" className="hover:text-pink-500 transition-colors">Careers</Link></li>
+            <li><Link href="/career" className="hover:text-pink-500 transition-colors">Careers</Link></li>
             <li><Link href="/contact" className="hover:text-pink-500 transition-colors">Contact Us</Link></li>
             <li><Link href="/exam" className="hover:text-pink-500 transition-colors">Exam</Link></li>
           </ul>
@@ -98,7 +98,7 @@ export default function Footer() {
             SUPPORT US (Donate)
           </Link>
           <span className="text-white">|</span>
-          <Link href="/write" className="text-white hover:text-gray-200 text-sm">
+          <Link href="/writeforus" className="text-white hover:text-gray-200 text-sm">
             WRITE FOR US
           </Link>
           <span className="text-white">|</span>
@@ -111,7 +111,7 @@ export default function Footer() {
       {/* Bottom Footer */}
       <div className="py-6">
         <div className="max-w-7xl mx-auto px-8 flex flex-col md:flex-row justify-between items-center gap-4">
-          <p className="text-gray-400 text-sm">© {new Date().getFullYear()} WCRT - Women & Child Right Trust. All rights reserved.</p>
+          <p className="text-gray-400 text-sm">© {new Date().getFullYear()} WCRT - Women & Child Rights Trust. All rights reserved.</p>
           
           <div className="flex flex-wrap gap-4 text-sm">
             <Link href="/privacy" className="text-gray-400 hover:text-pink-500 transition-colors">Privacy Policy</Link>
