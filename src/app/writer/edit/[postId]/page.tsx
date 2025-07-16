@@ -158,6 +158,7 @@ export default function EditPostPage() {
         <input
           type="file"
           accept="image/*"
+          className='p-3 bg-blue-200 rounded-lg my-2'
           onChange={(e) => {
             const file = e.target.files?.[0] || null;
             setImageFile(file);
@@ -192,6 +193,7 @@ export default function EditPostPage() {
         <label className="block text-sm font-medium">Author Image</label>
         <input
           type="file"
+          className='p-3 bg-blue-200 rounded-lg my-2'
           accept="image/*"
           onChange={(e) => {
             const file = e.target.files?.[0] || null;
