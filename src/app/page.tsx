@@ -67,6 +67,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const sliderRef = useRef<any>(null);
+  const leftColumnRef = useRef<HTMLDivElement>(null);
   const articlesPerPage = 4;
   const recentPerPage = 3; // Show exactly 3 per click (cumulative)
 
@@ -74,12 +75,43 @@ export default function Home() {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
+        setLoading(true);
         const response = await fetch(API_URL);
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch articles');
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Expected JSON response');
+        }
+        
         const data = await response.json();
-        setArticles(data.posts || []);
+        
+        // Ensure we have posts array and filter approved posts
+        const approvedPosts = data.posts?.filter(
+          (post: Article) => post.post_status === 'approved' || !post.post_status
+        ) || [];
+        
+        console.log('Successfully fetched articles:', approvedPosts.length);
+        console.log('Sample article:', approvedPosts[0]);
+        
+        // Debug: Log all unique categories
+        const allCategories = [...new Set(approvedPosts.map((post: Article) => post.category))];
+        console.log('All unique categories found:', allCategories);
+        
+        // Debug: Find potential issue briefs with different spellings
+        const potentialIssueBriefs = approvedPosts.filter((post: Article) => 
+          post.category?.toLowerCase().includes('issue') || 
+          post.category?.toLowerCase().includes('brief')
+        );
+        console.log('Potential issue briefs:', potentialIssueBriefs.map((p: Article) => ({ 
+          title: p.title, 
+          category: p.category 
+        })));
+        
+        setArticles(approvedPosts);
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to fetch articles');
         console.error('Error fetching articles:', error);
@@ -104,7 +136,7 @@ export default function Home() {
   };
 
   // Ensure dates are formatted consistently for sorting
-  const sortedArticles = [...allArticles].sort((a, b) => {
+  const sortedArticles = [...articles].sort((a, b) => {
     return new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime();
   });
 
@@ -122,8 +154,21 @@ export default function Home() {
     .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
     .slice(0, 4);
 
-  // Get issue briefs articles
-  const issueBriefs = sortedArticles.filter(article => article.category?.toLowerCase() === 'issue briefs');
+  // Get issue briefs articles - try multiple potential category names
+  const issueBriefs = sortedArticles.filter(article => {
+    const category = article.category?.toLowerCase() || '';
+    return category === 'issue briefs' || 
+           category === 'issue-briefs' || 
+           category === 'issuebriefs' ||
+           category === 'issue brief' ||
+           category === 'brief';
+  });
+  
+  // Debug: Log issue briefs filtering
+  console.log('Total articles:', sortedArticles.length);
+  console.log('All categories:', [...new Set(sortedArticles.map(a => a.category?.toLowerCase()))]);
+  console.log('Filtered issue briefs:', issueBriefs.length);
+  console.log('Issue briefs articles:', issueBriefs.slice(0, 3));
 
   // Get web articles
   const webArticles = sortedArticles.filter(article => article.category?.toLowerCase() === 'web-articles');
@@ -271,20 +316,31 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    // Validate all images
+    // Validate all images when articles are loaded
     const validateAllImages = async () => {
-      const imagePromises = allArticles.map(async (article) => {
-        const validImage = await validateImage(article.imageUrl || '');
-        return [article.imageUrl, validImage];
-      });
+      if (articles.length === 0) return;
+      
+      try {
+        const imagePromises = articles.map(async (article) => {
+          const validImage = await validateImage(article.imageUrl || '');
+          return [article.imageUrl, validImage];
+        });
 
-      const validatedPairs = await Promise.all(imagePromises);
-      const validatedMap = Object.fromEntries(validatedPairs);
-      setValidatedImages(validatedMap);
+        const validatedPairs = await Promise.all(imagePromises);
+        const validatedMap = Object.fromEntries(validatedPairs);
+        setValidatedImages(validatedMap);
+      } catch (error) {
+        console.error('Error validating images:', error);
+      }
     };
 
-    validateAllImages();
-  }, [allArticles]);
+    if (articles.length > 0) {
+      validateAllImages();
+    }
+  }, [articles]);
+
+  // We're now using the StickySidebar component for sidebar behavior
+  // No custom scroll behavior is needed
 
   // Pagination logic for Latest Post
   const postsPerPage = 2;
@@ -406,14 +462,20 @@ export default function Home() {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-600"></div>
         </div>
       ) : error ? (
-        <div className="flex justify-center items-center min-h-screen text-red-600">
-          <p>Error loading articles: {error}</p>
+        <div className="flex flex-col justify-center items-center min-h-screen text-red-600">
+          <p className="text-lg mb-4">Error loading articles: {error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+          >
+            Retry
+          </button>
         </div>
       ) : (
         <>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 mt-[30px] min-h-screen">
             {/* Left Column: Newsflash and Content */}
-            <div className="lg:col-span-2 space-y-6 lg:space-y-8">              {/* Newsflash Banner matching design */}
+            <div ref={leftColumnRef} className="lg:col-span-2 space-y-6 lg:space-y-8">              {/* Newsflash Banner matching design */}
               <div className="flex items-center h-12 overflow-hidden rounded-none border border-gray-300">
                 <div className="flex items-center bg-red-600 text-white px-4 space-x-2 h-full">
                   <FaBullhorn className="text-2xl" />
@@ -713,18 +775,26 @@ export default function Home() {
               </div>
               {/* Issue Briefs Section - Cumulative Load More */}
               <div className="w-[750px] mx-auto mb-4">
-                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Issue Briefs</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
-                  {paginatedIssueBriefs.map(renderCard)}
-                </div>
-                {canLoadMoreIssue && (
+                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">
+                  Issue Briefs
+                </h2>
+                {issueBriefs.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No Issue Briefs articles found</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
+                    {issueBriefs.slice(0, 3).map(renderCard)}
+                  </div>
+                )}
+                {issueBriefs.length > 3 && (
                   <div className="flex justify-center mt-4">
                     <button
-                      onClick={() => setIssueVisibleCount((prev) => Math.min(prev + issuePerPage, issueBriefs.length))}
-                      className="px-6 py-2 uppercase font-medium text-sm border border-pink-600 text-pink-600 rounded-none hover:bg-pink-600 hover:text-white transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={!canLoadMoreIssue}
+                      onClick={() => {}}
+                      disabled={true}
+                      className="px-6 py-2 uppercase font-medium text-sm border border-pink-600 text-pink-600 rounded-none opacity-50 cursor-not-allowed"
                     >
-                      Load More
+                      Load More (Demo Only)
                     </button>
                   </div>
                 )}
@@ -936,10 +1006,9 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right Column: Sticky Sidebar */}
-            {/* Sticky sidebar must not be inside a flex/overflow/height-constrained parent! */}
+            {/* Right Column: Using direct sticky approach */}
             <div className="lg:col-span-1">
-              <div className="sticky top-20 w-full max-w-sm">
+              <div className="sticky top-20 w-full" style={{ height: 'fit-content' }}>
                 <div className="space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm p-6">
                   {/* Web Updates Section */}
                   <WebUpdates />

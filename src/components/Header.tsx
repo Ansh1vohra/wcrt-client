@@ -13,61 +13,51 @@ type MenuItem = {
 
 const menuItems: MenuItem[] = [
     { title: 'HOME', href: '/', dropdown: null },
-    {
-        title: 'ABOUT US', href: '/about', dropdown: [
-            { name: 'POSH Advocates', href: '/about/poshAadvocates' },
-            { name: 'Advisors', href: '/about/advisors' },
-            { name: 'Arbitrators', href: '/about/arbitrators' },
-            { name: 'Board Members', href: '/about/boardmembers' },
-            { name: 'Faculty of POSH', href: '/about/facultyofposh' },
-            { name: 'President', href: '/about/president' },
-            { name: 'Vice President', href: '/about/vicepresident' },
+    { 
+        title: 'ABOUT US', 
+        href: '/about', 
+        dropdown: [
+            { name: 'PRESIDENT', href: '/about/president' },
+            { name: 'ADVOCATES POSH TRAINING', href: '/about/poshAadvocates' }
+        ] 
+    },
+    { 
+        title: 'PUBLICATIONS', 
+        href: '/publication', 
+        dropdown: [
+            { name: 'WEB ARTICLES', href: '/publication/web-articles' },
+            { name: 'ISSUE BRIEFS', href: '/publication/issue-briefs' },
+            { name: 'NEWSLETTERS', href: '/publication/newsletters' },
+            { name: 'WCRT JOURNAL', href: '/publication/wcrt-journal' },
+            { name: 'VOICE FOR HER & CHILD', href: '/publication/voice-for-her-and-child' },
+            { name: 'INTERNATIONAL JOURNAL OF TRANSNATION OF GENDER EQUALITY', href: '/publication/international-journal-of-transnation-of-gender-equality' },
+            { name: 'SCHOLAR WARRIOR', href: '/publication/scholar-warrior' },
+            { name: 'BOOKS', href: '/publication/books' },
+            { name: 'RAJKUMARI KAUL ESSAY COMPETITIONS', href: '/publication/rajkumari-kaul-essay-competitions' },
+            { name: 'INTERNS WRITE UP CAPSULE', href: '/publication/interns-write-up-capsule' },
+            { name: 'POLICIES', href: '/publication/policies' }
         ]
     },
-    {
-        title: 'PUBLICATIONS', href: '/publication', dropdown: [
-            { name: 'Web Articles', href: '/publication/web-articles' },
-            { name: 'Issue Briefs', href: '/publication/issue-briefs' },
-            { name: 'Anna Chandy Papers', href: '/publication/anna-chandy-papers' },
-            { name: 'NewsLetters', href: '/publication/newsletters' },
-            { name: 'WCRT Journal', href: '/publication/wcrt-journal' },
-            { name: 'Scholar Warrior', href: '/publication/scholar-warrior' },
-            { name: 'Books', href: '/publication/books' },
-            { name: 'Essays', href: '/publication/essays' },
-            { name: 'Rajkumari Kaul Essay Competitions', href: '/publication/rajkumari-kaul-essay-competitions' },
-            { name: 'Intern Articles', href: '/publication/intern-articles' },
-            { name: 'External Publications', href: '/publication/external-publications' }
+    { 
+        title: 'RESEARCH AREAS', 
+        href: '/research', 
+        dropdown: [
+            { name: 'WOMEN RIGHTS & DEVELOPMENT', href: '/research/women-rights-and-development' },
+            { name: 'CHILD RIGHTS & DEVELOPMENT', href: '/research/child-rights-and-development' },
+            { name: 'NATIONAL DATA: ATROCITIES AGAINST WOMEN', href: '/research/national-data-atrocities-against-women' },
+            { name: 'CHILD DEVELOPMENT & MALNUTRITION', href: '/research/child-development-and-malnutrition' }
         ]
     },
-    {
-        title: 'RESEARCH AREAS', href: '/research', dropdown: [
-            { name: 'Women Rights and Development', href: '/research/women-rights-development' },
-            { name: 'Child Rights and Development', href: '/research/child-rights-development' },
-            { name: 'National Data for Atrocities on Women', href: '/research/national-data-atrocities-women' },
-            { name: 'Child Development and Malnutrition', href: '/research/child-development-malnutrition' }
+    { title: 'ARCHIVE', href: '/archive', dropdown: null },
+    { 
+        title: 'EVENTS', 
+        href: '/events', 
+        dropdown: [
+            { name: 'SEMINAR', href: '/events/seminar' },
+            { name: 'WEBINAR', href: '/events/webinar' }
         ]
     },
-    {
-        title: 'POLICY', href: '/policy', dropdown: [
-            { name: 'Privacy Policy', href: '/policy/privacy-policy' },
-            { name: 'Refund Policy', href: '/policy/refund-policy' },
-            { name: 'Return Policy', href: '/policy/return-policy' },
-            { name: 'Terms & Conditions', href: '/policy/terms-and-conditions' },
-            { name: 'Shipping Policy', href: '/policy/shipping-policy' },
-        ]
-    },
-    {
-        title: 'ARCHIVE', href: '/archive', dropdown: null
-    },
-    {
-        title: 'EVENTS', href: '/events', dropdown: [
-            { name: 'Seminars', href: '/events/seminars' },
-            { name: 'Webinars', href: '/events/webinars' }
-        ]
-    },
-    { title: 'EXAM', href: '/exam', dropdown: null },
-    { title: 'CAREERS', href: '/career', dropdown: null },
-    { title: 'CONTACT', href: '/contact', dropdown: null }
+    { title: 'APLC(EXAM)', href: '/exam', dropdown: null },
 ];
 
 const Header = () => {
@@ -79,6 +69,10 @@ const Header = () => {
     const pathname = usePathname();
     const mobileMenuRef = useRef<HTMLDivElement>(null);
     const searchInputRef = useRef<HTMLInputElement>(null);
+    const joinUsBtnRef = useRef<HTMLButtonElement>(null);
+    const connectBtnRef = useRef<HTMLButtonElement>(null);
+    const [caretLeft, setCaretLeft] = useState<number | null>(null);
+    const containerRef = useRef<HTMLDivElement>(null);
 
     useEffect(() => {
         setIsClient(true);
@@ -102,6 +96,9 @@ const Header = () => {
             searchInputRef.current.focus();
         }
     }, [showMobileSearch]);
+
+    const [activeDropdownJoin, setActiveDropdownJoin] = useState<string | null>(null);
+    const [activeDropdownConnect, setActiveDropdownConnect] = useState<string | null>(null);
 
     const toggleDropdown = (dropdown: number) => {
         setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
@@ -165,6 +162,48 @@ const Header = () => {
         );
     };
 
+    const handleDropdownToggle = (dropdown: string) => {
+        if (dropdown === 'join') {
+            if (activeDropdownJoin === dropdown) {
+                setActiveDropdownJoin(null);
+                setCaretLeft(null);
+            } else {
+                setActiveDropdownJoin(dropdown);
+                setActiveDropdownConnect(null);
+                if (joinUsBtnRef.current && containerRef.current) {
+                    setCaretLeft(joinUsBtnRef.current.offsetLeft + joinUsBtnRef.current.offsetWidth / 2);
+                }
+            }
+        } else if (dropdown === 'connect') {
+            if (activeDropdownConnect === dropdown) {
+                setActiveDropdownConnect(null);
+                setCaretLeft(null);
+            } else {
+                setActiveDropdownConnect(dropdown);
+                setActiveDropdownJoin(null);
+                if (connectBtnRef.current && containerRef.current) {
+                    setCaretLeft(connectBtnRef.current.offsetLeft + connectBtnRef.current.offsetWidth / 2);
+                }
+            }
+        }
+    };
+
+    const handleBackdropClick = () => {
+        setActiveDropdownJoin(null);
+        setActiveDropdownConnect(null);
+    };
+
+    useEffect(() => {
+        if (activeDropdownJoin || activeDropdownConnect) {
+            document.body.style.overflow = 'hidden';
+        } else {
+            document.body.style.overflow = 'unset';
+        }
+        return () => {
+            document.body.style.overflow = 'unset';
+        };
+    }, [activeDropdownJoin, activeDropdownConnect]);
+
     return (
         <>
             <TopNavbar />
@@ -174,7 +213,7 @@ const Header = () => {
                 md:bg-[image:url('/BannerNew.png')]
                 md:cursor-pointer"
             >
-                <div className="container mx-auto px-4 md:w-6xl py-5 md:py-10">
+                <div className="container relative mx-auto px-4 md:w-6xl py-5 md:py-10" ref={containerRef}>
                     <div className="flex items-center justify-between">
                         <div className="flex items-center space-x-4">
                             {/* Hamburger button */}
@@ -209,7 +248,7 @@ const Header = () => {
 
             {/* Sticky navigation bar - stays fixed at top when scrolling */}
             <div className="sticky top-0 z-50 bg-white shadow-sm">
-                <div className="container mx-auto px-4 md:w-6xl">
+                <div className="container relative mx-auto px-4 md:w-6xl">
                     <nav className="hidden md:block border-t border-gray-200">
                         <ul className="flex justify-between items-center py-2">
                             {menuItems.map((item, index) => (
@@ -217,7 +256,7 @@ const Header = () => {
                                     key={index}
                                     className="relative group"
                                     onMouseEnter={() => item.dropdown && setActiveDropdown(index)}
-                                    onMouseLeave={() => setActiveDropdown(null)}
+                                    onMouseLeave={() => item.dropdown && setActiveDropdown(null)}
                                 >
                                     <div className="flex items-center">
                                         <Link
@@ -227,46 +266,205 @@ const Header = () => {
                                             `}
                                         >
                                             {item.title}
+                                            {item.dropdown && (
+                                                <svg className="w-4 h-4 ml-1 inline-block" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
+                                                </svg>
+                                            )}
                                             <div className={`absolute bottom-0 left-0 w-full h-0.5 bg-pink-600 transform origin-left transition-transform duration-300 ease-out
                                                 ${isActivePage(item) ? 'scale-x-100' : 'scale-x-0 group-hover:scale-x-100'}
                                             `}></div>
                                         </Link>
-                                        {item.dropdown && (
-                                            <svg
-                                                className={`w-4 h-4 ml-1 transition-transform duration-200 ${activeDropdown === index ? 'rotate-180 text-pink-600' : 'text-gray-400'
-                                                    }`}
-                                                fill="none"
-                                                stroke="currentColor"
-                                                viewBox="0 0 24 24"
-                                            >
-                                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
-                                            </svg>
+                                        
+                                        {/* Dropdown menu */}
+                                        {item.dropdown && activeDropdown === index && (
+                                            <div className="absolute top-full left-0 mt-1 w-80 bg-white border border-gray-200 rounded-lg shadow-lg z-50">
+                                                <div className="py-2">
+                                                    {item.dropdown.map((dropdownItem, dropIndex) => (
+                                                        <Link
+                                                            key={dropIndex}
+                                                            href={dropdownItem.href}
+                                                            className="block px-4 py-2 text-sm text-gray-700 hover:bg-pink-50 hover:text-pink-600 transition-colors duration-200"
+                                                        >
+                                                            {dropdownItem.name}
+                                                        </Link>
+                                                    ))}
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
-
-                                    {/* Dropdown */}
-                                    {item.dropdown && activeDropdown === index && (
-                                        <div className="absolute top-full left-0 w-48 bg-white shadow-lg rounded-lg py-2 z-50 transform transition-all duration-200">
-                                            {item.dropdown.map((dropItem, dropIndex) => (
-                                                <Link
-                                                    key={dropIndex}
-                                                    href={dropItem.href}
-                                                    className={`block px-4 py-2 text-sm transition-colors duration-200
-                                                        ${pathname === dropItem.href
-                                                            ? 'text-pink-600 bg-pink-50'
-                                                            : 'text-gray-700 hover:text-pink-600 hover:bg-gray-50'
-                                                        }
-                                                    `}
-                                                >
-                                                    {dropItem.name}
-                                                </Link>
-                                            ))}
-                                        </div>
-                                    )}
                                 </li>
                             ))}
+                            <li>
+                                <button
+                                    ref={joinUsBtnRef}
+                                    onClick={() => handleDropdownToggle('join')}
+                                    className="text-sm font-semibold px-3 py-2 relative transition-colors duration-200 text-gray-700 hover:text-pink-600"
+                                >
+                                    JOIN US
+                                    {activeDropdownJoin === 'join' && (
+                                        <span className="absolute left-1/2 -bottom-2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-b-8 border-l-transparent border-r-transparent border-b-pink-600"></span>
+                                    )}
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    ref={connectBtnRef}
+                                    onClick={() => handleDropdownToggle('connect')}
+                                    className="text-sm font-semibold px-3 py-2 relative transition-colors duration-200 text-gray-700 hover:text-pink-600"
+                                >
+                                    CONNECT
+                                    {activeDropdownConnect === 'connect' && (
+                                        <span className="absolute left-1/2 -bottom-2 transform -translate-x-1/2 w-0 h-0 border-l-8 border-r-8 border-b-8 border-l-transparent border-r-transparent border-b-pink-600"></span>
+                                    )}
+                                </button>
+                            </li>
                         </ul>
                     </nav>
+
+                    {/* Join Us Dropdown */}
+                    {activeDropdownJoin === 'join' && (
+                        <div
+                            className="absolute left-0 z-50 animate-in slide-in-from-top-4 duration-300"
+                            style={{ top: '100%', width: '100%', height: '50vh' }}
+                        >
+                            <div className="relative w-full h-full border-4 border-pink-500 border-t-yellow-400 shadow-2xl">
+                                {caretLeft !== null && (
+                                    <span
+                                        className="absolute -top-4"
+                                        style={{ left: caretLeft - 16 }}
+                                    >
+                                        <span className="block w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white"></span>
+                                    </span>
+                                )}
+                                <div className="flex w-full h-full">
+                                    <div className="w-1/3 bg-white p-12 flex flex-col justify-center">
+                                        <h2 className="text-4xl font-light mb-6 leading-tight text-pink-700">
+                                            Join us
+                                        </h2>
+                                        <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+                                            Seeking creative collaborators to push us in exciting, new directions.
+                                        </p>
+                                    </div>
+                                    <div className="w-2/3 bg-gray-100 p-12 flex items-center">
+                                        <form className="max-w-2xl w-full">
+                                            <div className="mb-4">
+                                                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
+                                                    Name
+                                                </label>
+                                                <input
+                                                    type="text"
+                                                    id="name"
+                                                    name="name"
+                                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                                    placeholder="Enter your name"
+                                                />
+                                            </div>
+                                            <div className="mb-4">
+                                                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
+                                                    Email
+                                                </label>
+                                                <input
+                                                    type="email"
+                                                    id="email"
+                                                    name="email"
+                                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                                    placeholder="Enter your email"
+                                                />
+                                            </div>
+                                            <div className="mb-4">
+                                                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="message">
+                                                    Message
+                                                </label>
+                                                <textarea
+                                                    id="message"
+                                                    name="message"
+                                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
+                                                    placeholder="Write your message"
+                                                ></textarea>
+                                            </div>
+                                            <button
+                                                type="submit"
+                                                className="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                            >
+                                                Submit
+                                            </button>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+
+                    {/* Connect Dropdown */}
+                    {activeDropdownConnect === 'connect' && (
+                        <div
+                            className="absolute left-0 z-50 animate-in slide-in-from-top-4 duration-300"
+                            style={{ top: '100%', width: '100%', height: '50vh' }}
+                        >
+                            <div className="relative w-full h-full border-4 border-pink-500 border-t-yellow-400 shadow-2xl">
+                                {caretLeft !== null && (
+                                    <span
+                                        className="absolute -top-4"
+                                        style={{ left: caretLeft - 16 }}
+                                    >
+                                        <span className="block w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white"></span>
+                                    </span>
+                                )}
+                                <div className="flex w-full h-full">
+                                    {/* Left: Address and Details */}
+                                    <div className="w-1/2 bg-white p-8 flex flex-col justify-center">
+                                        <h2 className="text-3xl font-light mb-4 leading-tight text-pink-700">
+                                            Connect
+                                        </h2>
+                                        <div className="mb-3">
+                                            <h4 className="text-base font-medium mb-1">Address</h4>
+                                            <p className="text-sm">WCRT Headquarters, New Delhi, India</p>
+                                        </div>
+                                        <div className="mb-3">
+                                            <h4 className="text-base font-medium mb-1">Email</h4>
+                                            <a href="mailto:connect@wcrt.in" className="text-pink-600 hover:underline text-sm">connect@wcrt.in</a>
+                                        </div>
+                                        <div className="mb-3">
+                                            <h4 className="text-base font-medium mb-1">Phone</h4>
+                                            <p className="text-sm">+91 120 4999484</p>
+                                        </div>
+                                        <div>
+                                            <h4 className="text-base font-medium mb-1">Social Media</h4>
+                                            <div className="flex space-x-3">
+                                                <a href="#" className="text-pink-600 hover:text-pink-800 text-sm">Twitter</a>
+                                                <a href="#" className="text-pink-600 hover:text-pink-800 text-sm">Facebook</a>
+                                                <a href="#" className="text-pink-600 hover:text-pink-800 text-sm">Instagram</a>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    {/* Right: Contact Form */}
+                                    <div className="w-1/2 bg-gray-100 p-6 flex items-center overflow-hidden">
+                                        <form className="w-full max-w-sm mx-auto bg-white rounded-lg shadow-md p-6">
+                                            <h3 className="text-xl font-light mb-4 text-center text-pink-700">Contact Us</h3>
+                                            <div className="mb-3">
+                                                <label className="block text-gray-700 text-xs font-bold mb-1" htmlFor="name">Name</label>
+                                                <input className="shadow appearance-none border rounded w-full py-1.5 px-2 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline" id="name" type="text" placeholder="Your Name" />
+                                            </div>
+                                            <div className="mb-3">
+                                                <label className="block text-gray-700 text-xs font-bold mb-1" htmlFor="email">Email</label>
+                                                <input className="shadow appearance-none border rounded w-full py-1.5 px-2 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" placeholder="Your Email" />
+                                            </div>
+                                            <div className="mb-3">
+                                                <label className="block text-gray-700 text-xs font-bold mb-1" htmlFor="message">Message</label>
+                                                <textarea className="shadow appearance-none border rounded w-full py-1.5 px-2 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline resize-none" id="message" placeholder="Your Message" rows={3}></textarea>
+                                            </div>
+                                            <div className="flex items-center justify-center">
+                                                <button type="submit" className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-1.5 px-4 text-sm rounded focus:outline-none focus:shadow-outline transition-colors duration-200">
+                                                    Send
+                                                </button>
+                                            </div>
+                                        </form>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
                 </div>
             </div>
 
@@ -347,6 +545,15 @@ const Header = () => {
             {/* Overlay when mobile menu is open */}
             {isMobileMenuOpen && (
                 <div className="fixed inset-0 bg-black bg-opacity-50 z-40 md:hidden"></div>
+            )}
+
+            {/* Backdrop */}
+            {(activeDropdownJoin || activeDropdownConnect) && (
+                <div
+                    className="fixed top-0 left-0 w-full h-full bg-pink-100 z-40"
+                    style={{ backgroundColor: 'rgba(252, 231, 243, 0.7)' }}
+                    onClick={handleBackdropClick}
+                />
             )}
         </>
     );

@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
+import PublicationSlider from '@/components/PublicationSlider';
 
 // Define archive sections inline (no local data file)
 const sections = [
@@ -11,27 +12,24 @@ const sections = [
   { name: 'Research Papers', href: '/archive/research-papers', key: 'research-papers' },
 ];
 
-interface Post {
+interface Article {
+  postId: string;
   title: string;
-  dateCreated: string;
-  tags: string[];
+  imageUrl?: string;
   category?: string;
+  uploadDate: string;
+  authorName?: string;
 }
 
 const API_BASE = process.env.NEXT_PUBLIC_BACKEND;
 const API_URL = `${API_BASE}/api/posts/status/approved`;
+const defaultImage = '/wcrt-logo.png';
 
 const ArchivePage: React.FC = () => {
-  const [allPosts, setAllPosts] = useState<Post[]>([]);
+  const [allPosts, setAllPosts] = useState<Article[]>([]);
   const [error, setError] = useState<string | null>(null);
   const [loadingData, setLoadingData] = useState(true);
-
-  // Pagination counts
-  const initialCounts: Record<string, number> = sections.reduce((acc, section) => {
-    acc[section.key] = 6;
-    return acc;
-  }, {} as Record<string, number>);
-  const [counts, setCounts] = useState<Record<string, number>>(initialCounts);
+  const [validatedImages, setValidatedImages] = useState<Record<string, string>>({});
 
   useEffect(() => {
     (async () => {
@@ -41,14 +39,43 @@ const ArchivePage: React.FC = () => {
         const response = await fetch(API_URL, { signal: controller.signal });
         if (!response.ok) throw new Error(`Status ${response.status}`);
         const json = await response.json();
-        setAllPosts(
-          json.posts?.map((p: any) => ({
-            title: p.title,
-            dateCreated: p.uploadDate,
-            tags: p.tags || [p.category],
-            category: p.category?.toLowerCase(),
-          })) || []
-        );
+        
+        const posts = json.posts?.map((p: any) => ({
+          postId: p.postId || p.id,
+          title: p.title,
+          imageUrl: p.imageUrl,
+          uploadDate: p.uploadDate,
+          authorName: p.authorName,
+          category: p.category?.toLowerCase(),
+        })) || [];
+        
+        setAllPosts(posts);
+
+        // Validate images
+        const imageValidationPromises = posts.map(async (post: Article) => {
+          if (post.imageUrl) {
+            try {
+              const img = new window.Image();
+              img.src = post.imageUrl;
+              await new Promise((resolve, reject) => {
+                img.onload = resolve;
+                img.onerror = reject;
+              });
+              return { url: post.imageUrl, validated: post.imageUrl };
+            } catch {
+              return { url: post.imageUrl, validated: defaultImage };
+            }
+          }
+          return { url: post.imageUrl || '', validated: defaultImage };
+        });
+
+        const validatedResults = await Promise.all(imageValidationPromises);
+        const imageMap: Record<string, string> = {};
+        validatedResults.forEach((result, index) => {
+          imageMap[posts[index].imageUrl || ''] = result.validated;
+        });
+        setValidatedImages(imageMap);
+
       } catch (e: any) {
         if (e.name === 'AbortError') setError('Request timed out');
         else setError(e.message || 'Failed to fetch');
@@ -59,62 +86,41 @@ const ArchivePage: React.FC = () => {
     })();
   }, []);
 
-  const loadMore = (key: string) => {
-    const total = allPosts.filter(p => p.category === key.replace(/-/g, ' ')).length;
-    setCounts(prev => ({
-      ...prev,
-      [key]: Math.min(total, prev[key] + 6),
-    }));
-  };
-
   return (
-    <div style={{ padding: '2rem', maxWidth: '1200px', margin: 'auto' }}>
-      <h1>Archive</h1>
-      {loadingData ? (
-        <p>Loading...</p>
-      ) : (
-        <>
-          {error && <p className="error">Failed to load data: {error}</p>}
-          <div className="grid">
-           {sections.map(section => {
-             const posts = allPosts.filter(p => p.category === section.key.replace(/-/g, ' '));
-             const count = counts[section.key];
-             return (
-               <div key={section.key} className="card">
-                 <Link href={section.href}>
-                   <h2>{section.name}</h2>
-                 </Link>
-                {/* only heading if no posts */}
-                {posts.length > 0 && (
-                  posts.slice(0, count).map((post, idx) => (
-                    <div key={idx} className="post-item">
-                      <h3>{post.title}</h3>
-                      <p className="date">{post.dateCreated}</p>
-                      <p className="tags">Tags: {post.tags.join(', ')}</p>
-                    </div>
-                  ))
-                )}
-                {posts.length > count && <button onClick={() => loadMore(section.key)}>Load More</button>}
-               </div>
-             );
-           })}
+    <main className="container mx-auto px-4 max-w-full">
+      <div className="w-[750px] mx-auto mt-[30px]">
+        <h1 className="text-4xl font-bold text-pink-700 mb-8">Archive</h1>
+        {loadingData ? (
+          <div className="flex justify-center items-center min-h-screen">
+            <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-600"></div>
           </div>
-        </>
-      )}
-       <style jsx>{`
-         .grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 2rem; margin-top: 1rem; }
-         .card { box-shadow: 0 4px 8px rgba(0,0,0,0.1); border-radius: 8px; padding: 1rem; background: #fff; }
-         .card h2 a { color: #0070f3; text-decoration: none; }
-         .card h2 a:hover { color: #005bb5; }
-         .post-item { margin-bottom: 1rem; }
-         .date { color: #666; font-size: 0.9rem; }
-         .tags { font-size: 0.9rem; }
-         .error { color: #e1006a; margin-bottom: 1rem; }
-         button { padding: 0.5rem 1rem; background: #0070f3; color: #fff; border: none; border-radius: 4px; cursor: pointer; }
-         button:hover { background: #005bb5; }
-       `}</style>
-     </div>
-   );
+        ) : (
+          <>
+            {error && (
+              <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded mb-4">
+                Failed to load data: {error}
+              </div>
+            )}
+            <div className="space-y-8">
+              {sections.map(section => {
+                const posts = allPosts.filter(p => p.category === section.key.replace(/-/g, ' '));
+                return (
+                  <div key={section.key}>
+                    <PublicationSlider
+                      title={section.name}
+                      articles={posts}
+                      defaultImage={defaultImage}
+                      validatedImages={validatedImages}
+                    />
+                  </div>
+                );
+              })}
+            </div>
+          </>
+        )}
+      </div>
+    </main>
+  );
 };
 
 export default ArchivePage;
