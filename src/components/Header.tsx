@@ -73,9 +73,18 @@ const Header = () => {
     const connectBtnRef = useRef<HTMLButtonElement>(null);
     const [caretLeft, setCaretLeft] = useState<number | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
+    const [isMobileView, setIsMobileView] = useState<boolean>(false);
 
     useEffect(() => {
         setIsClient(true);
+        setIsMobileView(window.innerWidth < 768);
+        
+        const handleResize = () => {
+            setIsMobileView(window.innerWidth < 768);
+        };
+        
+        window.addEventListener('resize', handleResize);
+        return () => window.removeEventListener('resize', handleResize);
     }, []);
 
     useEffect(() => {
@@ -99,6 +108,7 @@ const Header = () => {
 
     const [activeDropdownJoin, setActiveDropdownJoin] = useState<string | null>(null);
     const [activeDropdownConnect, setActiveDropdownConnect] = useState<string | null>(null);
+    const [selectedJoinOption, setSelectedJoinOption] = useState<'volunteer' | 'intern' | null>(null);
 
     const toggleDropdown = (dropdown: number) => {
         setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
@@ -167,9 +177,11 @@ const Header = () => {
             if (activeDropdownJoin === dropdown) {
                 setActiveDropdownJoin(null);
                 setCaretLeft(null);
+                setSelectedJoinOption(null); // Reset selected option when dropdown closes
             } else {
                 setActiveDropdownJoin(dropdown);
                 setActiveDropdownConnect(null);
+                setSelectedJoinOption(null); // Reset selected option when dropdown opens
                 if (joinUsBtnRef.current && containerRef.current) {
                     setCaretLeft(joinUsBtnRef.current.offsetLeft + joinUsBtnRef.current.offsetWidth / 2);
                 }
@@ -191,6 +203,7 @@ const Header = () => {
     const handleBackdropClick = () => {
         setActiveDropdownJoin(null);
         setActiveDropdownConnect(null);
+        setSelectedJoinOption(null); // Reset selected option when backdrop is clicked
     };
 
     useEffect(() => {
@@ -213,15 +226,16 @@ const Header = () => {
                 md:bg-[image:url('/BannerNew.png')]
                 md:cursor-pointer"
             >
-                <div className="container relative mx-auto px-4 md:w-6xl py-5 md:py-10" ref={containerRef}>
+                <div className="container relative mx-auto px-3 sm:px-4 md:w-6xl py-4 md:py-10" ref={containerRef}>
                     <div className="flex items-center justify-between">
-                        <div className="flex items-center space-x-4">
+                        <div className="flex items-center space-x-2 sm:space-x-4">
                             {/* Hamburger button */}
                             <button
                                 onClick={toggleMobileMenu}
-                                className="md:hidden p-2 text-gray-200"
+                                className="md:hidden p-3 text-gray-200 rounded-md hover:bg-pink-700 transition-colors"
+                                aria-label="Menu"
                             >
-                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
                                 </svg>
                             </button>
@@ -325,8 +339,8 @@ const Header = () => {
                     {/* Join Us Dropdown */}
                     {activeDropdownJoin === 'join' && (
                         <div
-                            className="absolute left-0 z-50 animate-in slide-in-from-top-4 duration-300"
-                            style={{ top: '100%', width: '100%', height: '50vh' }}
+                            className="absolute left-0 z-50 animate-in slide-in-from-top-4 duration-300 md:top-full"
+                            style={{ top: window.innerWidth < 768 ? '0' : '100%', width: '100%', height: window.innerWidth < 768 ? '100vh' : '450px', maxHeight: window.innerWidth < 768 ? '100vh' : '80vh' }}
                         >
                             <div className="relative w-full h-full border-4 border-pink-500 border-t-yellow-400 shadow-2xl">
                                 {caretLeft !== null && (
@@ -337,59 +351,151 @@ const Header = () => {
                                         <span className="block w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white"></span>
                                     </span>
                                 )}
-                                <div className="flex w-full h-full">
-                                    <div className="w-1/3 bg-white p-12 flex flex-col justify-center">
-                                        <h2 className="text-4xl font-light mb-6 leading-tight text-pink-700">
+                                <div className="flex w-full h-full flex-col md:flex-row">
+                                    {isMobileView && (
+                                        <div className="bg-pink-600 p-4 flex justify-between items-center">
+                                            <h2 className="text-xl font-semibold text-white">Join Us</h2>
+                                            <button 
+                                                onClick={() => handleBackdropClick()}
+                                                className="text-white p-2"
+                                            >
+                                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    )}
+                                    <div className="w-full md:w-1/3 bg-white p-4 md:p-8 flex flex-col justify-center">
+                                        <h2 className="text-2xl md:text-3xl font-light mb-3 md:mb-4 leading-tight text-pink-700">
                                             Join us
                                         </h2>
-                                        <p className="text-lg text-gray-700 mb-8 leading-relaxed">
+                                        <p className="text-base text-gray-700 mb-3 md:mb-4 leading-relaxed">
                                             Seeking creative collaborators to push us in exciting, new directions.
                                         </p>
-                                    </div>
-                                    <div className="w-2/3 bg-gray-100 p-12 flex items-center">
-                                        <form className="max-w-2xl w-full">
-                                            <div className="mb-4">
-                                                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="name">
-                                                    Name
-                                                </label>
-                                                <input
-                                                    type="text"
-                                                    id="name"
-                                                    name="name"
-                                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                                    placeholder="Enter your name"
-                                                />
-                                            </div>
-                                            <div className="mb-4">
-                                                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="email">
-                                                    Email
-                                                </label>
-                                                <input
-                                                    type="email"
-                                                    id="email"
-                                                    name="email"
-                                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                                    placeholder="Enter your email"
-                                                />
-                                            </div>
-                                            <div className="mb-4">
-                                                <label className="block text-gray-700 text-sm font-bold mb-2" htmlFor="message">
-                                                    Message
-                                                </label>
-                                                <textarea
-                                                    id="message"
-                                                    name="message"
-                                                    className="shadow appearance-none border rounded w-full py-2 px-3 text-gray-700 leading-tight focus:outline-none focus:shadow-outline"
-                                                    placeholder="Write your message"
-                                                ></textarea>
-                                            </div>
-                                            <button
-                                                type="submit"
-                                                className="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 px-4 rounded focus:outline-none focus:shadow-outline"
+                                        {selectedJoinOption && (
+                                            <button 
+                                                onClick={() => setSelectedJoinOption(null)}
+                                                className="text-pink-600 hover:text-pink-800 font-medium flex items-center text-sm py-2"
                                             >
-                                                Submit
+                                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
+                                                </svg>
+                                                Back to options
                                             </button>
-                                        </form>
+                                        )}
+                                    </div>
+                                    <div className="w-full md:w-2/3 bg-gray-100 p-4 md:p-8 flex items-center justify-center overflow-y-auto">
+                                        {!selectedJoinOption ? (
+                                            <div className="flex flex-col md:flex-row gap-4 md:gap-8 w-full justify-center">
+                                                <div 
+                                                    onClick={() => setSelectedJoinOption('volunteer')}
+                                                    className="w-full md:w-64 h-48 md:h-64 bg-white rounded-lg shadow-lg p-4 md:p-6 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transform hover:-translate-y-1 transition-all"
+                                                >
+                                                    <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center mb-2 md:mb-3">
+                                                        <svg className="w-8 h-8 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
+                                                        </svg>
+                                                    </div>
+                                                    <h3 className="text-lg font-bold text-center text-gray-800 mb-1 md:mb-2">Click To Volunteer</h3>
+                                                    <p className="text-center text-gray-600 text-sm">Join our volunteer team and make a difference</p>
+                                                </div>
+                                                
+                                                <div 
+                                                    onClick={() => setSelectedJoinOption('intern')}
+                                                    className="w-full md:w-64 h-48 md:h-64 bg-white rounded-lg shadow-lg p-4 md:p-6 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transform hover:-translate-y-1 transition-all"
+                                                >
+                                                    <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-2 md:mb-3">
+                                                        <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
+                                                        </svg>
+                                                    </div>
+                                                    <h3 className="text-lg font-bold text-center text-gray-800 mb-1 md:mb-2">Click To Intern</h3>
+                                                    <p className="text-center text-gray-600 text-sm">Gain experience with our internship program</p>
+                                                </div>
+                                            </div>
+                                        ) : (
+                                            <div className="w-full h-full overflow-y-auto px-2 md:px-4">
+                                                <form className="max-w-xl w-full mx-auto">
+                                                    <h3 className="text-xl font-bold mb-3 md:mb-4 text-center">
+                                                        {selectedJoinOption === 'volunteer' ? 'Volunteer Application' : 'Internship Application'}
+                                                    </h3>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                                                        <div className="mb-2 md:mb-3">
+                                                            <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="name">
+                                                                Name
+                                                            </label>
+                                                            <input
+                                                                type="text"
+                                                                id="name"
+                                                                name="name"
+                                                                className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline"
+                                                                placeholder="Enter your name"
+                                                            />
+                                                        </div>
+                                                        <div className="mb-2 md:mb-3">
+                                                            <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="email">
+                                                                Email
+                                                            </label>
+                                                            <input
+                                                                type="email"
+                                                                id="email"
+                                                                name="email"
+                                                                className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline"
+                                                                placeholder="Enter your email"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                                                        <div className="mb-2 md:mb-3">
+                                                            <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="phone">
+                                                                Phone
+                                                            </label>
+                                                            <input
+                                                                type="tel"
+                                                                id="phone"
+                                                                name="phone"
+                                                                className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline"
+                                                                placeholder="Enter your phone number"
+                                                            />
+                                                        </div>
+                                                        {selectedJoinOption === 'intern' && (
+                                                            <div className="mb-2 md:mb-3">
+                                                                <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="university">
+                                                                    University/College
+                                                                </label>
+                                                                <input
+                                                                    type="text"
+                                                                    id="university"
+                                                                    name="university"
+                                                                    className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline"
+                                                                    placeholder="Enter your university/college"
+                                                                />
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                    <div className="mb-3">
+                                                        <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="message">
+                                                            {selectedJoinOption === 'volunteer' ? 'Why do you want to volunteer?' : 'Why do you want to intern with us?'}
+                                                        </label>
+                                                        <textarea
+                                                            id="message"
+                                                            name="message"
+                                                            className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline"
+                                                            placeholder="Write your message"
+                                                            rows={2}
+                                                        ></textarea>
+                                                    </div>
+                                                    <div className="text-center mt-4">
+                                                        <button
+                                                            type="submit"
+                                                            className="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 md:py-1.5 px-6 rounded-md focus:outline-none focus:shadow-outline text-sm"
+                                                        >
+                                                            Submit Application
+                                                        </button>
+                                                    </div>
+                                                </form>
+                                            </div>
+                                        )}
                                     </div>
                                 </div>
                             </div>
@@ -399,11 +505,11 @@ const Header = () => {
                     {/* Connect Dropdown */}
                     {activeDropdownConnect === 'connect' && (
                         <div
-                            className="absolute left-0 z-50 animate-in slide-in-from-top-4 duration-300"
-                            style={{ top: '100%', width: '100%', height: '50vh' }}
+                            className="absolute left-0 z-50 animate-in slide-in-from-top-4 duration-300 md:top-full"
+                            style={{ top: window.innerWidth < 768 ? '0' : '100%', width: '100%', height: window.innerWidth < 768 ? '100vh' : '450px', maxHeight: window.innerWidth < 768 ? '100vh' : '80vh' }}
                         >
                             <div className="relative w-full h-full border-4 border-pink-500 border-t-yellow-400 shadow-2xl">
-                                {caretLeft !== null && (
+                                {caretLeft !== null && !isMobileView && (
                                     <span
                                         className="absolute -top-4"
                                         style={{ left: caretLeft - 16 }}
@@ -411,10 +517,23 @@ const Header = () => {
                                         <span className="block w-0 h-0 border-l-8 border-r-8 border-t-8 border-l-transparent border-r-transparent border-t-white"></span>
                                     </span>
                                 )}
-                                <div className="flex w-full h-full">
+                                <div className="flex w-full h-full flex-col md:flex-row">
+                                    {isMobileView && (
+                                        <div className="bg-pink-600 p-4 flex justify-between items-center">
+                                            <h2 className="text-xl font-semibold text-white">Connect</h2>
+                                            <button 
+                                                onClick={() => handleBackdropClick()}
+                                                className="text-white p-2"
+                                            >
+                                                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                                                </svg>
+                                            </button>
+                                        </div>
+                                    )}
                                     {/* Left: Address and Details */}
-                                    <div className="w-1/2 bg-white p-8 flex flex-col justify-center">
-                                        <h2 className="text-3xl font-light mb-4 leading-tight text-pink-700">
+                                    <div className="w-full md:w-1/2 bg-white p-4 md:p-8 flex flex-col justify-center">
+                                        <h2 className="text-2xl md:text-3xl font-light mb-3 md:mb-4 leading-tight text-pink-700">
                                             Connect
                                         </h2>
                                         <div className="mb-3">
@@ -439,23 +558,23 @@ const Header = () => {
                                         </div>
                                     </div>
                                     {/* Right: Contact Form */}
-                                    <div className="w-1/2 bg-gray-100 p-6 flex items-center overflow-hidden">
-                                        <form className="w-full max-w-sm mx-auto bg-white rounded-lg shadow-md p-6">
-                                            <h3 className="text-xl font-light mb-4 text-center text-pink-700">Contact Us</h3>
-                                            <div className="mb-3">
+                                    <div className="w-full md:w-1/2 bg-gray-100 p-4 md:p-6 flex items-center overflow-y-auto">
+                                        <form className="w-full max-w-sm mx-auto bg-white rounded-lg shadow-md p-4 md:p-6">
+                                            <h3 className="text-xl font-light mb-3 md:mb-4 text-center text-pink-700">Contact Us</h3>
+                                            <div className="mb-2 md:mb-3">
                                                 <label className="block text-gray-700 text-xs font-bold mb-1" htmlFor="name">Name</label>
-                                                <input className="shadow appearance-none border rounded w-full py-1.5 px-2 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline" id="name" type="text" placeholder="Your Name" />
+                                                <input className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline" id="name" type="text" placeholder="Your Name" />
                                             </div>
-                                            <div className="mb-3">
+                                            <div className="mb-2 md:mb-3">
                                                 <label className="block text-gray-700 text-xs font-bold mb-1" htmlFor="email">Email</label>
-                                                <input className="shadow appearance-none border rounded w-full py-1.5 px-2 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" placeholder="Your Email" />
+                                                <input className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline" id="email" type="email" placeholder="Your Email" />
                                             </div>
-                                            <div className="mb-3">
+                                            <div className="mb-2 md:mb-3">
                                                 <label className="block text-gray-700 text-xs font-bold mb-1" htmlFor="message">Message</label>
-                                                <textarea className="shadow appearance-none border rounded w-full py-1.5 px-2 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline resize-none" id="message" placeholder="Your Message" rows={3}></textarea>
+                                                <textarea className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline resize-none" id="message" placeholder="Your Message" rows={isMobileView ? 2 : 3}></textarea>
                                             </div>
-                                            <div className="flex items-center justify-center">
-                                                <button type="submit" className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-1.5 px-4 text-sm rounded focus:outline-none focus:shadow-outline transition-colors duration-200">
+                                            <div className="flex items-center justify-center mt-3">
+                                                <button type="submit" className="bg-pink-600 hover:bg-pink-700 text-white font-bold py-2 md:py-1.5 px-6 text-sm rounded-md focus:outline-none focus:shadow-outline transition-colors duration-200">
                                                     Send
                                                 </button>
                                             </div>
@@ -472,7 +591,7 @@ const Header = () => {
             {isMobileMenuOpen && (
                 <div
                     ref={mobileMenuRef}
-                    className="fixed inset-y-0 left-0 w-64 bg-white shadow-lg z-50 overflow-y-auto md:hidden"
+                    className="fixed inset-y-0 left-0 w-72 bg-white shadow-lg z-50 overflow-y-auto md:hidden"
                 >
                     <div className="p-4 border-b border-gray-200 flex justify-between items-center">
                         <button
@@ -494,7 +613,7 @@ const Header = () => {
                                     <div className="flex items-center justify-between">
                                         <Link
                                             href={item.href || '#'}
-                                            className={`block py-2 px-4 text-gray-700 hover:bg-gray-100 rounded flex-grow
+                                            className={`block py-3 px-4 text-gray-700 hover:bg-gray-100 rounded-md flex-grow text-base
                                                 ${isActivePage(item) ? 'text-pink-600 bg-pink-50' : ''}
                                             `}
                                             onClick={() => setIsMobileMenuOpen(false)}
@@ -504,10 +623,10 @@ const Header = () => {
                                         {item.dropdown && (
                                             <button
                                                 onClick={() => toggleDropdown(index)}
-                                                className="p-2 text-gray-500"
+                                                className="p-3 text-gray-500 rounded-md"
                                             >
                                                 <svg
-                                                    className={`w-4 h-4 transition-transform ${activeDropdown === index ? 'rotate-180' : ''}`}
+                                                    className={`w-5 h-5 transition-transform ${activeDropdown === index ? 'rotate-180' : ''}`}
                                                     fill="none"
                                                     stroke="currentColor"
                                                     viewBox="0 0 24 24"
@@ -519,12 +638,12 @@ const Header = () => {
                                     </div>
 
                                     {item.dropdown && activeDropdown === index && (
-                                        <ul className="pl-6 mt-1 space-y-1">
+                                        <ul className="pl-6 mt-1 space-y-1 bg-gray-50 rounded-md py-2">
                                             {item.dropdown.map((subItem, subIndex) => (
                                                 <li key={subIndex}>
                                                     <Link
                                                         href={subItem.href}
-                                                        className={`block py-1 px-4 text-sm text-gray-600 hover:bg-gray-100 rounded
+                                                        className={`block py-2 px-4 text-sm text-gray-600 hover:bg-gray-100 rounded-md
                                                             ${pathname === subItem.href ? 'text-pink-600 bg-pink-50' : ''}
                                                         `}
                                                         onClick={() => setIsMobileMenuOpen(false)}
@@ -537,6 +656,36 @@ const Header = () => {
                                     )}
                                 </li>
                             ))}
+                            
+                            {/* Additional JOIN US and CONNECT options for mobile */}
+                            <li className="mt-4 pt-4 border-t border-gray-200">
+                                <button
+                                    onClick={() => {
+                                        setIsMobileMenuOpen(false);
+                                        handleDropdownToggle('join');
+                                    }}
+                                    className="w-full flex items-center justify-between py-3 px-4 text-base font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                                >
+                                    <span>JOIN US</span>
+                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </li>
+                            <li>
+                                <button
+                                    onClick={() => {
+                                        setIsMobileMenuOpen(false);
+                                        handleDropdownToggle('connect');
+                                    }}
+                                    className="w-full flex items-center justify-between py-3 px-4 text-base font-medium text-gray-700 hover:bg-gray-100 rounded-md"
+                                >
+                                    <span>CONNECT</span>
+                                    <svg className="w-5 h-5 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                                    </svg>
+                                </button>
+                            </li>
                         </ul>
                     </nav>
                 </div>
