@@ -1,6 +1,6 @@
 export default function ShippingPolicy() {
   return (
-    <div className="max-w-2xl mx-auto p-8">
+    <div className="px-8">
       <h1 className="text-3xl font-bold text-pink-700 mb-6">Shipping Policy (Vs-1.12)</h1>
       <h2 className="text-lg font-semibold mb-4">WOMEN, CHILD &amp; HUMAN RIGHTS TRUST (WCRT.IN)</h2>
       <p className="mb-4">At WCRT, we are committed to transparent and responsible practices in support of our mission for human, women’s, and children’s rights. All orders placed in support of our fundraising initiatives—including plants, fixtures, and paintings—are handled with care and efficiency.</p>

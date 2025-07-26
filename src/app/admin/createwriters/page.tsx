@@ -8,12 +8,17 @@ const categoryGroups = {
   "Publications": [
     "web-articles",
     "issue-briefs",
-    "anna-chandy-papers",
     "newsletters",
     "wcrt-journal",
-    "scholar-warrier",
+    "voice-for-her-and-child",
+    "international-journal-of-transnation-of-gender-equality",
+    "scholar-warrior",
     "books",
     "rajkumari-kaul-essay-competitions",
+    "interns-write-up-capsule",
+    "policies",
+    // Keep existing categories that don't show on homepage but exist in writer system
+    "anna-chandy-papers",
     "intern-articles",
     "external-publications"
   ],

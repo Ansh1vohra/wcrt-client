@@ -1,6 +1,6 @@
 export default function ReturnPolicy() {
   return (
-    <div className="max-w-2xl mx-auto p-8">
+    <div className="px-8">
       <h1 className="text-3xl font-bold text-pink-700 mb-6">Return Policy</h1>
       <h2 className="text-lg font-semibold mb-4">WOMEN, CHILD &amp; HUMAN RIGHTS TRUST (WCRT.IN)</h2>
       <p className="mb-4">At WCRT, every purchase of plants, posters, fixtures, or similar items through our platform is considered a contribution towards our mission and objectives. As a not-for-profit trust, we follow a transparent and responsible approach regarding returns and exchanges.</p>

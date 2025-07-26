@@ -35,7 +35,7 @@ export default function AdminDashboard() {
       <h1 className="text-3xl font-bold mb-6">Admin Dashboard of WCRT</h1>
       <p className="mb-8">Welcome! Use the cards below to manage the site.</p>
 
-      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 sm:grid-cols-4 gap-6">
         <div
           onClick={() => handleRedirect("/admin/writers")}
           className="bg-white shadow-md rounded-lg p-6 cursor-pointer hover:shadow-xl transition"
@@ -61,6 +61,15 @@ export default function AdminDashboard() {
           <Layout className="text-green-600 w-10 h-10 mb-4" />
           <h2 className="text-xl font-semibold mb-2">Website Content Management</h2>
           <p>Update static website content and configuration.</p>
+        </div>
+
+        <div
+          onClick={() => handleRedirect("/admin/comments")}
+          className="bg-white shadow-md rounded-lg p-6 cursor-pointer hover:shadow-xl transition"
+        >
+          <FileText className="text-yellow-600 w-10 h-10 mb-4" />
+          <h2 className="text-xl font-semibold mb-2">Comments Approval</h2>
+          <p>Review and approve user comments.</p>
         </div>
       </div>
     </div>

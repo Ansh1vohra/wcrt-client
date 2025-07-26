@@ -1,6 +1,6 @@
 export default function TermsAndConditions() {
   return (
-    <div className="max-w-2xl mx-auto p-8">
+    <div className="px-8">
       <h1 className="text-3xl font-bold text-pink-700 mb-6">Terms &amp; Conditions</h1>
       <h2 className="text-lg font-semibold mb-4">WOMEN, CHILD &amp; HUMAN RIGHTS TRUST (WCRT.IN)</h2>
       <p className="mb-2 text-sm text-gray-600">Effective Date: 01/07/2023 - V1.12</p>
