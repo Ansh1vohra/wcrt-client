@@ -788,7 +788,7 @@ export default function Home() {
                 )}
               </div>
               {/* WCRT Web Articles Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">WCRT Web Articles</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedWebArticles.map(renderCard)}
@@ -806,7 +806,7 @@ export default function Home() {
                 )}
               </div>
               {/* Rajkumari Kaul Essay Competitions Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Rajkumari Kaul Essay Competitions</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedEssays.map(renderCard)}
@@ -824,7 +824,7 @@ export default function Home() {
                 )}
               </div>
               {/* Susma Swaraj Journal Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Susma Swaraj Journal</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {susmaSwarajJournal.slice(0, 5).map(renderCard)}
@@ -842,7 +842,7 @@ export default function Home() {
                 )}
               </div>
               {/* Issue Briefs Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">
                   Issue Briefs
                 </h2>
@@ -868,7 +868,7 @@ export default function Home() {
                 )}
               </div>
               {/* WCRT Journal Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">WCRT Journal</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedWcrtJournal.map(renderCard)}
@@ -886,7 +886,7 @@ export default function Home() {
                 )}
               </div>
               {/* Comment Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Comment</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {comments.slice(0, 10).map(renderCard)}
@@ -904,7 +904,7 @@ export default function Home() {
                 )}
               </div>
               {/* Anna Chandy Magazine Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Anna Chandy Magazine</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {annaChangyMagazine.slice(0, 8).map(renderCard)}
@@ -922,7 +922,7 @@ export default function Home() {
                 )}
               </div>
               {/* Books Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Books</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedBooks.map(renderCard)}
@@ -940,7 +940,7 @@ export default function Home() {
                 )}
               </div>
               {/* Scholar Warrior Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Scholar Warrior</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedScholarWarrior.map(renderCard)}
@@ -958,7 +958,7 @@ export default function Home() {
                 )}
               </div>
               {/* Workshop and Webinars Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Workshop and Webinars</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {workshopWebinars.slice(0, 8).map(renderCard)}
@@ -986,7 +986,7 @@ export default function Home() {
               />
               {/* Add NewsLetters Section */}
               {/* NewsLetters Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">NewsLetters</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedNewsletters.map(renderCard)}

@@ -72,9 +72,9 @@ export default function WriterPage() {
                 throw new Error('Invalid file type. Only JPEG, PNG, and GIF are allowed.');
             }
 
-            const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+            const MAX_FILE_SIZE = 500 * 1024; // 500KB
             if (file.size > MAX_FILE_SIZE) {
-                throw new Error('File size exceeds 5MB limit');
+                throw new Error('File size exceeds 500KB limit');
             }
 
             const presignedUrlResponse = await axios.get(
@@ -128,6 +128,11 @@ export default function WriterPage() {
             }
             if (!imageFile) {
                 throw new Error('Please upload a post image');
+            }
+            if (authorImageFile && authorImageFile.size > 500 * 1024) {
+                setError('Author image size must be less than 500KB');
+                setIsSubmitting(false);
+                return;
             }
 
             let authorImageUrl = '';
@@ -300,6 +305,12 @@ export default function WriterPage() {
                                 accept="image/*"
                                 onChange={(e) => {
                                     const file = e.target.files?.[0] || null;
+                                    if (file && file.size > 500 * 1024) {
+                                        setError('Post image size must be less than 500KB');
+                                        setImageFile(null);
+                                        setImagePreviewUrl(null);
+                                        return;
+                                    }
                                     setImageFile(file);
                                     setImagePreviewUrl(file ? URL.createObjectURL(file) : null);
                                 }}
@@ -326,6 +337,12 @@ export default function WriterPage() {
                                 accept="image/*"
                                 onChange={(e) => {
                                     const file = e.target.files?.[0] || null;
+                                    if (file && file.size > 500 * 1024) {
+                                        setError('Author image size must be less than 500KB');
+                                        setAuthorImageFile(null);
+                                        setAuthorImagePreviewUrl(null);
+                                        return;
+                                    }
                                     setAuthorImageFile(file);
                                     setAuthorImagePreviewUrl(file ? URL.createObjectURL(file) : null);
                                 }}

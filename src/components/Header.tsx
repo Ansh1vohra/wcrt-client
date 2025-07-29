@@ -74,6 +74,9 @@ const Header = () => {
     const [caretLeft, setCaretLeft] = useState<number | null>(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const [isMobileView, setIsMobileView] = useState<boolean>(false);
+    const [resumeFile, setResumeFile] = useState<File | null>(null);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const [submitMessage, setSubmitMessage] = useState<string | null>(null);
 
     useEffect(() => {
         setIsClient(true);
@@ -108,7 +111,7 @@ const Header = () => {
 
     const [activeDropdownJoin, setActiveDropdownJoin] = useState<string | null>(null);
     const [activeDropdownConnect, setActiveDropdownConnect] = useState<string | null>(null);
-    const [selectedJoinOption, setSelectedJoinOption] = useState<'volunteer' | 'intern' | null>(null);
+    const [selectedJoinOption, setSelectedJoinOption] = useState<'volunteer' | 'intern'>('volunteer');
 
     const toggleDropdown = (dropdown: number) => {
         setActiveDropdown(activeDropdown === dropdown ? null : dropdown);
@@ -177,11 +180,11 @@ const Header = () => {
             if (activeDropdownJoin === dropdown) {
                 setActiveDropdownJoin(null);
                 setCaretLeft(null);
-                setSelectedJoinOption(null); // Reset selected option when dropdown closes
+                setSelectedJoinOption('volunteer'); // Reset selected option when dropdown closes
             } else {
                 setActiveDropdownJoin(dropdown);
                 setActiveDropdownConnect(null);
-                setSelectedJoinOption(null); // Reset selected option when dropdown opens
+                setSelectedJoinOption('volunteer'); // Reset selected option when dropdown opens
                 if (joinUsBtnRef.current && containerRef.current) {
                     setCaretLeft(joinUsBtnRef.current.offsetLeft + joinUsBtnRef.current.offsetWidth / 2);
                 }
@@ -203,7 +206,7 @@ const Header = () => {
     const handleBackdropClick = () => {
         setActiveDropdownJoin(null);
         setActiveDropdownConnect(null);
-        setSelectedJoinOption(null); // Reset selected option when backdrop is clicked
+        setSelectedJoinOption('volunteer'); // Reset selected option when backdrop is clicked
     };
 
     useEffect(() => {
@@ -216,6 +219,35 @@ const Header = () => {
             document.body.style.overflow = 'unset';
         };
     }, [activeDropdownJoin, activeDropdownConnect]);
+
+    const handleJoinFormSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
+        e.preventDefault();
+        setIsSubmitting(true);
+        setSubmitMessage(null);
+        const form = e.currentTarget;
+        const formData = new FormData(form);
+        formData.append('type', selectedJoinOption);
+        if (resumeFile) {
+            formData.append('resume', resumeFile);
+        }
+        try {
+            const res = await fetch('${process.env.NEXT_PUBLIC_BACKEND}/api/applicationFormSumbit', {
+                method: 'POST',
+                body: formData,
+            });
+            if (res.ok) {
+                setSubmitMessage('Application submitted successfully!');
+                form.reset();
+                setResumeFile(null);
+            } else {
+                setSubmitMessage('Failed to submit application. Please try again.');
+            }
+        } catch (err) {
+            setSubmitMessage('An error occurred. Please try again.');
+        } finally {
+            setIsSubmitting(false);
+        }
+    };
 
     return (
         <>
@@ -372,130 +404,132 @@ const Header = () => {
                                         <p className="text-base text-gray-700 mb-3 md:mb-4 leading-relaxed">
                                             Seeking creative collaborators to push us in exciting, new directions.
                                         </p>
-                                        {selectedJoinOption && (
-                                            <button 
-                                                onClick={() => setSelectedJoinOption(null)}
-                                                className="text-pink-600 hover:text-pink-800 font-medium flex items-center text-sm py-2"
-                                            >
-                                                <svg className="w-5 h-5 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M10 19l-7-7m0 0l7-7m-7 7h18" />
-                                                </svg>
-                                                Back to options
-                                            </button>
-                                        )}
+                                        
                                     </div>
-                                    <div className="w-full md:w-2/3 bg-gray-100 p-4 md:p-8 flex items-center justify-center overflow-y-auto">
-                                        {!selectedJoinOption ? (
-                                            <div className="flex flex-col md:flex-row gap-4 md:gap-8 w-full justify-center">
-                                                <div 
-                                                    onClick={() => setSelectedJoinOption('volunteer')}
-                                                    className="w-full md:w-64 h-48 md:h-64 bg-white rounded-lg shadow-lg p-4 md:p-6 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transform hover:-translate-y-1 transition-all"
-                                                >
-                                                    <div className="w-16 h-16 rounded-full bg-pink-100 flex items-center justify-center mb-2 md:mb-3">
-                                                        <svg className="w-8 h-8 text-pink-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 4a2 2 0 114 0v1a1 1 0 001 1h3a1 1 0 011 1v3a1 1 0 01-1 1h-1a2 2 0 100 4h1a1 1 0 011 1v3a1 1 0 01-1 1h-3a1 1 0 01-1-1v-1a2 2 0 10-4 0v1a1 1 0 01-1 1H7a1 1 0 01-1-1v-3a1 1 0 00-1-1H4a2 2 0 110-4h1a1 1 0 001-1V7a1 1 0 011-1h3a1 1 0 001-1V4z" />
-                                                        </svg>
+                                    <div className='w-full md:w-2/3 bg-gray-100 p-4 md:p-8  overflow-y-auto'>{/* Tab Bar */}
+                                        <div className="flex space-x-2 mt-4">
+                                            <button
+                                                className={`px-4 py-2 rounded-t-md font-semibold text-sm focus:outline-none transition-colors duration-200 ${selectedJoinOption === 'volunteer' ? 'bg-pink-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-pink-100'}`}
+                                                onClick={() => setSelectedJoinOption('volunteer')}
+                                                type="button"
+                                            >
+                                                Volunteer
+                                            </button>
+                                            <button
+                                                className={`px-4 py-2 rounded-t-md font-semibold text-sm focus:outline-none transition-colors duration-200 ${selectedJoinOption === 'intern' ? 'bg-pink-600 text-white' : 'bg-gray-200 text-gray-700 hover:bg-pink-100'}`}
+                                                onClick={() => setSelectedJoinOption('intern')}
+                                                type="button"
+                                            >
+                                                Intern
+                                            </button>
+                                        </div>
+                                    <div className="bg-gray-100 p-4 md:p-8 flex items-center justify-center overflow-y-auto">
+                                    
+                                        <div className="w-full h-full overflow-y-auto px-2 md:px-4">
+                                            <form className="max-w-xl w-full mx-auto" onSubmit={handleJoinFormSubmit} encType="multipart/form-data">
+                                                <h3 className="text-xl font-bold mb-3 md:mb-4 text-center">
+                                                    {selectedJoinOption === 'volunteer' ? 'Volunteer Application' : 'Internship Application'}
+                                                </h3>
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                                                    <div className="mb-2 md:mb-3">
+                                                        <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="name">
+                                                            Name
+                                                        </label>
+                                                        <input
+                                                            type="text"
+                                                            id="name"
+                                                            name="name"
+                                                            className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline"
+                                                            placeholder="Enter your name"
+                                                            required
+                                                        />
                                                     </div>
-                                                    <h3 className="text-lg font-bold text-center text-gray-800 mb-1 md:mb-2">Click To Volunteer</h3>
-                                                    <p className="text-center text-gray-600 text-sm">Join our volunteer team and make a difference</p>
-                                                </div>
-                                                
-                                                <div 
-                                                    onClick={() => setSelectedJoinOption('intern')}
-                                                    className="w-full md:w-64 h-48 md:h-64 bg-white rounded-lg shadow-lg p-4 md:p-6 flex flex-col items-center justify-center cursor-pointer hover:shadow-xl transform hover:-translate-y-1 transition-all"
-                                                >
-                                                    <div className="w-16 h-16 rounded-full bg-blue-100 flex items-center justify-center mb-2 md:mb-3">
-                                                        <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" />
-                                                        </svg>
+                                                    <div className="mb-2 md:mb-3">
+                                                        <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="email">
+                                                            Email
+                                                        </label>
+                                                        <input
+                                                            type="email"
+                                                            id="email"
+                                                            name="email"
+                                                            className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline"
+                                                            placeholder="Enter your email"
+                                                            required
+                                                        />
                                                     </div>
-                                                    <h3 className="text-lg font-bold text-center text-gray-800 mb-1 md:mb-2">Click To Intern</h3>
-                                                    <p className="text-center text-gray-600 text-sm">Gain experience with our internship program</p>
                                                 </div>
-                                            </div>
-                                        ) : (
-                                            <div className="w-full h-full overflow-y-auto px-2 md:px-4">
-                                                <form className="max-w-xl w-full mx-auto">
-                                                    <h3 className="text-xl font-bold mb-3 md:mb-4 text-center">
-                                                        {selectedJoinOption === 'volunteer' ? 'Volunteer Application' : 'Internship Application'}
-                                                    </h3>
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                                                <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+                                                    <div className="mb-2 md:mb-3">
+                                                        <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="phone">
+                                                            Phone
+                                                        </label>
+                                                        <input
+                                                            type="tel"
+                                                            id="phone"
+                                                            name="phone"
+                                                            className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline"
+                                                            placeholder="Enter your phone number"
+                                                            required
+                                                        />
+                                                    </div>
+                                                    {selectedJoinOption === 'intern' && (
                                                         <div className="mb-2 md:mb-3">
-                                                            <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="name">
-                                                                Name
+                                                            <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="university">
+                                                                University/College
                                                             </label>
                                                             <input
                                                                 type="text"
-                                                                id="name"
-                                                                name="name"
+                                                                id="university"
+                                                                name="university"
                                                                 className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline"
-                                                                placeholder="Enter your name"
+                                                                placeholder="Enter your university/college"
+                                                                required
                                                             />
                                                         </div>
-                                                        <div className="mb-2 md:mb-3">
-                                                            <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="email">
-                                                                Email
-                                                            </label>
-                                                            <input
-                                                                type="email"
-                                                                id="email"
-                                                                name="email"
-                                                                className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline"
-                                                                placeholder="Enter your email"
-                                                            />
-                                                        </div>
-                                                    </div>
-                                                    <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-                                                        <div className="mb-2 md:mb-3">
-                                                            <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="phone">
-                                                                Phone
-                                                            </label>
-                                                            <input
-                                                                type="tel"
-                                                                id="phone"
-                                                                name="phone"
-                                                                className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline"
-                                                                placeholder="Enter your phone number"
-                                                            />
-                                                        </div>
-                                                        {selectedJoinOption === 'intern' && (
-                                                            <div className="mb-2 md:mb-3">
-                                                                <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="university">
-                                                                    University/College
-                                                                </label>
-                                                                <input
-                                                                    type="text"
-                                                                    id="university"
-                                                                    name="university"
-                                                                    className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline"
-                                                                    placeholder="Enter your university/college"
-                                                                />
-                                                            </div>
-                                                        )}
-                                                    </div>
-                                                    <div className="mb-3">
-                                                        <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="message">
-                                                            {selectedJoinOption === 'volunteer' ? 'Why do you want to volunteer?' : 'Why do you want to intern with us?'}
-                                                        </label>
-                                                        <textarea
-                                                            id="message"
-                                                            name="message"
-                                                            className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline"
-                                                            placeholder="Write your message"
-                                                            rows={2}
-                                                        ></textarea>
-                                                    </div>
-                                                    <div className="text-center mt-4">
-                                                        <button
-                                                            type="submit"
-                                                            className="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 md:py-1.5 px-6 rounded-md focus:outline-none focus:shadow-outline text-sm"
-                                                        >
-                                                            Submit Application
-                                                        </button>
-                                                    </div>
-                                                </form>
-                                            </div>
-                                        )}
+                                                    )}
+                                                </div>
+                                                <div className="mb-3">
+                                                    <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="resume">
+                                                        Upload Resume
+                                                    </label>
+                                                    <input
+                                                        type="file"
+                                                        id="resume"
+                                                        name="resume"
+                                                        accept=".pdf,.doc,.docx"
+                                                        className="block w-full text-sm text-gray-700 border border-gray-300 rounded-lg cursor-pointer focus:outline-none"
+                                                        onChange={e => setResumeFile(e.target.files && e.target.files[0] ? e.target.files[0] : null)}
+                                                        required
+                                                    />
+                                                </div>
+                                                <div className="mb-3">
+                                                    <label className="block text-gray-700 text-sm font-bold mb-1" htmlFor="message">
+                                                        {selectedJoinOption === 'volunteer' ? 'Why do you want to volunteer?' : 'Why do you want to intern with us?'}
+                                                    </label>
+                                                    <textarea
+                                                        id="message"
+                                                        name="message"
+                                                        className="shadow appearance-none border rounded w-full py-2 md:py-1.5 px-3 text-gray-700 text-sm leading-tight focus:outline-none focus:shadow-outline"
+                                                        placeholder="Write your message"
+                                                        rows={2}
+                                                        required
+                                                    ></textarea>
+                                                </div>
+                                                <div className="text-center mt-4">
+                                                    <button
+                                                        type="submit"
+                                                        className="bg-pink-500 hover:bg-pink-700 text-white font-bold py-2 md:py-1.5 px-6 rounded-md focus:outline-none focus:shadow-outline text-sm disabled:opacity-60"
+                                                        disabled={isSubmitting}
+                                                    >
+                                                        {isSubmitting ? 'Submitting...' : 'Submit Application'}
+                                                    </button>
+                                                </div>
+                                                {submitMessage && (
+                                                    <div className={`mt-3 text-center text-sm ${submitMessage.includes('success') ? 'text-green-600' : 'text-red-600'}`}>{submitMessage}</div>
+                                                )}
+                                            </form>
+                                        </div>
+                                    </div>
                                     </div>
                                 </div>
                             </div>

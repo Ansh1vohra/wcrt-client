@@ -24,6 +24,7 @@ export default function EditPostPage() {
   const [imagePreview, setImagePreview] = useState<string>('');
 
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
     const fetchPost = async () => {
@@ -56,7 +57,7 @@ export default function EditPostPage() {
   const handleFileUpload = async (file: File): Promise<string> => {
     const validTypes = ['image/jpeg', 'image/png', 'image/gif'];
     if (!validTypes.includes(file.type)) throw new Error('Invalid file type');
-    if (file.size > 5 * 1024 * 1024) throw new Error('File too large');
+    if (file.size > 500 * 1024) throw new Error('File too large (max 500KB)');
 
     const token = localStorage.getItem('writer-token');
     const { data } = await axios.get(`${process.env.NEXT_PUBLIC_BACKEND}/api/posts/admin/s3/upload-url`, {
@@ -75,6 +76,16 @@ export default function EditPostPage() {
   const handleSubmit = async () => {
     setIsSubmitting(true);
     try {
+      if (imageFile && imageFile.size > 500 * 1024) {
+        setError('Post image size must be less than 500KB');
+        setIsSubmitting(false);
+        return;
+      }
+      if (authorImageFile && authorImageFile.size > 500 * 1024) {
+        setError('Author image size must be less than 500KB');
+        setIsSubmitting(false);
+        return;
+      }
       const token = localStorage.getItem('writer-token');
       if (!token) throw new Error('No token found');
   
@@ -129,6 +140,10 @@ export default function EditPostPage() {
       </button>
       <h1 className="text-2xl font-bold mb-4">Edit Post</h1>
 
+      {error && (
+        <div className="mb-4 p-4 bg-red-100 text-red-700 rounded-lg">{error}</div>
+      )}
+
       <div className="mb-4">
         <label className="block text-sm font-medium">Category</label>
         <select
@@ -161,8 +176,15 @@ export default function EditPostPage() {
           className='p-3 bg-blue-200 rounded-lg my-2'
           onChange={(e) => {
             const file = e.target.files?.[0] || null;
+            if (file && file.size > 500 * 1024) {
+              setError('Post image size must be less than 500KB');
+              setImageFile(null);
+              setImagePreview('');
+              return;
+            }
             setImageFile(file);
-            if (file) setImagePreview(URL.createObjectURL(file));
+            setImagePreview(file ? URL.createObjectURL(file) : '');
+            setError(null);
           }}
         />
         {imagePreview && (
@@ -197,8 +219,15 @@ export default function EditPostPage() {
           accept="image/*"
           onChange={(e) => {
             const file = e.target.files?.[0] || null;
+            if (file && file.size > 500 * 1024) {
+              setError('Author image size must be less than 500KB');
+              setAuthorImageFile(null);
+              setAuthorImagePreview('');
+              return;
+            }
             setAuthorImageFile(file);
-            if (file) setAuthorImagePreview(URL.createObjectURL(file));
+            setAuthorImagePreview(file ? URL.createObjectURL(file) : '');
+            setError(null);
           }}
         />
         {authorImagePreview && (

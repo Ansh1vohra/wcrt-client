@@ -55,13 +55,13 @@ export default function AboutPage() {
                 }
             `}</style>
             
-            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-12 lg:py-16">
+            <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8 sm:py-4 lg:py-4">
                 {/* Header Section */}
-                <div className="text-center mb-12 lg:mb-20 animate-fade-in">
-                    <h1 className="text-3xl sm:text-4xl lg:text-6xl font-bold mb-4 lg:mb-6 bg-pink-500 bg-clip-text text-transparent leading-tight">
+                <div className="text-left mb-12 lg:mb-10 animate-fade-in">
+                    <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold mb-4 lg:mb-6 bg-pink-500 bg-clip-text text-transparent leading-tight">
                         Empowering Voices. Protecting Rights. Building Futures.
                     </h1>
-                    <div className="max-w-4xl mx-auto text-base sm:text-lg text-gray-700 leading-relaxed space-y-4 lg:space-y-6">
+                    <div className="mx-auto text-base text-justify sm:text-lg text-gray-700 leading-relaxed space-y-4 lg:space-y-6">
                         <p className="animate-fade-in" style={{ animationDelay: "0.2s" }}>
                             The Women and Child Rights Trust (WCRT) is a future-focused think tank dedicated to the rights and empowerment of women and children across India. We blend law, policy, education, and digital activism to create real impact—especially for those who are vulnerable or unheard.
                         </p>
