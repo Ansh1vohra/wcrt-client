@@ -4,6 +4,12 @@ import Link from "next/link";
 export default function TopNavbar() {
     const [searchQuery, setSearchQuery] = useState<string>('');
     const [formattedDateTime, setFormattedDateTime] = useState<string>('');
+    const [filteredLinks, setFilteredLinks] = useState([
+        { href: '/advertise', label: 'ADVERTISE WITH US' },
+        { href: '/donate', label: 'SUPPORT US (DONATE)' },
+        { href: '/writeforus', label: 'WRITE FOR US' },
+        { href: '/shop', label: 'SHOP(FUND RAISER)' }
+    ]);
 
     useEffect(() => {
         const updateDateTime = () => {
@@ -31,27 +37,37 @@ export default function TopNavbar() {
         return () => clearInterval(interval); // Clean up
     }, []);
 
+    useEffect(() => {
+        const links = [
+            { href: '/advertise', label: 'ADVERTISE WITH US' },
+            { href: '/donate', label: 'SUPPORT US (DONATE)' },
+            { href: '/writeforus', label: 'WRITE FOR US' },
+            { href: '/shop', label: 'SHOP(FUND RAISER)' }
+        ];
+
+        if (searchQuery) {
+            setFilteredLinks(
+                links.filter(link => link.label.toLowerCase().includes(searchQuery.toLowerCase()))
+            );
+        } else {
+            setFilteredLinks(links);
+        }
+    }, [searchQuery]);
+
     return (
         <div className="bg-neutral-100">
             <div className="max-w-6xl mx-auto p-2 flex items-center justify-between hidden text-xs md:flex">
                 <div className="flex items-center md:max-w-6xl">
                     <span className="text-gray-600">{formattedDateTime}</span>
                     <span className="mx-3 text-gray-400">|</span>
-                    <Link href="/advertise" className="text-gray-600 hover:text-gray-900">
-                        ADVERTISE WITH US
-                    </Link>
-                    <span className="mx-3 text-gray-400">|</span>
-                    <Link href="/donate" className="text-gray-600 hover:text-gray-900">
-                        SUPPORT US (DONATE)
-                    </Link>
-                    <span className="mx-3 text-gray-400">|</span>
-                    <Link href="/writeforus" className="text-gray-600 hover:text-gray-900">
-                        WRITE FOR US
-                    </Link>
-                    <span className="mx-3 text-gray-400">|</span>
-                    <Link href="/shop" className="text-gray-600 hover:text-gray-900">
-                        SHOP(FUND RAISER)
-                    </Link>
+                    {filteredLinks.map(link => (
+                        <div key={link.href} className="flex items-center">
+                            <Link href={link.href} className="text-gray-600 hover:text-gray-900">
+                                {link.label}
+                            </Link>
+                            <span className="mx-3 text-gray-400">|</span>
+                        </div>
+                    ))}
                 </div>
                 <div className="relative">
                     <input

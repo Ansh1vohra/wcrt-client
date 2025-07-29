@@ -72,9 +72,9 @@ export default function WriterPage() {
                 throw new Error('Invalid file type. Only JPEG, PNG, and GIF are allowed.');
             }
 
-            const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+            const MAX_FILE_SIZE = 500 * 1024; // 500KB
             if (file.size > MAX_FILE_SIZE) {
-                throw new Error('File size exceeds 5MB limit');
+                throw new Error('File size exceeds 500KB limit');
             }
 
             const presignedUrlResponse = await axios.get(
@@ -128,6 +128,11 @@ export default function WriterPage() {
             }
             if (!imageFile) {
                 throw new Error('Please upload a post image');
+            }
+            if (authorImageFile && authorImageFile.size > 500 * 1024) {
+                setError('Author image size must be less than 500KB');
+                setIsSubmitting(false);
+                return;
             }
 
             let authorImageUrl = '';
@@ -300,6 +305,12 @@ export default function WriterPage() {
                                 accept="image/*"
                                 onChange={(e) => {
                                     const file = e.target.files?.[0] || null;
+                                    if (file && file.size > 500 * 1024) {
+                                        setError('Post image size must be less than 500KB');
+                                        setImageFile(null);
+                                        setImagePreviewUrl(null);
+                                        return;
+                                    }
                                     setImageFile(file);
                                     setImagePreviewUrl(file ? URL.createObjectURL(file) : null);
                                 }}
@@ -326,6 +337,12 @@ export default function WriterPage() {
                                 accept="image/*"
                                 onChange={(e) => {
                                     const file = e.target.files?.[0] || null;
+                                    if (file && file.size > 500 * 1024) {
+                                        setError('Author image size must be less than 500KB');
+                                        setAuthorImageFile(null);
+                                        setAuthorImagePreviewUrl(null);
+                                        return;
+                                    }
                                     setAuthorImageFile(file);
                                     setAuthorImagePreviewUrl(file ? URL.createObjectURL(file) : null);
                                 }}
@@ -348,66 +365,99 @@ export default function WriterPage() {
 
             {/* My Posts */}
             {activeTab === 'myPosts' && (
-                <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
-                    {posts.filter(post => post.writerName === writerName).map((post) => (
-                        <div
-                            key={post.postId}
-                            className="bg-gray-50 rounded-lg overflow-hidden shadow-md cursor-pointer hover:shadow-lg transition"
-                            onClick={() => {
-                                setSelectedPost(post);
-                                setShowModal(true);
-                            }}
-                        >
-                            <img
-                                src={post.imageUrl}
-                                alt={post.title}
-                                className="w-full h-48 object-cover"
-                            />
-                            <div className="p-4">
-                                <h3 className="text-lg font-semibold truncate">{post.title}</h3>
-                                <p className="text-sm text-gray-500 mt-1">{post.category}</p>
-                                <p className="text-sm text-gray-400">Status: {post.post_status}</p>
-                                <div className="mt-2 line-clamp-3 text-sm text-gray-700">
-                                    <SafeHTML html={post.content} className="article-content" />
+                <div>
+                    {/* Posts needing edits */}
+                    <h2 className="text-xl font-semibold mt-6 mb-2">Posts Needing Edits</h2>
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-4">
+                        {posts
+                            .filter(post => post.writerName === writerName && post.post_status === 'edit')
+                            .map(post => (
+                                <div key={post.postId} className="bg-yellow-50 border border-yellow-300 rounded-lg p-4 shadow-md">
+                                    <h3 className="text-lg font-semibold text-yellow-800">{post.title}</h3>
+                                    <p className="text-sm text-yellow-700">Status: {post.post_status}</p>
+                                    <button
+                                        onClick={() => {
+                                            setSelectedPost(post);
+                                            setShowModal(true);
+                                        }}
+                                        className="mt-2 text-blue-600 underline hover:text-blue-800"
+                                    >
+                                        Preview
+                                    </button>
+                                    <button
+                                        onClick={() => router.push(`/writer/edit/${post.postId}`)}
+                                        className="mt-2 ml-4 py-1 px-3 bg-blue-500 text-white rounded hover:bg-blue-600"
+                                    >
+                                        Edit
+                                    </button>
                                 </div>
-                            </div>
-                        </div>
-                    ))}
-                    {showModal && selectedPost && (
-                        <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
-                            <div className="bg-white rounded-lg max-w-2xl w-full overflow-y-auto max-h-[90vh] p-6 relative">
-                                <button
-                                    onClick={() => setShowModal(false)}
-                                    className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
-                                >
-                                    ✕
-                                </button>
+                            ))}
+                    </div>
 
+                    <h2 className="text-xl font-semibold mt-6 mb-2">All Posts</h2>
+
+                    <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4">
+
+                        {posts.filter(post => post.writerName === writerName).map((post) => (
+                            <div
+                                key={post.postId}
+                                className="bg-gray-50 rounded-lg overflow-hidden shadow-md cursor-pointer hover:shadow-lg transition"
+                                onClick={() => {
+                                    setSelectedPost(post);
+                                    setShowModal(true);
+                                }}
+                            >
                                 <img
-                                    src={selectedPost.imageUrl}
-                                    alt={selectedPost.title}
-                                    className="w-full h-64 object-cover rounded mb-4"
+                                    src={post.imageUrl}
+                                    alt={post.title}
+                                    className="w-full h-48 object-cover"
                                 />
-                                <h2 className="text-2xl font-bold mb-2">{selectedPost.title}</h2>
-                                <p className="text-sm text-gray-600 mb-1">By: {selectedPost.writerName}</p>
-                                <p className="text-sm text-gray-500 mb-4">Category: {selectedPost.category} | Views: {selectedPost.viewCount}</p>
-
-                                {selectedPost.authorImage && (
-                                    <div className="flex items-center mb-4">
-                                        <img src={selectedPost.authorImage} alt="Author" className="w-10 h-10 rounded-full mr-2" />
-                                        <span className="text-sm text-gray-700">{selectedPost.authorName}</span>
+                                <div className="p-4">
+                                    <h3 className="text-lg font-semibold truncate">{post.title}</h3>
+                                    <p className="text-sm text-gray-500 mt-1">{post.category}</p>
+                                    <p className="text-sm text-gray-400">Status: {post.post_status}</p>
+                                    <div className="mt-2 line-clamp-3 text-sm text-gray-700">
+                                        <SafeHTML html={post.content} className="article-content" />
                                     </div>
-                                )}
-
-                                <div className="text-gray-800">
-                                    <SafeHTML html={selectedPost.content} className="article-content" />
                                 </div>
                             </div>
-                        </div>
-                    )}
+                        ))}
+                        {showModal && selectedPost && (
+                            <div className="fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center">
+                                <div className="bg-white rounded-lg max-w-2xl w-full overflow-y-auto max-h-[90vh] p-6 relative">
+                                    <button
+                                        onClick={() => setShowModal(false)}
+                                        className="absolute top-3 right-3 text-gray-500 hover:text-red-500"
+                                    >
+                                        ✕
+                                    </button>
+
+                                    <img
+                                        src={selectedPost.imageUrl}
+                                        alt={selectedPost.title}
+                                        className="w-full h-64 object-cover rounded mb-4"
+                                    />
+                                    <h2 className="text-2xl font-bold mb-2">{selectedPost.title}</h2>
+                                    <p className="text-sm text-gray-600 mb-1">By: {selectedPost.writerName}</p>
+                                    <p className="text-sm text-gray-500 mb-4">Category: {selectedPost.category} | Views: {selectedPost.viewCount}</p>
+
+                                    {selectedPost.authorImage && (
+                                        <div className="flex items-center mb-4">
+                                            <img src={selectedPost.authorImage} alt="Author" className="w-10 h-10 rounded-full mr-2" />
+                                            <span className="text-sm text-gray-700">{selectedPost.authorName}</span>
+                                        </div>
+                                    )}
+
+                                    <div className="text-gray-800">
+                                        <SafeHTML html={selectedPost.content} className="article-content" />
+                                    </div>
+                                </div>
+                            </div>
+                        )}
+
+                    </div>
 
                 </div>
-
             )}
         </div>
 

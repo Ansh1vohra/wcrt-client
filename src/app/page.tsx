@@ -67,6 +67,7 @@ export default function Home() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const sliderRef = useRef<any>(null);
+  const leftColumnRef = useRef<HTMLDivElement>(null);
   const articlesPerPage = 4;
   const recentPerPage = 3; // Show exactly 3 per click (cumulative)
 
@@ -74,12 +75,43 @@ export default function Home() {
   useEffect(() => {
     const fetchArticles = async () => {
       try {
+        setLoading(true);
         const response = await fetch(API_URL);
+        
         if (!response.ok) {
-          throw new Error('Failed to fetch articles');
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+        
+        const contentType = response.headers.get('content-type');
+        if (!contentType || !contentType.includes('application/json')) {
+          throw new Error('Expected JSON response');
+        }
+        
         const data = await response.json();
-        setArticles(data.posts || []);
+        
+        // Ensure we have posts array and filter approved posts
+        const approvedPosts = data.posts?.filter(
+          (post: Article) => post.post_status === 'approved' || !post.post_status
+        ) || [];
+        
+        console.log('Successfully fetched articles:', approvedPosts.length);
+        console.log('Sample article:', approvedPosts[0]);
+        
+        // Debug: Log all unique categories
+        const allCategories = [...new Set(approvedPosts.map((post: Article) => post.category))];
+        console.log('All unique categories found:', allCategories);
+        
+        // Debug: Find potential issue briefs with different spellings
+        const potentialIssueBriefs = approvedPosts.filter((post: Article) => 
+          post.category?.toLowerCase().includes('issue') || 
+          post.category?.toLowerCase().includes('brief')
+        );
+        console.log('Potential issue briefs:', potentialIssueBriefs.map((p: Article) => ({ 
+          title: p.title, 
+          category: p.category 
+        })));
+        
+        setArticles(approvedPosts);
       } catch (error) {
         setError(error instanceof Error ? error.message : 'Failed to fetch articles');
         console.error('Error fetching articles:', error);
@@ -104,7 +136,7 @@ export default function Home() {
   };
 
   // Ensure dates are formatted consistently for sorting
-  const sortedArticles = [...allArticles].sort((a, b) => {
+  const sortedArticles = [...articles].sort((a, b) => {
     return new Date(b.uploadDate).getTime() - new Date(a.uploadDate).getTime();
   });
 
@@ -122,8 +154,21 @@ export default function Home() {
     .sort((a, b) => (b.viewCount || 0) - (a.viewCount || 0))
     .slice(0, 4);
 
-  // Get issue briefs articles
-  const issueBriefs = sortedArticles.filter(article => article.category?.toLowerCase() === 'issue briefs');
+  // Get issue briefs articles - try multiple potential category names
+  const issueBriefs = sortedArticles.filter(article => {
+    const category = article.category?.toLowerCase() || '';
+    return category === 'issue briefs' || 
+           category === 'issue-briefs' || 
+           category === 'issuebriefs' ||
+           category === 'issue brief' ||
+           category === 'brief';
+  });
+  
+  // Debug: Log issue briefs filtering
+  console.log('Total articles:', sortedArticles.length);
+  console.log('All categories:', [...new Set(sortedArticles.map(a => a.category?.toLowerCase()))]);
+  console.log('Filtered issue briefs:', issueBriefs.length);
+  console.log('Issue briefs articles:', issueBriefs.slice(0, 3));
 
   // Get web articles
   const webArticles = sortedArticles.filter(article => article.category?.toLowerCase() === 'web-articles');
@@ -271,20 +316,31 @@ export default function Home() {
   }, []);
 
   useEffect(() => {
-    // Validate all images
+    // Validate all images when articles are loaded
     const validateAllImages = async () => {
-      const imagePromises = allArticles.map(async (article) => {
-        const validImage = await validateImage(article.imageUrl || '');
-        return [article.imageUrl, validImage];
-      });
+      if (articles.length === 0) return;
+      
+      try {
+        const imagePromises = articles.map(async (article) => {
+          const validImage = await validateImage(article.imageUrl || '');
+          return [article.imageUrl, validImage];
+        });
 
-      const validatedPairs = await Promise.all(imagePromises);
-      const validatedMap = Object.fromEntries(validatedPairs);
-      setValidatedImages(validatedMap);
+        const validatedPairs = await Promise.all(imagePromises);
+        const validatedMap = Object.fromEntries(validatedPairs);
+        setValidatedImages(validatedMap);
+      } catch (error) {
+        console.error('Error validating images:', error);
+      }
     };
 
-    validateAllImages();
-  }, [allArticles]);
+    if (articles.length > 0) {
+      validateAllImages();
+    }
+  }, [articles]);
+
+  // We're now using the StickySidebar component for sidebar behavior
+  // No custom scroll behavior is needed
 
   // Pagination logic for Latest Post
   const postsPerPage = 2;
@@ -406,50 +462,57 @@ export default function Home() {
           <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-pink-600"></div>
         </div>
       ) : error ? (
-        <div className="flex justify-center items-center min-h-screen text-red-600">
-          <p>Error loading articles: {error}</p>
+        <div className="flex flex-col justify-center items-center min-h-screen text-red-600">
+          <p className="text-lg mb-4">Error loading articles: {error}</p>
+          <button 
+            onClick={() => window.location.reload()} 
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700 transition-colors"
+          >
+            Retry
+          </button>
         </div>
       ) : (
         <>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 mt-[30px] min-h-screen">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 lg:gap-8 mt-3 sm:mt-[30px] min-h-screen">
             {/* Left Column: Newsflash and Content */}
-            <div className="lg:col-span-2 space-y-6 lg:space-y-8">              {/* Newsflash Banner matching design */}
+            <div ref={leftColumnRef} className="lg:col-span-2 space-y-4 sm:space-y-6 lg:space-y-8">              {/* Newsflash Banner matching design */}
               <div className="flex items-center h-12 overflow-hidden rounded-none border border-gray-300">
-                <div className="flex items-center bg-red-600 text-white px-4 space-x-2 h-full">
-                  <FaBullhorn className="text-2xl" />
-                  <span className="text-xs font-bold uppercase">NEWSFLASH</span>
-                </div>                <div className="flex items-center flex-1 bg-white px-3 h-full min-w-0">
+                <div className="flex items-center bg-red-600 text-white px-2 sm:px-4 space-x-1 sm:space-x-2 h-full">
+                  <FaBullhorn className="text-lg sm:text-2xl" />
+                  <span className="text-xs font-bold uppercase hidden sm:inline">NEWSFLASH</span>
+                </div>                
+                <div className="flex items-center flex-1 bg-white px-2 sm:px-3 h-full min-w-0">
                   {/* Post Image */}
                   {newsArticle && (
-                    <div className="relative w-12 h-10 flex-shrink-0 mr-4 overflow-hidden rounded">
+                    <div className="relative w-8 h-8 sm:w-12 sm:h-10 flex-shrink-0 mr-2 sm:mr-4 overflow-hidden rounded">
                       <Image 
                         src={validatedImages[newsArticle.imageUrl || ''] || defaultImage}
                         alt={newsArticle.title}
                         fill
                         className="object-cover"
-                        sizes="48px"
+                        sizes="(max-width: 640px) 32px, 48px"
                       />
                     </div>
                   )}
                   {/* News Text */}
-                  <p className="flex-1 text-black text-sm font-bold truncate min-w-0 mr-4">{newsLabel}</p>
+                  <p className="flex-1 text-black text-xs sm:text-sm font-bold truncate min-w-0 mr-2 sm:mr-4">{newsLabel}</p>
                   {/* Navigation Buttons - Fixed Width Container */}
-                  <div className="flex space-x-2 flex-shrink-0">
+                  <div className="flex space-x-1 sm:space-x-2 flex-shrink-0">
                     <button 
                       onClick={() => setNewsIndex(prev => (prev - 1 + sortedArticles.length) % sortedArticles.length)} 
                       aria-label="Previous news" 
-                      className="text-gray-500 hover:text-gray-700 p-1 w-7 h-7 flex items-center justify-center"
+                      className="text-gray-500 hover:text-gray-700 p-1 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M15.75 19.5L8.25 12l7.5-7.5" />
                       </svg>
                     </button>
                     <button 
                       onClick={() => setNewsIndex(prev => (prev + 1) % sortedArticles.length)} 
                       aria-label="Next news" 
-                      className="text-gray-500 hover:text-gray-700 p-1 w-7 h-7 flex items-center justify-center"
+                      className="text-gray-500 hover:text-gray-700 p-1 w-6 h-6 sm:w-7 sm:h-7 flex items-center justify-center"
                     >
-                      <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
+                      <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 sm:w-4 sm:h-4" fill="none" viewBox="0 0 24 24" strokeWidth={2} stroke="currentColor">
                         <path strokeLinecap="round" strokeLinejoin="round" d="M8.25 4.5l7.5 7.5-7.5 7.5" />
                       </svg>
                     </button>
@@ -457,7 +520,7 @@ export default function Home() {
                 </div>
               </div>{/* Main Article Section */}
               <div>
-                <div className="w-[750px] mx-auto relative overflow-hidden rounded-none">
+                <div className="w-full md:w-[750px] mx-auto relative overflow-hidden rounded-none">
                   <Slider ref={sliderRef} {...sliderSettings}>
                     {featuredArticles.map((article, index) => (
                       <Link key={article.postId} href={`/post/${article.postId}`}>
@@ -475,14 +538,14 @@ export default function Home() {
                             }}
                           />
                           <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/50 to-transparent opacity-60 transition-opacity duration-300 group-hover:opacity-80" />
-                          <div className="absolute bottom-0 left-0 right-0 p-6 group-hover:translate-y-[-5px] transition-transform duration-300">
-                            <div className="inline-block bg-red-600 text-white text-xs uppercase px-2 py-1 mb-2">
+                          <div className="absolute bottom-0 left-0 right-0 p-3 sm:p-6 group-hover:translate-y-[-5px] transition-transform duration-300">
+                            <div className="inline-block bg-red-600 text-white text-xs uppercase px-2 py-1 mb-1 sm:mb-2">
                               {article.category?.toUpperCase() || 'POST'}
                             </div>
-                            <h2 className="text-white text-[34px] font-bold">
+                            <h2 className="text-white text-xl sm:text-[34px] font-bold line-clamp-2 sm:line-clamp-none">
                               {article.title}
                             </h2>
-                            <p className="text-gray-200 text-[11px] mt-2 uppercase font-bold">
+                            <p className="text-gray-200 text-[10px] sm:text-[11px] mt-1 sm:mt-2 uppercase font-bold">
                               BY {article.authorName} | {new Date(article.uploadDate).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' }).toUpperCase()}
                             </p>
                           </div>
@@ -504,8 +567,8 @@ export default function Home() {
                     </button>
                   </div>
                 </div>
-                {/* Thumbnails */}
-                <div className="grid grid-cols-7 justify-items-center mt-4 gap-2 w-[750px] mx-auto">
+                {/* Thumbnails - hidden on mobile */}
+                <div className="hidden md:grid grid-cols-7 justify-items-center mt-4 gap-2 md:w-[750px] mx-auto">
                   {featuredArticles.map((article, index) => (
                     <button
                       key={article.postId} onClick={() => sliderRef.current?.slickGoTo(index)}
@@ -518,28 +581,41 @@ export default function Home() {
                     </button>
                   ))}
                 </div>
+                {/* Mobile dot indicators */}
+                <div className="flex md:hidden justify-center mt-3 gap-1">
+                  {featuredArticles.map((article, index) => (
+                    <button
+                      key={article.postId} onClick={() => sliderRef.current?.slickGoTo(index)}
+                      className={`w-2 h-2 rounded-full ${index === currentImageIndex ? 'bg-pink-600' : 'bg-gray-300'}`}
+                      aria-label={`Go to slide ${index + 1}`}
+                    />
+                  ))}
+                </div>
               </div>
 
               {/* Recent Articles Section */}
-              <div id="recent-articles" className="w-[750px] mx-auto mb-4 transform transition-all duration-300">
+              <div id="recent-articles" className="w-full md:w-[750px] mx-auto mb-4 transform transition-all duration-300 px-3 md:px-0">
                 <div className="flex items-center justify-between mb-4">
                   <h2 className="text-xl lg:text-2xl font-bold text-pink-600 inline-block border-b-2 border-pink-600 pb-2">Recent Articles</h2>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">                  {recentArticles.map((article: Article) => (                    <Link
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 justify-items-center md:justify-items-start">                  
+                  {recentArticles.map((article: Article) => (                    
+                    <Link
                       key={article.postId}
                       href={`/post/${article.postId}`}
-                      className="group inline-block w-[230px] bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-300"
+                      className="group inline-block w-full sm:w-[230px] bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-300"
                     >
-                      <div className="relative w-[230px] h-[164px] overflow-hidden">
+                      <div className="relative w-full sm:w-[230px] h-[164px] overflow-hidden">
                         <Image
                           src={validatedImages[article.imageUrl || ''] || defaultImage}
                           alt={article.title}
                           fill
                           className="object-cover"
-                          sizes="230px"
+                          sizes="(max-width: 640px) 100vw, 230px"
                         />
                         <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1 truncate max-w-[70px]">{article.category?.toUpperCase() || 'POST'}</span>
-                      </div>                      <div className="px-3 py-4">
+                      </div>                      
+                      <div className="px-3 py-4">
                         <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200">
                           {article.title}
                         </h3>
@@ -565,15 +641,15 @@ export default function Home() {
               </div>
 
               {/* Latest Section: Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4 transform transition-all duration-300">
+              <div className="w-full md:w-[750px] mx-auto mb-4 transform transition-all duration-300 px-3 md:px-0">
                 <div className="flex items-center mb-4">
                   <h2 className="text-xl lg:text-2xl font-bold text-pink-600 inline-block border-b-2 border-pink-600 pb-2">Latest</h2>
                 </div>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 justify-items-center md:justify-items-start">
                   {paginatedLatest.map(article => (
-                    <Link key={article.postId} href={`/post/${article.postId}`} className="group inline-block w-[230px] bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-300">
-                      <div className="relative w-[230px] h-[164px] overflow-hidden">
-                        <Image src={validatedImages[article.imageUrl || ''] || defaultImage} alt={article.title} fill className="object-cover" sizes="230px" />
+                    <Link key={article.postId} href={`/post/${article.postId}`} className="group inline-block w-full sm:w-[230px] bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-300">
+                      <div className="relative w-full sm:w-[230px] h-[164px] overflow-hidden">
+                        <Image src={validatedImages[article.imageUrl || ''] || defaultImage} alt={article.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 230px" />
                         <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1 truncate max-w-[70px]">{article.category?.toUpperCase() || 'POST'}</span>
                       </div>
                       <div className="px-3 py-4">
@@ -603,10 +679,26 @@ export default function Home() {
 
               {/* Recent Event Section */}
               {/* Recent Event Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full md:w-[750px] mx-auto mb-4 px-3 md:px-0">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">Recent Event</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
-                  {recentEvents.slice(0, 3).map(renderCard)}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 justify-items-center md:justify-items-start">
+                  {recentEvents.slice(0, 3).map((article) => (
+                    <Link key={article.postId} href={`/post/${article.postId}`} className="group inline-block w-full sm:w-[230px] bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-300">
+                      <div className="relative w-full sm:w-[230px] h-[164px] overflow-hidden">
+                        <Image src={validatedImages[article.imageUrl || ''] || defaultImage} alt={article.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 230px" />
+                        <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1 truncate max-w-[70px]">{article.category?.toUpperCase() || 'POST'}</span>
+                      </div>
+                      <div className="px-3 py-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200">{article.title}</h3>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3M16 7V3M4 11h16M5 19h14a2 2 0 002-2V11a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                          </svg>
+                          <span>{formatDate(article.uploadDate)}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
                 {/* Add Load More if more than 3 */}
                 {recentEvents.length > 3 && (
@@ -622,10 +714,32 @@ export default function Home() {
                 )}
               </div>
               {/* Summer Internship Capsule Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full md:w-[750px] mx-auto mb-4 px-3 md:px-0">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">Summer Internship Capsule</h2>
-                <div className="grid grid-cols-1 gap-6">
-                  {internshipCapsule.slice(0, 6).map(renderDetailsOnly)}
+                <div className="grid grid-cols-1 gap-4 md:gap-6">
+                  {internshipCapsule.slice(0, 6).map((article) => (
+                    <Link key={article.postId} href={`/post/${article.postId}`} className="group block w-full bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 border border-gray-300 p-3 md:p-4 col-span-full">
+                      <div className="mb-2">
+                        <span className="bg-red-600 text-white text-xs font-bold uppercase px-2 py-1 truncate max-w-[70px]">{article.category?.toUpperCase() || 'POST'}</span>
+                      </div>
+                      <h3 className="text-base md:text-lg font-semibold text-gray-900 mb-2 md:mb-3 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200">{article.title}</h3>
+                      <div className="flex items-center text-xs md:text-sm text-gray-500 mb-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" className="w-3 h-3 md:w-4 md:h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3M16 7V3M4 11h16M5 19h14a2 2 0 002-2V11a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z"/>
+                        </svg>
+                        <span>{formatDate(article.uploadDate)}</span>
+                        {article.authorName && (
+                          <>
+                            <span className="mx-2">•</span>
+                            <span>By {article.authorName}</span>
+                          </>
+                        )}
+                      </div>
+                      <div className="text-xs md:text-sm text-gray-600 line-clamp-2 md:line-clamp-3">
+                        <SafeHTML html={article.content} className="article-content" />
+                      </div>
+                    </Link>
+                  ))}
                 </div>
                 {internshipCapsule.length > 6 && (
                   <div className="flex justify-center mt-4">
@@ -640,10 +754,26 @@ export default function Home() {
                 )}
               </div>
               {/* YouTube Podcast Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full md:w-[750px] mx-auto mb-4 px-3 md:px-0">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">YouTube Podcast</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
-                  {youtubePodcast.slice(0, 4).map(renderCard)}
+                <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 md:gap-6 justify-items-center md:justify-items-start">
+                  {youtubePodcast.slice(0, 4).map((article) => (
+                    <Link key={article.postId} href={`/post/${article.postId}`} className="group inline-block w-full sm:w-[230px] bg-white rounded-none overflow-hidden shadow-md hover:shadow-xl transition-all duration-300 transform hover:-translate-y-1 border border-gray-300">
+                      <div className="relative w-full sm:w-[230px] h-[164px] overflow-hidden">
+                        <Image src={validatedImages[article.imageUrl || ''] || defaultImage} alt={article.title} fill className="object-cover" sizes="(max-width: 640px) 100vw, 230px" />
+                        <span className="absolute bottom-2 left-2 bg-red-600 text-white text-xs font-bold uppercase px-2 py-1 truncate max-w-[70px]">{article.category?.toUpperCase() || 'POST'}</span>
+                      </div>
+                      <div className="px-3 py-4">
+                        <h3 className="text-lg font-semibold text-gray-900 mb-3 line-clamp-2 group-hover:text-pink-600 transition-colors duration-200">{article.title}</h3>
+                        <div className="flex items-center text-sm text-gray-500">
+                          <svg xmlns="http://www.w3.org/2000/svg" className="w-4 h-4 mr-1" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3M16 7V3M4 11h16M5 19h14a2 2 0 002-2V11a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2z" />
+                          </svg>
+                          <span>{formatDate(article.uploadDate)}</span>
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
                 {youtubePodcast.length > 4 && (
                   <div className="flex justify-center mt-4">
@@ -658,7 +788,7 @@ export default function Home() {
                 )}
               </div>
               {/* WCRT Web Articles Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">WCRT Web Articles</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedWebArticles.map(renderCard)}
@@ -676,7 +806,7 @@ export default function Home() {
                 )}
               </div>
               {/* Rajkumari Kaul Essay Competitions Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Rajkumari Kaul Essay Competitions</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedEssays.map(renderCard)}
@@ -694,7 +824,7 @@ export default function Home() {
                 )}
               </div>
               {/* Susma Swaraj Journal Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Susma Swaraj Journal</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {susmaSwarajJournal.slice(0, 5).map(renderCard)}
@@ -712,25 +842,33 @@ export default function Home() {
                 )}
               </div>
               {/* Issue Briefs Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
-                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Issue Briefs</h2>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
-                  {paginatedIssueBriefs.map(renderCard)}
-                </div>
-                {canLoadMoreIssue && (
+              <div className="w-full max-w-[750px] mx-auto mb-4">
+                <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">
+                  Issue Briefs
+                </h2>
+                {issueBriefs.length === 0 ? (
+                  <div className="text-center py-8 text-gray-500">
+                    <p>No Issue Briefs articles found</p>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
+                    {issueBriefs.slice(0, 3).map(renderCard)}
+                  </div>
+                )}
+                {issueBriefs.length > 3 && (
                   <div className="flex justify-center mt-4">
                     <button
-                      onClick={() => setIssueVisibleCount((prev) => Math.min(prev + issuePerPage, issueBriefs.length))}
-                      className="px-6 py-2 uppercase font-medium text-sm border border-pink-600 text-pink-600 rounded-none hover:bg-pink-600 hover:text-white transition-colors duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-                      disabled={!canLoadMoreIssue}
+                      onClick={() => {}}
+                      disabled={true}
+                      className="px-6 py-2 uppercase font-medium text-sm border border-pink-600 text-pink-600 rounded-none opacity-50 cursor-not-allowed"
                     >
-                      Load More
+                      Load More (Demo Only)
                     </button>
                   </div>
                 )}
               </div>
               {/* WCRT Journal Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">WCRT Journal</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedWcrtJournal.map(renderCard)}
@@ -748,7 +886,7 @@ export default function Home() {
                 )}
               </div>
               {/* Comment Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Comment</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {comments.slice(0, 10).map(renderCard)}
@@ -766,7 +904,7 @@ export default function Home() {
                 )}
               </div>
               {/* Anna Chandy Magazine Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Anna Chandy Magazine</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {annaChangyMagazine.slice(0, 8).map(renderCard)}
@@ -784,7 +922,7 @@ export default function Home() {
                 )}
               </div>
               {/* Books Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Books</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedBooks.map(renderCard)}
@@ -802,7 +940,7 @@ export default function Home() {
                 )}
               </div>
               {/* Scholar Warrior Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Scholar Warrior</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedScholarWarrior.map(renderCard)}
@@ -820,7 +958,7 @@ export default function Home() {
                 )}
               </div>
               {/* Workshop and Webinars Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 custom-underline">Workshop and Webinars</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {workshopWebinars.slice(0, 8).map(renderCard)}
@@ -848,7 +986,7 @@ export default function Home() {
               />
               {/* Add NewsLetters Section */}
               {/* NewsLetters Section - Cumulative Load More */}
-              <div className="w-[750px] mx-auto mb-4">
+              <div className="w-full max-w-[750px] mx-auto mb-4">
                 <h2 className="text-xl lg:text-2xl font-bold text-pink-600 border-b-2 border-pink-600 pb-2 mb-4">NewsLetters</h2>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 justify-items-start">
                   {paginatedNewsletters.map(renderCard)}
@@ -865,13 +1003,14 @@ export default function Home() {
                   </div>
                 )}
               </div>
-              <div className="w-[750px] mx-auto mb-8 pr-0 lg:pr-8">
+              <div className="w-full md:w-[750px] mx-auto mb-8 pr-0 lg:pr-8 px-3 md:px-0">
                 <div className="flex justify-between items-center mb-4">
                   <h2 className="text-xl lg:text-2xl font-bold text-pink-600 inline-block border-b-2 border-pink-600 pb-2">Latest Post</h2>
                 </div>
-                <div className="flex flex-col gap-6">                  {paginatedLatestPosts.map((article) => (
-                    <div key={article.postId} className="flex flex-row gap-4 bg-white rounded-none shadow-md overflow-hidden border border-gray-300">
-                      <div className="relative w-[360px] h-[258px] flex-shrink-0 overflow-hidden">
+                <div className="flex flex-col gap-4 md:gap-6">                  
+                  {paginatedLatestPosts.map((article) => (
+                    <div key={article.postId} className="flex flex-col sm:flex-row gap-4 bg-white rounded-none shadow-md overflow-hidden border border-gray-300">
+                      <div className="relative w-full sm:w-[360px] h-[200px] sm:h-[258px] flex-shrink-0 overflow-hidden">
                         <Image
                           src={validatedImages[article.imageUrl || ''] || defaultImage}
                           alt={article.title}
@@ -884,9 +1023,10 @@ export default function Home() {
                       </div>
                       <div className="flex-1 flex flex-col justify-between p-3">
                         <div>
-                          <h3 className="text-[22px] font-bold text-gray-800 leading-[30px] mb-2 group-hover:text-pink-600 transition-colors line-clamp-2">
+                          <h3 className="text-lg sm:text-[22px] font-bold text-gray-800 leading-tight sm:leading-[30px] mb-2 group-hover:text-pink-600 transition-colors line-clamp-2">
                             {article.title}
-                          </h3>                           <div className="flex items-center text-xs text-gray-500 gap-2 mb-2">
+                          </h3>                          
+                          <div className="flex flex-wrap items-center text-xs text-gray-500 gap-1 sm:gap-2 mb-2">
                              {article.authorName && (
                                <span className="text-pink-600 font-semibold">BY {article.authorName.toUpperCase()}</span>
                              )}
@@ -895,7 +1035,7 @@ export default function Home() {
                            </div>
                           <SafeHTML 
                             html={article.content} 
-                            className="text-[14px] text-gray-600 line-clamp-2 mb-2"
+                            className="text-xs sm:text-[14px] text-gray-600 line-clamp-2 mb-2"
                           />
                         </div>
                         <div>
@@ -908,11 +1048,11 @@ export default function Home() {
                   ))}
                 </div>
                 {/* Pagination numbers at the bottom */}
-                <div className="flex justify-center items-center gap-2 mt-4">
+                <div className="flex justify-center items-center gap-1 sm:gap-2 mt-4">
                   <button
                     onClick={() => setCurrentPage(prev => Math.max(1, prev - 1))}
                     disabled={currentPage === 1}
-                    className="px-3 py-1 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 disabled:opacity-50"
+                    className="px-2 sm:px-3 py-1 rounded bg-gray-100 text-gray-500 hover:bg-gray-200 disabled:opacity-50 text-xs sm:text-sm"
                   >
                     Prev
                   </button>
@@ -920,7 +1060,7 @@ export default function Home() {
                     <button
                       key={i}
                       onClick={() => setCurrentPage(i + 1)}
-                      className={`px-3 py-1 rounded font-medium ${currentPage === i + 1 ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
+                      className={`px-2 sm:px-3 py-1 rounded font-medium text-xs sm:text-sm ${currentPage === i + 1 ? 'bg-pink-600 text-white' : 'bg-gray-100 text-gray-700 hover:bg-gray-200'}`}
                     >
                       {i + 1}
                     </button>
@@ -936,11 +1076,10 @@ export default function Home() {
               </div>
             </div>
 
-            {/* Right Column: Sticky Sidebar */}
-            {/* Sticky sidebar must not be inside a flex/overflow/height-constrained parent! */}
+            {/* Right Column: Using direct sticky approach */}
             <div className="lg:col-span-1">
-              <div className="sticky top-20 w-full max-w-sm">
-                <div className="space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm p-6">
+              <div className="sticky top-20 w-full" style={{ height: 'fit-content' }}>
+                <div className="space-y-4 sm:space-y-6 bg-white border border-gray-200 rounded-lg shadow-sm p-3 sm:p-6">
                   {/* Web Updates Section */}
                   <WebUpdates />
                   {/* Trending Section */}

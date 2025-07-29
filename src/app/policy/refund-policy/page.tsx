@@ -1,6 +1,6 @@
 export default function RefundPolicy() {
   return (
-    <div className="max-w-2xl mx-auto p-8">
+    <div className="px-8">
       <h1 className="text-3xl font-bold text-pink-700 mb-6">Refund Policy</h1>
       <h2 className="text-lg font-semibold mb-4">WOMEN, CHILD &amp; HUMAN RIGHTS TRUST (WCRT.IN)</h2>
       <p className="mb-4">At WCRT, we believe in full transparency and responsible stewardship of every contribution made in support of our mission to advance the rights of women, children, and humanity.</p>

@@ -1,0 +1,61 @@
+/* Add animation styles to globals.css */
+@keyframes fadeIn {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes scaleIn {
+  from { opacity: 0; transform: scale(0.9); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-fade-in {
+  animation: fadeIn 0.8s ease-in-out forwards;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.6s ease-out forwards;
+}
+
+.animate-float {
+  animation: float 3s ease-in-out infinite;
+}
+
+/* Theme colors */
+.bg-wcrt-gradient {
+  background: linear-gradient(135deg, #d50b8b 0%, #ff4d8d 100%);
+}
+
+.bg-wcrt-circle {
+  background: linear-gradient(135deg, #ffebf4 0%, #ffe0ed 100%);
+}
+
+.text-wcrt-orange {
+  color: #f59e0b;
+}
+
+.bg-wcrt-orange {
+  background-color: #f59e0b;
+}
+
+.text-accent {
+  color: #06b6d4;
+}
+
+.bg-accent {
+  background-color: #06b6d4;
+}
+
+.shadow-warm {
+  box-shadow: 0 4px 14px 0 rgba(213, 11, 139, 0.1);
+}
+
+.shadow-glow {
+  box-shadow: 0 0 20px 0 rgba(213, 11, 139, 0.2);
+}
